@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+  <!--Login-->
+  <category label="100">    
+    <setting id="username" type="text" label="140" default=""/>
+    <setting id="password" type="text" label="150" option="hidden" default=""/>
+    <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)" default="4" />
+    <setting id="no_spoilers" type="bool" label="170" default="false" />  
+  </category>
+</settings>
