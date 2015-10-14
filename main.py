@@ -23,6 +23,7 @@ LOCAL_STRING = ADDON.getLocalizedString
 settings = xbmcaddon.Addon(id='plugin.video.nhlgcl')
 USERNAME = str(settings.getSetting(id="username"))
 PASSWORD = str(settings.getSetting(id="password"))
+ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
 QUALITY = str(settings.getSetting(id="quality"))
 NO_SPOILERS = str(settings.getSetting(id="no_spoilers"))
 SCORE_COLOR = 'FF00B7EB'
@@ -205,7 +206,8 @@ def publishPoint(game_id,ft,gs):
         
         #Error 401 for invalid cookies
         if e.code == 401:
-            #Attempt to login and try again
+            #Remove cookies file and attempt to login and try again
+            cj.clear()
             login()
             try:
                 cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
@@ -264,14 +266,16 @@ def login():
                         ("User-Agent", UA_IPAD)]
 
     
-    login_data = urllib.urlencode({'username' : USERNAME,
-                                   'password' : PASSWORD                                  
-                                   #'deviceid' : '########-DAF3-43DE-B7B8-############',
-                                   #'devicename' : 'iPhone',
-                                   #'devicetype' : '7'    
-                                   })
+    login_data = {'username' : USERNAME,
+                   'password' : PASSWORD                   
+                   #'deviceid' : '########-DAF3-43DE-B7B8-############',
+                   #'devicename' : 'iPhone',
+                   #'devicetype' : '7'    
+                   }
+    if ROGERS_SUBSCRIBER == 'true':
+        login_data['rogers'] = 'true'
     
-
+    login_data = urllib.urlencode(login_data)                                   
     response = opener.open(url, login_data)
     #json_source = json.load(response)    
     user_data = response.read()
