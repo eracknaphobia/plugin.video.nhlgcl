@@ -254,41 +254,55 @@ def publishPoint(game_id,ft,gs):
 
 
 def login():    
-    cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))    
-    url = 'https://gamecenter.nhl.com/nhlgc/secure/login'        
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))    
-    opener.addheaders = [ ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
-                        ("Accept-Encoding", "gzip, deflate"),
-                        ("Accept-Language", "en-us"),
-                        ("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
-                        ("Proxy-Connection", "keep-alive"),
-                        ("Connection", "close"),
-                        ("User-Agent", UA_IPAD)]
+    #Check if username and password are provided
+    global USERNAME
+    if USERNAME == '':        
+        dialog = xbmcgui.Dialog()
+        USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)        
+        settings.setSetting(id='username', value=USERNAME)
 
-    
-    login_data = {'username' : USERNAME,
-                   'password' : PASSWORD                   
-                   #'deviceid' : '########-DAF3-43DE-B7B8-############',
-                   #'devicename' : 'iPhone',
-                   #'devicetype' : '7'    
-                   }
-    if ROGERS_SUBSCRIBER == 'true':
-        login_data['rogers'] = 'true'
-    
-    login_data = urllib.urlencode(login_data)                                   
-    response = opener.open(url, login_data)
-    #json_source = json.load(response)    
-    user_data = response.read()
-    response.close()
-    token = find(user_data,'token><![CDATA[',']]')
+    global PASSWORD
+    if PASSWORD == '':        
+        dialog = xbmcgui.Dialog()
+        PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
+        settings.setSetting(id='password', value=PASSWORD)
 
-    #Save token to file for         
-    #fname = os.path.join(ADDON_PATH_PROFILE, 'token')               
-    #device_file = open(fname,'w')   
-    #device_file.write(token)
-    #device_file.close()
+    if USERNAME != '' and PASSWORD != '':
+        cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))    
+        url = 'https://gamecenter.nhl.com/nhlgc/secure/login'        
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))    
+        opener.addheaders = [ ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
+                            ("Accept-Encoding", "gzip, deflate"),
+                            ("Accept-Language", "en-us"),
+                            ("Content-Type", "application/x-www-form-urlencoded; charset=utf-8"),
+                            ("Proxy-Connection", "keep-alive"),
+                            ("Connection", "close"),
+                            ("User-Agent", UA_IPAD)]
 
-    cj.save(ignore_discard=True); 
+        
+        login_data = {'username' : USERNAME,
+                       'password' : PASSWORD                   
+                       #'deviceid' : '########-DAF3-43DE-B7B8-############',
+                       #'devicename' : 'iPhone',
+                       #'devicetype' : '7'    
+                       }
+        if ROGERS_SUBSCRIBER == 'true':
+            login_data['rogers'] = 'true'
+        
+        login_data = urllib.urlencode(login_data)                                   
+        response = opener.open(url, login_data)
+        #json_source = json.load(response)    
+        user_data = response.read()
+        response.close()
+        token = find(user_data,'token><![CDATA[',']]')
+
+        #Save token to file for         
+        #fname = os.path.join(ADDON_PATH_PROFILE, 'token')               
+        #device_file = open(fname,'w')   
+        #device_file.write(token)
+        #device_file.close()
+
+        cj.save(ignore_discard=True); 
 
 def checkLogin():
     expired_cookies = True
@@ -361,15 +375,20 @@ def streamSelect(live_feeds,archive_feeds):
         #Even though cookies haven't expired some calls won't run unless the cookies are fairly new???
         #Login checking is now done at the publishpoint. If error 401 is received a login is submitted and the stream url is requested again
         #checkLogin()
-
         stream_url = publishPoint(game_id,ft[n],gs)
+
         if stream_url != None:
             print "STREAM URL: "+stream_url
             #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)        
             bndwth = find(QUALITY,'(',' kbps)')
-            stream_url = stream_url.replace('_hd_ced.m3u8', '_hd_'+bndwth+'_ced.m3u8')    
-            stream_url = stream_url + '|User-Agent='+UA_GCL
 
+            #Don't replace quality for goalie cams or if 5000 kbps is selected
+            #The best quality will be selected by default (1600 kbps for goalie cams | 4500 kbps for French feeds)
+            if ft[n] != '64' and ft[n] != '128' and bndwth != '5000':
+                stream_url = stream_url.replace('_hd_ced.m3u8', '_hd_'+bndwth+'_ced.m3u8')    
+
+            #Add user-agent to stream
+            stream_url = stream_url + '|User-Agent='+UA_GCL
 
             listitem = xbmcgui.ListItem(path=stream_url)
             xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
