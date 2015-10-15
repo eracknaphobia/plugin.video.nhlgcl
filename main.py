@@ -47,7 +47,7 @@ UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.00 (PlayStation 4)'
 
 def categories():                    
     addDir('Today\'s Games','/live',100,ICON,FANART)
-    addDir('Enter Date','/date',200,ICON,FANART)         
+    addDir('Enter Date','/date',200,ICON,FANART)      
 
 def todaysGames(game_day):
     print "GAME DAY = " + str(game_day)        
@@ -57,8 +57,7 @@ def todaysGames(game_day):
 
     date_display = '[B]'+ colorString(day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/B]'
     addDir(date_display,'/nothing',999,ICON,FANART)
-    
-    #LOGIN()
+        
     url = 'http://f.nhl.com/livescores/nhl/leagueapp/20142015/scores/'+game_day+'_O1T1.json'
     req = urllib2.Request(url)    
     req.add_header('Connection', 'keep-alive')
@@ -73,15 +72,14 @@ def todaysGames(game_day):
         response.close()                
     except HTTPError as e:
         print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code  
-        msg = "This game was broadcast on television in your area and is not available to view at this time. Please check back after 48 hours."
-        dialog = xbmcgui.Dialog() 
-        ok = dialog.ok('Game Blacked Out', msg) 
+        print 'Error code: ', e.code          
         sys.exit()
 
     for game in json_source['games']:
         away = game['gameInformation']['awayTeam']
         home = game['gameInformation']['homeTeam']
+        #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
+        #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['teamAbb']+'_at_'+home['teamAbb']+'.jpg'
 
         away_city = away['teamCity']
         home_city = home['teamCity']        
@@ -123,7 +121,7 @@ def todaysGames(game_day):
                 away_feed = str(int(live_video['hasLiveAwayVideo']))
                 french_feed = str(int(live_video['hasLiveFrenchVideo']))
                 goalie_cam_1 = str(int(live_video['hasLiveCam1Video']))
-                goalie_cam_2 = str(int(live_video['hasLiveCam2Video']))
+                goalie_cam_2 = str(int(live_video['hasLiveCam2Video']))                
                 live_feeds = home_feed+away_feed+french_feed+goalie_cam_1+goalie_cam_2
         except:
             pass
@@ -158,11 +156,18 @@ def publishPoint(game_id,ft,gs):
     #---------------------
     # ft key
     #---------------------
-    # 2 = home
-    # 4 = away
-    # 8 = french
+    # 1 = Broadcast
+    # 2 = Home
+    # 4 = Away
+    # 8 = French
+    # 16 = NBC
     # 64 = Goalie Cam 1
     # 128 = Goalie Cam 2
+    # 256 = Rogers Cam 1
+    # 512 = Rogers Cam 1
+    # 1024 = Rogers Cam 1
+    # 2048 = PreGame Press Conference
+    # 4096 = PostGame Press Conference
     #---------------------
 
     #---------------------
@@ -572,7 +577,6 @@ elif mode == 200:
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Invalid Date', msg)
         sys.exit()
-
 elif mode == 999:
     sys.exit()
 
