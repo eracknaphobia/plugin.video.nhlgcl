@@ -47,7 +47,8 @@ UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.00 (PlayStation 4)'
 
 def categories():                    
     addDir('Today\'s Games','/live',100,ICON,FANART)
-    addDir('Enter Date','/date',200,ICON,FANART)      
+    addDir('Enter Date','/date',200,ICON,FANART)
+    addDir('Quick Picks','/qp',300,ICON,FANART)      
 
 def todaysGames(game_day):
     print "GAME DAY = " + str(game_day)        
@@ -126,13 +127,25 @@ def todaysGames(game_day):
         except:
             pass
 
+        '''
+        "hasArchiveAwayVideo": false,
+        "hasArchiveFrenchVideo": false,
+        "hasArchiveHomeVideo": true,
+        "hasCondensedVideo": true,
+        "hasContinuousVideo": true,
+        "hasFullGameVideo": false
+        '''
 
         archive_video = game['gameHighlightVideo']
         archive_feeds = 0
         if len(archive_video) > 0:
             home_feed = str(int(archive_video['hasArchiveHomeVideo']))
             away_feed = str(int(archive_video['hasArchiveAwayVideo']))
-            french_feed = str(int(archive_video['hasArchiveFrenchVideo']))        
+            french_feed = str(int(archive_video['hasArchiveFrenchVideo']))
+            if french_feed == '0':
+                #For some reason the live french stream is set to true when the game has a french archive stream
+                french_feed = str(int(live_video['hasLiveFrenchVideo']))
+
             archive_feeds = home_feed+away_feed+french_feed
 
         if NO_SPOILERS == 'true':
@@ -174,7 +187,10 @@ def publishPoint(game_id,ft,gs):
     # gs key
     #---------------------
     # live 
-    # dvr    
+    # dvr
+    # archive 
+    # condensed
+    # highlights
     #---------------------
 
     #token = epoch time (in milliseconds) + "." + token???
@@ -211,7 +227,7 @@ def publishPoint(game_id,ft,gs):
         
         #Error 401 for invalid cookies
         if e.code == 401:
-            #Remove cookies file and attempt to login and try again
+            #Clear cookies and attempt to login and try again
             cj.clear()
             login()
             try:
@@ -223,7 +239,7 @@ def publishPoint(game_id,ft,gs):
                         ("Accept-Language", "en-us"),
                         ("Content-Type", "application/x-www-form-urlencoded"),                        
                         ("Connection", "keep-alive"),
-                        ("User-Agent", UA_PS3)]
+                        ("User-Agent", UA_PS4)]
                 response = opener.open(url, game_data)
                 stream_data = response.read()
                 response.close()
@@ -231,11 +247,17 @@ def publishPoint(game_id,ft,gs):
                 stream_url = find(stream_data,'![CDATA[',']]')
                 print stream_url
                 return stream_url
-            except:       
-                #alert user that credentials may not be correct         
-                msg = "Please make sure that your username and password are correct."
-                dialog = xbmcgui.Dialog() 
-                ok = dialog.ok('Invalid Login', msg)
+            except HTTPError as e:
+                if e.code == 401:      
+                    #alert user that credentials may not be correct         
+                    msg = "Please make sure that your username and password are correct."
+                    dialog = xbmcgui.Dialog() 
+                    ok = dialog.ok('Invalid Login', msg)
+                elif e.code == 403:
+                    #Error 403 for blacked out games
+                    msg = "This game was broadcast on television in your area and is not available to view at this time. Please check back after 48 hours."
+                    dialog = xbmcgui.Dialog() 
+                    ok = dialog.ok('Game Blacked Out', msg)            
                 
         elif e.code == 403:
             #Error 403 for blacked out games
@@ -295,13 +317,12 @@ def login():
             login_data['rogers'] = 'true'
         
         login_data = urllib.urlencode(login_data)                                   
-        response = opener.open(url, login_data)
-        #json_source = json.load(response)    
+        response = opener.open(url, login_data)        
         user_data = response.read()
         response.close()
         token = find(user_data,'token><![CDATA[',']]')
 
-        #Save token to file for         
+        #Save token to file for calls       
         #fname = os.path.join(ADDON_PATH_PROFILE, 'token')               
         #device_file = open(fname,'w')   
         #device_file.write(token)
@@ -338,6 +359,9 @@ def streamSelect(live_feeds,archive_feeds):
     print archive_feeds
     stream_title = []
     ft = []
+    archive_type = ['Full Game','Condensed','Highlights']
+    #archive_gs = ['dvr','condensed','highlights']
+    archive_gs = ['archive','condensed','highlights']
     
     if int(live_feeds) > 1:
         gs = 'live'
@@ -356,8 +380,13 @@ def streamSelect(live_feeds,archive_feeds):
         #if live_feeds[4] == "1":
         stream_title.append('Goalie Cam 2')
         ft.append('128')
-    elif int(archive_feeds) > 1:
-        gs = 'dvr'
+    elif int(archive_feeds) > 1:       
+        dialog = xbmcgui.Dialog()          
+        n = dialog.select('Choose Archive', archive_type)
+        if n == -1:
+            sys.exit()
+
+        gs = archive_gs[n]        
         if archive_feeds[0] == "1":
             stream_title.append('Home')
             ft.append('2')
@@ -367,15 +396,25 @@ def streamSelect(live_feeds,archive_feeds):
         if archive_feeds[2] == "1":
             stream_title.append('French')
             ft.append('8')
+       
     else:
         msg = "No playable streams found."
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Streams Not Found', msg)
         sys.exit()
 
-  
-    dialog = xbmcgui.Dialog() 
-    n = dialog.select('Choose Stream', stream_title)    
+    
+    n = -1
+    is_highlights = 0
+    if gs != 'highlights':
+        dialog = xbmcgui.Dialog() 
+        n = dialog.select('Choose Stream', stream_title)  
+    else:
+        #Make home stream
+        is_highlights = 1
+        gs = 'condensed'
+        n = 0
+
     if n > -1:
         #Even though cookies haven't expired some calls won't run unless the cookies are fairly new???
         #Login checking is now done at the publishpoint. If error 401 is received a login is submitted and the stream url is requested again
@@ -392,6 +431,9 @@ def streamSelect(live_feeds,archive_feeds):
             if ft[n] != '64' and ft[n] != '128' and bndwth != '5000':
                 stream_url = stream_url.replace('_hd_ced.m3u8', '_hd_'+bndwth+'_ced.m3u8')    
 
+            if is_highlights:
+                stream_url = stream_url.replace('_condensed_1_ced.mp4.m3u8', '_continuous_1_1600.mp4')
+
             #Add user-agent to stream
             stream_url = stream_url + '|User-Agent='+UA_GCL
 
@@ -403,6 +445,32 @@ def streamSelect(live_feeds,archive_feeds):
         sys.exit()
 
 
+def quickPicks():    
+    url = 'http://smb.cdnak.neulion.com/fs/nhl/mobile/feed_new/data/catvideo/xbox/nhl_0.json'
+    req = urllib2.Request(url)   
+    req.add_header('User-Agent', UA_IPAD)
+    
+    try:    
+        response = urllib2.urlopen(req)    
+        json_source = json.load(response)                           
+        response.close()                
+    except HTTPError as e:
+        print 'The server couldn\'t fulfill the request.'
+        print 'Error code: ', e.code          
+        sys.exit()
+    
+    for video in json_source['videos']:
+        title = video['title']
+        name = title
+        icon = video['image']
+        url = video['mediaGroup'][0]['url']
+        desc = video['description']
+        release_date = video['releaseDate'][0:10]
+
+        info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
+        addLink(name,url,title,icon,info,fanart=None)
+
+
 def find(source,start_str,end_str):    
     start = source.find(start_str)
     end = source.find(end_str,start+len(start_str))
@@ -412,8 +480,10 @@ def find(source,start_str,end_str):
     else:
         return ''
 
+
 def colorString(string, color):
     return '[COLOR='+color+']'+string+'[/COLOR]'
+
 
 def stringToDate(string, date_format):
     try:
@@ -422,7 +492,6 @@ def stringToDate(string, date_format):
         date = datetime(*(time.strptime(str(string), date_format)[0:6]))                
 
     return date
-
 
 
 def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fanart=None,info=None):
@@ -448,7 +517,7 @@ def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fan
     
     return ok
 
-def addLink(name,url,title,iconimage,fanart=None):
+def addLink(name,url,title,iconimage,info=None,fanart=None):
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)    
     liz.setProperty("IsPlayable", "true")
@@ -462,7 +531,11 @@ def addLink(name,url,title,iconimage,fanart=None):
         liz.setProperty('fanart_image', fanart)
     else:
         liz.setProperty('fanart_image', FANART)
+
+    if info != None:
+        liz.setInfo( type="Video", infoLabels=info)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
+    xbmcplugin.setContent(addon_handle, 'episodes')
     return ok
 
 
@@ -470,7 +543,7 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
     ok=True
     
     if game_day == None:
-        #Set day to today in none given
+        #Set day to today if none given
         game_day = time.strftime("%Y-%m-%d")
 
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)+"&game_day="+urllib.quote_plus(game_day)
@@ -577,6 +650,10 @@ elif mode == 200:
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Invalid Date', msg)
         sys.exit()
+
+elif mode == 300:
+    quickPicks()
+
 elif mode == 999:
     sys.exit()
 

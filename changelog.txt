@@ -1,3 +1,7 @@
+2015.10.16
+- Added Quick Picks Section
+- Added highlights and condensed options for archive games
+
 2015.10.15
 - Added Rogers login support
 - Fixed default quality setting bug
