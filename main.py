@@ -83,6 +83,8 @@ def todaysGames(game_day):
         home = game['gameInformation']['homeTeam']
         #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
         #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['teamAbb']+'_at_'+home['teamAbb']+'.jpg'
+        icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['teamAbb']+'vs'+home['teamAbb']+'.png'
+
 
         away_city = away['teamCity']
         home_city = home['teamCity']        
@@ -161,7 +163,7 @@ def todaysGames(game_day):
         title = away_city + ' at ' + home_city
         title = title.encode('utf-8')
         
-        addStream(name,'',title,game_id,live_feeds,archive_feeds)
+        addStream(name,'',title,game_id,live_feeds,archive_feeds,icon)
 
     
     d = day + timedelta(days=1)
