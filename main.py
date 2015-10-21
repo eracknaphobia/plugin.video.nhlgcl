@@ -7,6 +7,8 @@ from urllib2 import URLError, HTTPError
 import json
 import calendar
 import cookielib
+import pytz
+
 
 addon_handle = int(sys.argv[1])
 
@@ -90,9 +92,10 @@ def todaysGames(game_day):
         game_time = ''
         if game['gameInformation']['currentGameTime'] != ' ':
             game_time = game['gameInformation']['currentGameTime']
-        else:
-            game_time = game['gameInformation']['easternGameTime']
+        else:            
+            game_time = game['gameInformation']['easternGameTime']            
             game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
+            game_time = easternToLocal(game_time)
             print game_time
             game_time = game_time.strftime('%I:%M %p').lstrip('0')
 
@@ -177,8 +180,8 @@ def publishPoint(game_id,ft,gs):
     # 64 = Goalie Cam 1
     # 128 = Goalie Cam 2
     # 256 = Rogers Cam 1
-    # 512 = Rogers Cam 1
-    # 1024 = Rogers Cam 1
+    # 512 = Rogers Cam 2
+    # 1024 = Rogers Cam 3
     # 2048 = PreGame Press Conference
     # 4096 = PostGame Press Conference
     #---------------------
@@ -354,6 +357,8 @@ def checkLogin():
     if expired_cookies:
         login()
 
+
+
 def streamSelect(live_feeds,archive_feeds):
     print live_feeds
     print archive_feeds
@@ -492,6 +497,19 @@ def stringToDate(string, date_format):
         date = datetime(*(time.strptime(str(string), date_format)[0:6]))                
 
     return date
+
+def easternToLocal(eastern_time):
+    utc = pytz.utc
+    eastern = pytz.timezone('US/Eastern')    
+    eastern_time = eastern.localize(eastern_time)
+    # Convert it from Eastern to UTC
+    utc_time = eastern_time.astimezone(utc)
+    timestamp = calendar.timegm(utc_time.timetuple())
+    local_dt = datetime.fromtimestamp(timestamp)
+    # Convert it from UTC to local time
+    assert utc_time.resolution >= timedelta(microseconds=1)
+    return local_dt.replace(microsecond=utc_time.microsecond)
+    
 
 
 def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fanart=None,info=None):

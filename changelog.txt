@@ -1,3 +1,6 @@
+2015.10.21
+- Convert game start times from eastern to local time
+
 2015.10.16
 - Added Quick Picks Section
 - Added highlights and condensed options for archive games
