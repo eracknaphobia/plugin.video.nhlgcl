@@ -1,3 +1,8 @@
+2015.10.27
+- Organized settings into groups
+- Code cleanup / organization
+- Added Score notifications option under settings
+
 2015.10.21.1
 - Added game images
 

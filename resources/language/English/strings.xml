@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
-	<!-- Provider -->
-	<string id="100">General</string>
+	<!-- Login -->
+	<string id="100">Login</string>
 	<string id="140">Username</string>
 	<string id="150">Password</string>
+	<!-- Visual Settings -->
+	<string id="159">Visual</string>
 	<string id="155">Rogers Subscriber</string>
 	<string id="160">Stream Quality</string>
 	<string id="170">No Spoilers</string>
+	<!-- Scoring Updates -->
+	<string id='300'>Score Notifications</string>
+	<string id='320'>Toggle Score Notifications</string>
 </strings>
 
