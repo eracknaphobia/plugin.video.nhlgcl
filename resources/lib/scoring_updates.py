@@ -82,6 +82,10 @@ def startScoringUpdates():
             for new_item in NEW_GAME_STATS:                    
                 if ADDON.getSetting(id="score_updates") == 'false':                                       
                     break
+                #Check if all games have finished
+                if new_item[5].find('FINAL') == -1:
+                    all_games_finished = 0
+
                 for old_item in OLD_GAME_STATS:                    
                     #Break out of loop if updates disabled
                     if ADDON.getSetting(id="score_updates") == 'false':                                       
@@ -103,8 +107,7 @@ def startScoringUpdates():
                                     message = '[COLOR='+SCORE_COLOR+']' + ateam + ' ' + ascore + '[/COLOR]    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
                                 else:
                                     message = ateam + ' ' + ascore + '    [COLOR='+SCORE_COLOR+']' + hteam + ' ' + hscore + '[/COLOR]    [COLOR='+GAMETIME_COLOR+']' + gameclock  + '[/COLOR]'
-                            else:
-                                all_games_finished = 0
+                            else:                                
                                 title = 'Score Update'
                                 #Highlight if changed
                                 if new_item[3] != old_item[3]:
@@ -119,19 +122,19 @@ def startScoringUpdates():
                                 print message                   
                                 dialog.notification(title, message, nhl_logo, 5000, False)
                                 sleep(5)
-                        #if all games have finished for the night kill the thread
-                        elif all_games_finished == 1:
-                            ADDON.setSetting(id='score_updates', value='false')
-                            dialog = xbmcgui.Dialog() 
-                            title = "Score Notifications"
-                            dialog.notification(title, 'All games have ended, good night.', nhl_logo, 5000, False)
+            #if all games have finished for the night kill the thread
+            if all_games_finished == 1 and ADDON.getSetting(id="score_updates") == 'true':
+                ADDON.setSetting(id='score_updates', value='false')
+                dialog = xbmcgui.Dialog() 
+                title = "Score Notifications"
+                dialog.notification(title, 'All games have ended, good night.', nhl_logo, 5000, False)
 
 
 
         OLD_GAME_STATS = []
         OLD_GAME_STATS = NEW_GAME_STATS              
         FIRST_TIME_THRU = 0          
-        sleep(int(refreshInterval))   
+        #sleep(int(refreshInterval))   
     
 
 
