@@ -1,3 +1,6 @@
+2015.10.27.2
+- Fix notifications bug attempt #2
+
 2015.10.27.1
 - Fix notifications bug
 
