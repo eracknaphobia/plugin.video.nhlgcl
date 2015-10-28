@@ -39,12 +39,11 @@ def getScoreBoard(date):
 
 
 def startScoringUpdates():
-    dialog = xbmcgui.Dialog()  
-    title = "Score Notifications"    
-    dialog.notification(title, 'Starting...', nhl_logo, 5000, False)
+        
     FIRST_TIME_THRU = 1  
     OLD_GAME_STATS = []   
-    todays_date = datetime.now().strftime("%Y-%m-%d")         
+    todays_date = datetime.now().strftime("%Y-%m-%d")          
+    
     while ADDON.getSetting(id="score_updates") == 'true':  
         game_url = ''
         try:   
@@ -78,6 +77,16 @@ def startScoringUpdates():
                 
 
         if FIRST_TIME_THRU != 1:
+            display_seconds = int(ADDON.getSetting(id="display_seconds"))
+            if display_seconds > 60:
+                #Max Seconds 60
+                display_seconds = 60
+            elif display_seconds < 1:
+                #Min Seconds 1
+                display_seconds = 1
+
+            #Convert to milliseconds
+            display_milliseconds = display_seconds * 1000
             all_games_finished = 1
             for new_item in NEW_GAME_STATS:                    
                 if ADDON.getSetting(id="score_updates") == 'false':                                       
@@ -120,8 +129,8 @@ def startScoringUpdates():
 
                             if ADDON.getSetting(id="score_updates") != 'false':                                       
                                 print message                   
-                                dialog.notification(title, message, nhl_logo, 5000, False)
-                                sleep(5)
+                                dialog.notification(title, message, nhl_logo, display_milliseconds, False)
+                                sleep(display_seconds)
             #if all games have finished for the night kill the thread
             if all_games_finished == 1 and ADDON.getSetting(id="score_updates") == 'true':
                 ADDON.setSetting(id='score_updates', value='false')
@@ -137,15 +146,15 @@ def startScoringUpdates():
         sleep(int(refreshInterval))   
     
 
-
+dialog = xbmcgui.Dialog()  
+title = "Score Notifications"  
 #Toggle the setting
-if ADDON.getSetting(id="score_updates") == 'false':    
+if ADDON.getSetting(id="score_updates") == 'false':        
+    dialog.notification(title, 'Starting...', nhl_logo, 5000, False)  
     ADDON.setSetting(id='score_updates', value='true')
     startScoringUpdates()    
 else:    
-    ADDON.setSetting(id='score_updates', value='false')
-    dialog = xbmcgui.Dialog() 
-    title = "Score Notifications"
+    ADDON.setSetting(id='score_updates', value='false')    
     dialog.notification(title, 'Stopping...', nhl_logo, 5000, False)
     
 
