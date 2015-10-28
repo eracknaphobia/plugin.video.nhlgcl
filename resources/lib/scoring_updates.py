@@ -134,7 +134,7 @@ def startScoringUpdates():
         OLD_GAME_STATS = []
         OLD_GAME_STATS = NEW_GAME_STATS              
         FIRST_TIME_THRU = 0          
-        #sleep(int(refreshInterval))   
+        sleep(int(refreshInterval))   
     
 
 
