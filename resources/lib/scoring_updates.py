@@ -128,7 +128,8 @@ def startScoringUpdates():
                                 message = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
 
                             if ADDON.getSetting(id="score_updates") != 'false':                                       
-                                print message                   
+                                #print message                   
+                                dialog = xbmcgui.Dialog()
                                 dialog.notification(title, message, nhl_logo, display_milliseconds, False)
                                 sleep(display_seconds)
             #if all games have finished for the night kill the thread
