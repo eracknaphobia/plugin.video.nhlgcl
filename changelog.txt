@@ -1,3 +1,9 @@
+2015.12.30
+- Added team name to the two New York teams to distinguish them in the list
+- Added ability to choose favorite team, so that there list title will be in bold in order to stick out more
+- Bumped python version
+- Added source to addon.xml
+
 2015.10.29
 - Minor Bug fix
 

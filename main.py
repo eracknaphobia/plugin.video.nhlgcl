@@ -50,7 +50,18 @@ def todaysGames(game_day):
 
 
         away_city = away['teamCity']
-        home_city = home['teamCity']        
+        home_city = home['teamCity']   
+
+        if away_city == "New York":
+            away_city = away_city + " " + away['teamName']
+
+        if home_city == "New York":
+            home_city = home_city + " " + home['teamName']
+
+        fav_game = False
+        if away_city == FAV_TEAM or home_city == FAV_TEAM:
+            fav_game = True
+
         away_score = colorString(str(away['teamScore']),SCORE_COLOR)
         home_score = colorString(str(home['teamScore']),SCORE_COLOR)
 
@@ -117,11 +128,13 @@ def todaysGames(game_day):
             archive_feeds = home_feed+away_feed+french_feed
 
         if NO_SPOILERS == 'true':
-            name = away_city + ' at ' + home_city
+            name = game_time + ' ' + away_city + ' at ' + home_city
         else:
             name = game_time + ' '+ away_city + ' ' + away_score + ' at ' + home_city + ' ' + home_score
 
         name = name.encode('utf-8')
+        if fav_game:
+            name = '[B]'+name+'[/B]'
         
         title = away_city + ' at ' + home_city
         title = title.encode('utf-8')
@@ -197,7 +210,7 @@ def publishPoint(game_id,ft,gs):
         if e.code == 401:
             #Clear cookies and attempt to login and try again
             cj.clear()
-            login()
+            login()                       
             try:
                 cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
                 cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
@@ -333,6 +346,7 @@ def streamSelect(live_feeds,archive_feeds):
     #archive_gs = ['dvr','condensed','highlights']
     archive_gs = ['archive','condensed','highlights']
     
+    #Live Feed
     if int(live_feeds) > 1:
         gs = 'live'
         if live_feeds[0] == "1":
@@ -350,6 +364,8 @@ def streamSelect(live_feeds,archive_feeds):
         #if live_feeds[4] == "1":
         stream_title.append('Goalie Cam 2')
         ft.append('128')
+
+    # Archive Feed
     elif int(archive_feeds) > 1:       
         dialog = xbmcgui.Dialog()          
         n = dialog.select('Choose Archive', archive_type)
@@ -409,6 +425,9 @@ def streamSelect(live_feeds,archive_feeds):
 
             listitem = xbmcgui.ListItem(path=stream_url)
             xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
+
+            #Seek ahead 1 minute
+            #xbmc.executebuiltin('Seek(-600)')
         else:
             sys.exit()
     else:

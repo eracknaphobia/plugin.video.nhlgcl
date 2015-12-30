@@ -26,10 +26,12 @@ PASSWORD = str(settings.getSetting(id="password"))
 ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
 QUALITY = str(settings.getSetting(id="quality"))
 NO_SPOILERS = str(settings.getSetting(id="no_spoilers"))
+FAV_TEAM = str(settings.getSetting(id="fav_team"))
 
 #Colors
 SCORE_COLOR = 'FF00B7EB'
 GAMETIME_COLOR = 'FFFFFF66'
+FAV_TEAM_COLOR = 'FFFFFF88'
 
 #Localisation
 local_string = xbmcaddon.Addon(id='plugin.video.nhlgcl').getLocalizedString
@@ -119,7 +121,7 @@ def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fan
     liz.setProperty("IsPlayable", "true")
     liz.setInfo( type="Video", infoLabels={ "Title": title } )
     if info != None:
-        liz.setInfo( type="Video", infoLabels=info) 
+        liz.setInfo( type="Video", infoLabels=info)
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
     xbmcplugin.setContent(addon_handle, 'episodes')
     
