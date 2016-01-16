@@ -8,8 +8,9 @@
   </category>
   <category label="159">
     <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)" default="HD (5000 kbps)" />
-    <setting id="no_spoilers" type="bool" label="170" default="false" />  
-    <setting id="fav_team" type="labelenum" label="180" default="None" values="None|Anaheim|Arizona|Boston|Buffalo|Calgary|Carolina|Chicago|Colorado|Columbus|Dallas|Detroit|Edmonton|Florida|Los Angeles|Minnesota|Montreal|Nashville|New Jersey|New York Islanders|New York Rangers|Philadelphia|Pittsburgh|Ottawa|San Jose|St Louis|Tampa Bay|Toronto Maple|Vancouver|Washington|Winnipeg" />    
+    <setting id="no_spoilers" type="enum" label="170" lvalues="1700|1701|1702" />  
+    <setting id="fav_team" type="labelenum" label="180" default="None" values="None|Anaheim|Arizona|Boston|Buffalo|Calgary|Carolina|Chicago|Colorado|Columbus|Dallas|Detroit|Edmonton|Florida|Los Angeles|Minnesota|Montreal|Nashville|New Jersey|New York Islanders|New York Rangers|Philadelphia|Pittsburgh|Ottawa|San Jose|St Louis|Tampa Bay|Toronto Maple|Vancouver|Washington|Winnipeg" />
+	<setting id="team_names" type="select" label="190" lvalues="1900|1901|1902|1903" default="0" />
   </category>
   <category label="300">
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
