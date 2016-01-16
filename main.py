@@ -49,31 +49,47 @@ def todaysGames(game_day):
         icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['teamAbb']+'vs'+home['teamAbb']+'.png'
 
 
-        away_city = away['teamCity']
-        home_city = home['teamCity']   
+        if TEAM_NAMES == "0":
+            away_team = away['teamCity']
+            home_team = home['teamCity']
+        elif TEAM_NAMES == "1":
+            away_team = away['teamName']
+            home_team = home['teamName']
+        elif TEAM_NAMES == "2":
+            away_team = away['teamCity'] + " " + away['teamName']
+            home_team = home['teamCity'] + " " + home['teamName']
+        elif TEAM_NAMES == "3":
+            away_team = away['teamAbb']
+            home_team = home['teamAbb']
 
-        if away_city == "New York":
-            away_city = away_city + " " + away['teamName']
-
-        if home_city == "New York":
-            home_city = home_city + " " + home['teamName']
 
         fav_game = False
-        if away_city == FAV_TEAM or home_city == FAV_TEAM:
+        if away['teamCity'] == FAV_TEAM:
             fav_game = True
+            away_team = colorString(away_team,FAV_TEAM_COLOR)
 
-        away_score = colorString(str(away['teamScore']),SCORE_COLOR)
-        home_score = colorString(str(home['teamScore']),SCORE_COLOR)
+        if home['teamCity'] == FAV_TEAM:
+            fav_game = True
+            home_team = colorString(home_team,FAV_TEAM_COLOR)
+
+
+        score = str(away['teamScore']) + ' - ' + str(home['teamScore'])
+        score = colorString(score,SCORE_COLOR)
 
         game_time = ''
         if game['gameInformation']['currentGameTime'] != ' ':
             game_time = game['gameInformation']['currentGameTime']
+            if NO_SPOILERS == '1' and game_time[:5] == "FINAL":
+                 game_time = game_time[:5]
+            elif NO_SPOILERS == '2' and game_time[:5] == "FINAL":
+                 if fav_game:
+                      game_time = game_time[:5]
         else:            
             game_time = game['gameInformation']['easternGameTime']            
             game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
             game_time = easternToLocal(game_time)
             print game_time
-            game_time = game_time.strftime('%I:%M %p').lstrip('0')
+            game_time = game_time.strftime('%H:%M')
 
         game_time = colorString(game_time,GAMETIME_COLOR) 
                
@@ -127,16 +143,21 @@ def todaysGames(game_day):
 
             archive_feeds = home_feed+away_feed+french_feed
 
-        if NO_SPOILERS == 'true':
-            name = game_time + ' ' + away_city + ' at ' + home_city
+        if NO_SPOILERS == '1':
+            name = game_time + ' ' + away_team + ' at ' + home_team
+        elif NO_SPOILERS == '2':
+            if fav_game:
+                name = game_time + ' ' + away_team + ' at ' + home_team
+            else:
+                name = game_time + ' ' + away_team + ' at ' + home_team + ' ' + score
         else:
-            name = game_time + ' '+ away_city + ' ' + away_score + ' at ' + home_city + ' ' + home_score
+            name = game_time + ' ' + away_team + ' at ' + home_team + ' ' + score
 
         name = name.encode('utf-8')
         if fav_game:
             name = '[B]'+name+'[/B]'
         
-        title = away_city + ' at ' + home_city
+        title = away_team + ' at ' + home_team
         title = title.encode('utf-8')
         
         addStream(name,'',title,game_id,live_feeds,archive_feeds,icon)
