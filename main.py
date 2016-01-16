@@ -94,7 +94,10 @@ def todaysGames(game_day):
             game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
             game_time = easternToLocal(game_time)
             print game_time
-            game_time = game_time.strftime('%H:%M')
+            if TIME_FORMAT == '0':
+                 game_time = game_time.strftime('%I:%M %p').lstrip('0')
+            else:
+                 game_time = game_time.strftime('%H:%M')
 
         game_time = colorString(game_time,GAMETIME_COLOR) 
                
