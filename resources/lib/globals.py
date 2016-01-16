@@ -28,6 +28,7 @@ QUALITY = str(settings.getSetting(id="quality"))
 NO_SPOILERS = settings.getSetting(id="no_spoilers")
 FAV_TEAM = str(settings.getSetting(id="fav_team"))
 TEAM_NAMES = settings.getSetting(id="team_names")
+TIME_FORMAT = settings.getSetting(id="time_format")
 
 #Colors
 SCORE_COLOR = 'FF00B7EB'
