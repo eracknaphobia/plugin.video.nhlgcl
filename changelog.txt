@@ -1,3 +1,10 @@
+2016.16.01
+- Added ability to choose team naming style
+- Added ability to choose time format
+- Added ability to hide spoilers only for the favorite team
+- favorite team will be in red in order to stick out even more :-)
+- if no spoilers set to true, games decided in OT or SO will be shown as FINAL instead of FINAL (OT) or FINAL (SO)
+
 2015.12.30
 - Added team name to the two New York teams to distinguish them in the list
 - Added ability to choose favorite team, so that there list title will be in bold in order to stick out more
