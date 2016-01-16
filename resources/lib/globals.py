@@ -25,13 +25,14 @@ USERNAME = str(settings.getSetting(id="username"))
 PASSWORD = str(settings.getSetting(id="password"))
 ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
 QUALITY = str(settings.getSetting(id="quality"))
-NO_SPOILERS = str(settings.getSetting(id="no_spoilers"))
+NO_SPOILERS = settings.getSetting(id="no_spoilers")
 FAV_TEAM = str(settings.getSetting(id="fav_team"))
+TEAM_NAMES = settings.getSetting(id="team_names")
 
 #Colors
 SCORE_COLOR = 'FF00B7EB'
 GAMETIME_COLOR = 'FFFFFF66'
-FAV_TEAM_COLOR = 'FFFFFF88'
+FAV_TEAM_COLOR = 'FFFF0000'
 
 #Localisation
 local_string = xbmcaddon.Addon(id='plugin.video.nhlgcl').getLocalizedString
