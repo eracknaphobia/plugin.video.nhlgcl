@@ -62,6 +62,11 @@ def todaysGames(game_day):
             away_team = away['teamAbb']
             home_team = home['teamAbb']
 
+        if away_team == "New York":
+            away_team = away_team + " " + away['teamName']
+
+        if home_team == "New York":
+            home_team = home_team + " " + home['teamName']
 
         fav_game = False
         if away['teamCity'] == FAV_TEAM:
