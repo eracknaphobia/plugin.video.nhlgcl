@@ -1,3 +1,9 @@
+2016.1.20
+- Favorite team color uses teams dominant color for highlighting
+- Fixed favorite team bugs for certain teams
+- Set default view mode for quick picks to media info 1
+- Added previous and next icons
+
 2016.1.16
 *** Big thanks to mcruise40 for adding the following features ***
 - Added ability to choose team naming style

@@ -19,9 +19,9 @@ def todaysGames(game_day):
     print "GAME DAY = " + str(game_day)        
     day = stringToDate(game_day, "%Y-%m-%d")
     d = day - timedelta(days=1)
-    addDir('[B]<< Previous Day[/B]','/live',101,ICON,FANART,d.strftime("%Y-%m-%d"))
+    addDir('[B]<< Previous Day[/B]','/live',101,PREV_ICON,FANART,d.strftime("%Y-%m-%d"))
 
-    date_display = '[B]'+ colorString(day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/B]'
+    date_display = '[B][I]'+ colorString(day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
     addDir(date_display,'/nothing',999,ICON,FANART)
         
     url = 'http://f.nhl.com/livescores/nhl/leagueapp/20142015/scores/'+game_day+'_O1T1.json'
@@ -42,137 +42,137 @@ def todaysGames(game_day):
         sys.exit()
 
     for game in json_source['games']:
-        away = game['gameInformation']['awayTeam']
-        home = game['gameInformation']['homeTeam']
-        #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
-        #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['teamAbb']+'_at_'+home['teamAbb']+'.jpg'
-        icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['teamAbb']+'vs'+home['teamAbb']+'.png'
-
-
-        if TEAM_NAMES == "0":
-            away_team = away['teamCity']
-            home_team = home['teamCity']
-        elif TEAM_NAMES == "1":
-            away_team = away['teamName']
-            home_team = home['teamName']
-        elif TEAM_NAMES == "2":
-            away_team = away['teamCity'] + " " + away['teamName']
-            home_team = home['teamCity'] + " " + home['teamName']
-        elif TEAM_NAMES == "3":
-            away_team = away['teamAbb']
-            home_team = home['teamAbb']
-
-        if away_team == "New York":
-            away_team = away_team + " " + away['teamName']
-
-        if home_team == "New York":
-            home_team = home_team + " " + home['teamName']
-
-        fav_game = False
-        if away['teamCity'] == FAV_TEAM:
-            fav_game = True
-            away_team = colorString(away_team,FAV_TEAM_COLOR)
-
-        if home['teamCity'] == FAV_TEAM:
-            fav_game = True
-            home_team = colorString(home_team,FAV_TEAM_COLOR)
-
-
-        score = str(away['teamScore']) + ' - ' + str(home['teamScore'])
-        score = colorString(score,SCORE_COLOR)
-
-        game_time = ''
-        if game['gameInformation']['currentGameTime'] != ' ':
-            game_time = game['gameInformation']['currentGameTime']
-            if NO_SPOILERS == '1' and game_time[:5] == "FINAL":
-                 game_time = game_time[:5]
-            elif NO_SPOILERS == '2' and game_time[:5] == "FINAL":
-                 if fav_game:
-                      game_time = game_time[:5]
-        else:            
-            game_time = game['gameInformation']['easternGameTime']            
-            game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
-            game_time = easternToLocal(game_time)
-            print game_time
-            if TIME_FORMAT == '0':
-                 game_time = game_time.strftime('%I:%M %p').lstrip('0')
-            else:
-                 game_time = game_time.strftime('%H:%M')
-
-        game_time = colorString(game_time,GAMETIME_COLOR) 
-               
-        game_id = str(game['id'])
-
-        '''
-        "gameLiveVideo": {
-        "hasLiveAwayVideo": true,
-        "hasLiveBroadcastVideo": false,
-        "hasLiveCam1Video": false,
-        "hasLiveCam2Video": false,
-        "hasLiveFrenchVideo": false,
-        "hasLiveHomeVideo": true,
-        "hasLivePostgameVideo": false,
-        "hasLivePregameVideo": false,
-        "hasLiveRogersCam1Video": false,
-        "hasLiveRogersCam2Video": false,
-        "hasLiveRogersCam3Video": false
-        '''
-        live_video = game['gameLiveVideo']
-        live_feeds = 0
-        try:
-            if int(live_video['hasLiveHomeVideo']):
-                home_feed = str(int(live_video['hasLiveHomeVideo']))
-                away_feed = str(int(live_video['hasLiveAwayVideo']))
-                french_feed = str(int(live_video['hasLiveFrenchVideo']))
-                goalie_cam_1 = str(int(live_video['hasLiveCam1Video']))
-                goalie_cam_2 = str(int(live_video['hasLiveCam2Video']))                
-                live_feeds = home_feed+away_feed+french_feed+goalie_cam_1+goalie_cam_2
-        except:
-            pass
-
-        '''
-        "hasArchiveAwayVideo": false,
-        "hasArchiveFrenchVideo": false,
-        "hasArchiveHomeVideo": true,
-        "hasCondensedVideo": true,
-        "hasContinuousVideo": true,
-        "hasFullGameVideo": false
-        '''
-
-        archive_video = game['gameHighlightVideo']
-        archive_feeds = 0
-        if len(archive_video) > 0:
-            home_feed = str(int(archive_video['hasArchiveHomeVideo']))
-            away_feed = str(int(archive_video['hasArchiveAwayVideo']))
-            french_feed = str(int(archive_video['hasArchiveFrenchVideo']))
-            if french_feed == '0':
-                #For some reason the live french stream is set to true when the game has a french archive stream
-                french_feed = str(int(live_video['hasLiveFrenchVideo']))
-
-            archive_feeds = home_feed+away_feed+french_feed
-
-        if NO_SPOILERS == '1':
-            name = game_time + ' ' + away_team + ' at ' + home_team
-        elif NO_SPOILERS == '2':
-            if fav_game:
-                name = game_time + ' ' + away_team + ' at ' + home_team
-            else:
-                name = game_time + ' ' + away_team + ' at ' + home_team + ' ' + score
-        else:
-            name = game_time + ' ' + away_team + ' at ' + home_team + ' ' + score
-
-        name = name.encode('utf-8')
-        if fav_game:
-            name = '[B]'+name+'[/B]'
-        
-        title = away_team + ' at ' + home_team
-        title = title.encode('utf-8')
-        
-        addStream(name,'',title,game_id,live_feeds,archive_feeds,icon)
-
+        createGameStream(game)
     
     d = day + timedelta(days=1)
-    addDir('[B]Next Day >>[/B]','/live',101,ICON,FANART,d.strftime("%Y-%m-%d"))
+    addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,d.strftime("%Y-%m-%d"))
+
+
+def createGameStream(game):
+    away = game['gameInformation']['awayTeam']
+    home = game['gameInformation']['homeTeam']
+    #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
+    #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['teamAbb']+'_at_'+home['teamAbb']+'.jpg'
+    icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['teamAbb']+'vs'+home['teamAbb']+'.png'
+
+
+    if TEAM_NAMES == "0":
+        away_team = away['teamCity']
+        home_team = home['teamCity']
+    elif TEAM_NAMES == "1":
+        away_team = away['teamName']
+        home_team = home['teamName']
+    elif TEAM_NAMES == "2":
+        away_team = away['teamCity'] + " " + away['teamName']
+        home_team = home['teamCity'] + " " + home['teamName']
+    elif TEAM_NAMES == "3":
+        away_team = away['teamAbb']
+        home_team = home['teamAbb']
+
+
+    if away_team == "New York":
+        away_team = away_team + " " + away['teamName']
+
+    if home_team == "New York":
+        home_team = home_team + " " + home['teamName']
+
+
+    fav_game = False
+    if away['teamCity'].encode('utf-8') == FAV_TEAM or away['teamCity'] + " " + away['teamName'].encode('utf-8') == FAV_TEAM:
+        fav_game = True
+        away_team = colorString(away_team,getFavTeamColor())           
+    
+    if home['teamCity'].encode('utf-8') == FAV_TEAM or home['teamCity'] + " " + home['teamName'].encode('utf-8') == FAV_TEAM:
+        fav_game = True
+        home_team = colorString(home_team,getFavTeamColor())
+
+
+    game_time = ''
+    if game['gameInformation']['currentGameTime'] != ' ':
+        game_time = game['gameInformation']['currentGameTime']
+        if NO_SPOILERS == '1' and game_time[:5] == "FINAL":
+             game_time = game_time[:5]
+        elif NO_SPOILERS == '2' and game_time[:5] == "FINAL":
+             if fav_game:
+                  game_time = game_time[:5]
+    else:            
+        game_time = game['gameInformation']['easternGameTime']            
+        game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
+        game_time = easternToLocal(game_time)
+        print game_time
+        if TIME_FORMAT == '0':
+             game_time = game_time.strftime('%I:%M %p').lstrip('0')
+        else:
+             game_time = game_time.strftime('%H:%M')
+
+    game_time = colorString(game_time,GAMETIME_COLOR) 
+           
+    game_id = str(game['id'])
+
+    '''
+    "gameLiveVideo": {
+    "hasLiveAwayVideo": true,
+    "hasLiveBroadcastVideo": false,
+    "hasLiveCam1Video": false,
+    "hasLiveCam2Video": false,
+    "hasLiveFrenchVideo": false,
+    "hasLiveHomeVideo": true,
+    "hasLivePostgameVideo": false,
+    "hasLivePregameVideo": false,
+    "hasLiveRogersCam1Video": false,
+    "hasLiveRogersCam2Video": false,
+    "hasLiveRogersCam3Video": false
+    '''
+    live_video = game['gameLiveVideo']
+    live_feeds = 0
+    try:
+        if int(live_video['hasLiveHomeVideo']):
+            home_feed = str(int(live_video['hasLiveHomeVideo']))
+            away_feed = str(int(live_video['hasLiveAwayVideo']))
+            french_feed = str(int(live_video['hasLiveFrenchVideo']))
+            goalie_cam_1 = str(int(live_video['hasLiveCam1Video']))
+            goalie_cam_2 = str(int(live_video['hasLiveCam2Video']))                
+            live_feeds = home_feed+away_feed+french_feed+goalie_cam_1+goalie_cam_2
+    except:
+        pass
+
+    '''
+    "hasArchiveAwayVideo": false,
+    "hasArchiveFrenchVideo": false,
+    "hasArchiveHomeVideo": true,
+    "hasCondensedVideo": true,
+    "hasContinuousVideo": true,
+    "hasFullGameVideo": false
+    '''
+
+    archive_video = game['gameHighlightVideo']
+    archive_feeds = 0
+    if len(archive_video) > 0:
+        home_feed = str(int(archive_video['hasArchiveHomeVideo']))
+        away_feed = str(int(archive_video['hasArchiveAwayVideo']))
+        french_feed = str(int(archive_video['hasArchiveFrenchVideo']))
+        if french_feed == '0':
+            #For some reason the live french stream is set to true when the game has a french archive stream
+            french_feed = str(int(live_video['hasLiveFrenchVideo']))
+
+        archive_feeds = home_feed+away_feed+french_feed
+
+    if NO_SPOILERS == '1':
+        name = game_time + ' ' + away_team + ' at ' + home_team
+    elif NO_SPOILERS == '2' and fav_game:            
+        name = game_time + ' ' + away_team + ' at ' + home_team
+    else:
+        name = game_time + ' ' + away_team + ' ' + colorString(str(away['teamScore']),SCORE_COLOR) + ' at ' + home_team + ' ' + colorString(str(home['teamScore']),SCORE_COLOR) 
+
+
+    name = name.encode('utf-8')
+    if fav_game:
+        name = '[B]'+name+'[/B]'
+    
+    title = away_team + ' at ' + home_team
+    title = title.encode('utf-8')
+    
+    addStream(name,'',title,game_id,live_feeds,archive_feeds,icon)
 
 
 def publishPoint(game_id,ft,gs):    
@@ -487,6 +487,8 @@ def quickPicks():
 
         info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
         addLink(name,url,title,icon,info,fanart=None)
+
+    xbmc.executebuiltin("Container.SetViewMode(504)")
 
 
 
