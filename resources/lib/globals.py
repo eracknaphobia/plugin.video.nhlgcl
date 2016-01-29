@@ -92,6 +92,13 @@ def easternToLocal(eastern_time):
     return local_dt.replace(microsecond=utc_time.microsecond)
 
 
+def localToEastern():    
+    eastern = pytz.timezone('US/Eastern')    
+    local_to_utc = datetime.now(pytz.timezone('UTC'))    
+    local_to_eastern = local_to_utc.astimezone(eastern).strftime('%Y-%m-%d')
+    return local_to_eastern
+
+
 def get_params():
     param=[]
     paramstring=sys.argv[2]
@@ -112,7 +119,7 @@ def get_params():
 
 
 
-def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fanart=None,info=None):
+def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fanart=None,info=None,video_info=None,audio_info=None):
     ok=True
     u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&live_feeds="+urllib.quote_plus(str(live_feeds))+"&archive_feeds="+urllib.quote_plus(str(archive_feeds))
     
@@ -130,29 +137,35 @@ def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fan
     liz.setInfo( type="Video", infoLabels={ "Title": title } )
     if info != None:
         liz.setInfo( type="Video", infoLabels=info)
+    if video_info != None:
+        liz.addStreamInfo('video', video_info)
+    if audio_info != None:
+        liz.addStreamInfo('audio', audio_info)
+
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
     xbmcplugin.setContent(addon_handle, 'episodes')
     
     return ok
 
 
-def addLink(name,url,title,iconimage,info=None,fanart=None):
+def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None):
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)    
     liz.setProperty("IsPlayable", "true")
     liz.setInfo( type="Video", infoLabels={ "Title": title } )
+    liz.setProperty('fanart_image', FANART)
     if iconimage != None:
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage) 
     else:
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=ICON) 
 
-    if fanart != None:
-        liz.setProperty('fanart_image', fanart)
-    else:
-        liz.setProperty('fanart_image', FANART)
-
     if info != None:
         liz.setInfo( type="Video", infoLabels=info)
+    if video_info != None:
+        liz.addStreamInfo('video', video_info)
+    if audio_info != None:
+        liz.addStreamInfo('audio', audio_info)
+
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
     xbmcplugin.setContent(addon_handle, 'episodes')
     return ok
@@ -165,7 +178,8 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
     
     if game_day == None:
         #Set day to today if none given
-        game_day = time.strftime("%Y-%m-%d")
+        #game_day = time.strftime("%Y-%m-%d")
+        game_day = localToEastern()
 
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)+"&game_day="+urllib.quote_plus(game_day)
 
@@ -235,3 +249,16 @@ def getFavTeamColor():
     #pass
 
     return  fav_team_color
+
+def getAudioVideoInfo():
+    #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)
+    if QUALITY == 'SD (800 kbps)':        
+        video_info = { 'codec': 'h264', 'width' : 640, 'height' : 360, 'aspect' : 1.78 }        
+    elif QUALITY == 'SD (1600 kbps)':
+        video_info = { 'codec': 'h264', 'width' : 960, 'height' : 540, 'aspect' : 1.78 }        
+    elif QUALITY == 'HD (3000 kbps)' or QUALITY == 'HD (5000 kbps)':
+        video_info = { 'codec': 'h264', 'width' : 1280, 'height' : 720, 'aspect' : 1.78 }        
+
+    audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }
+    return audio_info, video_info
+

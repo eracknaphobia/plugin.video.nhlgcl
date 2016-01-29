@@ -1,3 +1,10 @@
+2016.1.29
+- Added support for addition camera angles (i.e. Rogers Cams) *most games don't offer these*
+- Added 5000kbps support for full and condensed archived games
+- Convert local date to eastern when calling score notifications
+- Fixed bug that caused score notifications to crash if no games were scheduled for the day
+- Added audio and video stream info for display purposes
+
 2016.1.20
 - Favorite team color uses teams dominant color for highlighting
 - Fixed favorite team bugs for certain teams

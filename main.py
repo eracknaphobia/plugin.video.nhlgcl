@@ -9,19 +9,22 @@ import cookielib
 from resources.lib.globals import *
 
 
-def categories():                    
+def categories():    
+    localToEastern()
+
     addDir('Today\'s Games','/live',100,ICON,FANART)
-    addDir('Enter Date','/date',200,ICON,FANART)
+    addDir('Goto Date','/date',200,ICON,FANART)
     addDir('Quick Picks','/qp',300,ICON,FANART)  
         
 
 def todaysGames(game_day):
     print "GAME DAY = " + str(game_day)        
-    day = stringToDate(game_day, "%Y-%m-%d")
-    d = day - timedelta(days=1)
-    addDir('[B]<< Previous Day[/B]','/live',101,PREV_ICON,FANART,d.strftime("%Y-%m-%d"))
+    display_day = stringToDate(game_day, "%Y-%m-%d")            
+    prev_day = display_day - timedelta(days=1)                
 
-    date_display = '[B][I]'+ colorString(day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
+    addDir('[B]<< Previous Day[/B]','/live',101,PREV_ICON,FANART,prev_day.strftime("%Y-%m-%d"))
+
+    date_display = '[B][I]'+ colorString(display_day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
     addDir(date_display,'/nothing',999,ICON,FANART)
         
     url = 'http://f.nhl.com/livescores/nhl/leagueapp/20142015/scores/'+game_day+'_O1T1.json'
@@ -44,8 +47,8 @@ def todaysGames(game_day):
     for game in json_source['games']:
         createGameStream(game)
     
-    d = day + timedelta(days=1)
-    addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,d.strftime("%Y-%m-%d"))
+    next_day = display_day + timedelta(days=1)
+    addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))
 
 
 def createGameStream(game):
@@ -54,7 +57,6 @@ def createGameStream(game):
     #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
     #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['teamAbb']+'_at_'+home['teamAbb']+'.jpg'
     icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['teamAbb']+'vs'+home['teamAbb']+'.png'
-
 
     if TEAM_NAMES == "0":
         away_team = away['teamCity']
@@ -99,63 +101,74 @@ def createGameStream(game):
         game_time = game['gameInformation']['easternGameTime']            
         game_time = stringToDate(game_time, "%Y/%m/%d %H:%M:%S")
         game_time = easternToLocal(game_time)
-        print game_time
+       
         if TIME_FORMAT == '0':
              game_time = game_time.strftime('%I:%M %p').lstrip('0')
         else:
              game_time = game_time.strftime('%H:%M')
 
-    game_time = colorString(game_time,GAMETIME_COLOR) 
-           
+    game_time = colorString(game_time,GAMETIME_COLOR)            
     game_id = str(game['id'])
 
-    '''
-    "gameLiveVideo": {
-    "hasLiveAwayVideo": true,
-    "hasLiveBroadcastVideo": false,
-    "hasLiveCam1Video": false,
-    "hasLiveCam2Video": false,
-    "hasLiveFrenchVideo": false,
-    "hasLiveHomeVideo": true,
-    "hasLivePostgameVideo": false,
-    "hasLivePregameVideo": false,
-    "hasLiveRogersCam1Video": false,
-    "hasLiveRogersCam2Video": false,
-    "hasLiveRogersCam3Video": false
-    '''
+
     live_video = game['gameLiveVideo']
     live_feeds = 0
     try:
-        if int(live_video['hasLiveHomeVideo']):
-            home_feed = str(int(live_video['hasLiveHomeVideo']))
-            away_feed = str(int(live_video['hasLiveAwayVideo']))
-            french_feed = str(int(live_video['hasLiveFrenchVideo']))
-            goalie_cam_1 = str(int(live_video['hasLiveCam1Video']))
-            goalie_cam_2 = str(int(live_video['hasLiveCam2Video']))                
-            live_feeds = home_feed+away_feed+french_feed+goalie_cam_1+goalie_cam_2
+        if int(live_video['hasLiveHomeVideo']):           
+
+            if bool(live_video['hasLiveBroadcastVideo']):
+                live_feeds += 1
+
+            if bool(live_video['hasLiveAwayVideo']):
+                live_feeds += 2
+
+            if bool(live_video['hasLiveHomeVideo']):
+                live_feeds += 4
+
+            if bool(live_video['hasLiveFrenchVideo']):
+                live_feeds += 8
+
+            #-----------------------------
+            #Always add Goalie Cams
+            #-----------------------------
+            #if bool(live_video['hasLiveCam1Video']):
+            live_feeds += 64
+
+            #if bool(live_video['hasLiveCam2Video']):
+            live_feeds += 128
+            #-----------------------------
+
+            if bool(live_video['hasLiveRogersCam1Video']):
+                live_feeds += 256
+
+            if bool(live_video['hasLiveRogersCam2Video']):
+                live_feeds += 512
+
+            if bool(live_video['hasLiveRogersCam1Video']):
+                live_feeds += 1024
+
+            if bool(live_video['hasLivePregameVideo']):
+                live_feeds += 2048
+
+            if bool(live_video['hasLivePostgameVideo']):
+                live_feeds += 4096
     except:
         pass
-
-    '''
-    "hasArchiveAwayVideo": false,
-    "hasArchiveFrenchVideo": false,
-    "hasArchiveHomeVideo": true,
-    "hasCondensedVideo": true,
-    "hasContinuousVideo": true,
-    "hasFullGameVideo": false
-    '''
 
     archive_video = game['gameHighlightVideo']
     archive_feeds = 0
     if len(archive_video) > 0:
-        home_feed = str(int(archive_video['hasArchiveHomeVideo']))
-        away_feed = str(int(archive_video['hasArchiveAwayVideo']))
-        french_feed = str(int(archive_video['hasArchiveFrenchVideo']))
-        if french_feed == '0':
-            #For some reason the live french stream is set to true when the game has a french archive stream
-            french_feed = str(int(live_video['hasLiveFrenchVideo']))
 
-        archive_feeds = home_feed+away_feed+french_feed
+        if bool(archive_video['hasArchiveAwayVideo']):
+                archive_feeds += 2
+
+        if bool(archive_video['hasArchiveHomeVideo']):
+            archive_feeds += 4
+
+        #For some reason the live french stream is set to true when the game has a french archive stream            
+        if bool(archive_video['hasArchiveFrenchVideo']) or bool(live_video['hasLiveFrenchVideo']):
+            archive_feeds += 8
+
 
     if NO_SPOILERS == '1':
         name = game_time + ' ' + away_team + ' at ' + home_team
@@ -172,37 +185,12 @@ def createGameStream(game):
     title = away_team + ' at ' + home_team
     title = title.encode('utf-8')
     
-    addStream(name,'',title,game_id,live_feeds,archive_feeds,icon)
+    #Set audio/video info based on stream quality setting
+    audio_info, video_info = getAudioVideoInfo()
+    addStream(name,'',title,game_id,live_feeds,archive_feeds,icon,None,None,video_info,audio_info)
 
 
 def publishPoint(game_id,ft,gs):    
-    #---------------------
-    # ft key
-    #---------------------
-    # 1 = Broadcast
-    # 2 = Home
-    # 4 = Away
-    # 8 = French
-    # 16 = NBC
-    # 64 = Goalie Cam 1
-    # 128 = Goalie Cam 2
-    # 256 = Rogers Cam 1
-    # 512 = Rogers Cam 2
-    # 1024 = Rogers Cam 3
-    # 2048 = PreGame Press Conference
-    # 4096 = PostGame Press Conference
-    #---------------------
-
-    #---------------------
-    # gs key
-    #---------------------
-    # live 
-    # dvr
-    # archive 
-    # condensed
-    # highlights
-    #---------------------
-
     #token = epoch time (in milliseconds) + "." + token???
 
     cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
@@ -340,33 +328,35 @@ def login():
 
         cj.save(ignore_discard=True); 
 
-def checkLogin():
-    expired_cookies = True
-    try:
-        cj = cookielib.LWPCookieJar()
-        cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
-        at_least_one_expired = False
-        for cookie in cj:                
-            #if cookie.name == 'gcsub':
-            print cookie.name
-            print cookie.expires
-            print cookie.is_expired()
-            if cookie.is_expired():
-                at_least_one_expired = True
-                break
-
-        if not at_least_one_expired:
-            expired_cookies = False
-            
-    except:
-        pass
-    
-    if expired_cookies:
-        login()
-
 
 
 def streamSelect(live_feeds,archive_feeds):
+    #---------------------
+    # ft key
+    #---------------------
+    # 1 = Broadcast
+    # 2 = Home
+    # 4 = Away
+    # 8 = French
+    # 16 = NBC
+    # 64 = Goalie Cam 1
+    # 128 = Goalie Cam 2
+    # 256 = Rogers Cam 1
+    # 512 = Rogers Cam 2
+    # 1024 = Rogers Cam 3
+    # 2048 = PreGame Press Conference
+    # 4096 = PostGame Press Conference
+    #---------------------
+
+    #---------------------
+    # gs key
+    #---------------------
+    # live 
+    # dvr
+    # archive 
+    # condensed
+    # highlights
+    #---------------------
     print live_feeds
     print archive_feeds
     stream_title = []
@@ -375,43 +365,86 @@ def streamSelect(live_feeds,archive_feeds):
     #archive_gs = ['dvr','condensed','highlights']
     archive_gs = ['archive','condensed','highlights']
     
-    #Live Feed
+    #Live Feeds    
     if int(live_feeds) > 1:
         gs = 'live'
-        if live_feeds[0] == "1":
-            stream_title.append('Home')
-            ft.append('2')
-        if live_feeds[1] == "1":
+        if live_feeds >= 4096:
+            stream_title.append('Post-Game Press Conference')
+            ft.append('4096')
+            live_feeds -= 4096
+
+        if live_feeds >= 2048:
+            stream_title.append('Pre-Game Press Conference')
+            ft.append('2048')
+            live_feeds -= 2048
+
+        if live_feeds >= 1024:
+            stream_title.append('Rogers Cam 3')
+            ft.append('1024')
+            live_feeds -= 1024
+            
+        if live_feeds >= 512:
+            stream_title.append('Rogers Cam 2')
+            ft.append('512')
+            live_feeds -= 512
+
+        if live_feeds >= 256:
+            stream_title.append('Rogers Cam 1')
+            ft.append('256')
+            live_feeds -= 256
+            
+        if live_feeds >= 128:
+            stream_title.append('Goalie Cam 2')
+            ft.append('128')
+            live_feeds -= 128
+
+        if live_feeds >= 64:
+            stream_title.append('Goalie Cam 1')
+            ft.append('64')
+            live_feeds -= 64
+
+        if live_feeds >= 8:
+            stream_title.append('French')
+            ft.append('8')
+            live_feeds -= 8
+
+        if live_feeds >= 4:
             stream_title.append('Away')
             ft.append('4')
-        if live_feeds[2] == "1":
-            stream_title.append('French')
-            ft.append('8')  
-        #if live_feeds[3] == "1":
-        stream_title.append('Goalie Cam 1')
-        ft.append('64')
-        #if live_feeds[4] == "1":
-        stream_title.append('Goalie Cam 2')
-        ft.append('128')
+            live_feeds -= 4
+            
+        if live_feeds >= 2:
+            stream_title.append('Home')
+            ft.append('2')
+            live_feeds -= 2
 
-    # Archive Feed
-    elif int(archive_feeds) > 1:       
+        if live_feeds >= 1:
+            stream_title.append('NBC')
+            ft.append('1')            
+       
+    # Archive Feeds
+    elif archive_feeds > 1:       
         dialog = xbmcgui.Dialog()          
         n = dialog.select('Choose Archive', archive_type)
         if n == -1:
             sys.exit()
 
-        gs = archive_gs[n]        
-        if archive_feeds[0] == "1":
-            stream_title.append('Home')
-            ft.append('2')
-        if archive_feeds[1] == "1":
-            stream_title.append('Away')
-            ft.append('4')
-        if archive_feeds[2] == "1":
+        gs = archive_gs[n] 
+
+        if archive_feeds >= 8:
             stream_title.append('French')
             ft.append('8')
-       
+            archive_feeds -= 8
+
+        if archive_feeds >= 4:
+            stream_title.append('Away')
+            ft.append('4')
+            archive_feeds -= 4
+            
+        if archive_feeds >= 2:
+            stream_title.append('Home')
+            ft.append('2')
+        
     else:
         msg = "No playable streams found."
         dialog = xbmcgui.Dialog() 
@@ -419,6 +452,10 @@ def streamSelect(live_feeds,archive_feeds):
         sys.exit()
 
     
+    #Reverse Order for display purposes
+    stream_title.reverse()
+    ft.reverse()
+
     n = -1
     is_highlights = 0
     if gs != 'highlights':
@@ -433,30 +470,50 @@ def streamSelect(live_feeds,archive_feeds):
     if n > -1:
         #Even though cookies haven't expired some calls won't run unless the cookies are fairly new???
         #Login checking is now done at the publishpoint. If error 401 is received a login is submitted and the stream url is requested again
-        #checkLogin()
         stream_url = publishPoint(game_id,ft[n],gs)
-
+        
         if stream_url != None:
-            print "STREAM URL: "+stream_url
             #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)        
-            bndwth = find(QUALITY,'(',' kbps)')
+            bandwidth = find(QUALITY,'(',' kbps)')
 
-            #Don't replace quality for goalie cams, french feeds or if 5000 kbps is selected
-            #The best quality will be selected by default (1600 kbps for goalie cams | 4500 kbps for French feeds)
-            if ft[n] != '64' and ft[n] != '128' and bndwth != '5000':
-                stream_url = stream_url.replace('_hd_ced.m3u8', '_hd_'+bndwth+'_ced.m3u8')    
+            #Don't replace quality for special camera angles (64 and up) if quality is greater than 1600
+            #The best quality will be selected by default (ex. 1600 kbps for goalie cams)            
+            if int(ft[n]) < 64 or int(bandwidth) < 1600:
+                stream_url = stream_url.replace('_hd_ced.m3u8', '_hd_'+bandwidth+'_ced.m3u8')    
+                stream_url = stream_url.replace('whole_1_ced.mp4', 'whole_1_'+bandwidth+'_ced.mp4')
+                stream_url = stream_url.replace('_condensed_1_ced.mp4', '_condensed_1_'+bandwidth+'_ced.mp4')
 
             if is_highlights:
                 stream_url = stream_url.replace('_condensed_1_ced.mp4.m3u8', '_continuous_1_1600.mp4')
 
+            '''            
+            Print manifest contents to kodi log
+            cookies = ''
+            cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
+            cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
+            for cookie in cj:                            
+                cookies = cookies + cookie.name + "=" + cookie.value + "; "
+            req = urllib2.Request(stream_url)    
+            req.add_header('Connection', 'keep-alive')
+            req.add_header('Accept', '*/*')
+            req.add_header('User-Agent', UA_IPAD)
+            req.add_header('Accept-Language', 'en-us')
+            req.add_header('Accept-Encoding', 'gzip, deflate')
+            req.add_header('Cookie', cookies)
+            response = urllib2.urlopen(req)
+            print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+            print response.read()
+            print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+            response.close()
+            '''
+
             #Add user-agent to stream
-            stream_url = stream_url + '|User-Agent='+UA_GCL
+            stream_url = stream_url + '|User-Agent='+UA_IPAD
+
+            print "STREAM URL: "+stream_url
 
             listitem = xbmcgui.ListItem(path=stream_url)
-            xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
-
-            #Seek ahead 1 minute
-            #xbmc.executebuiltin('Seek(-600)')
+            xbmcplugin.setResolvedUrl(addon_handle, True, listitem)            
         else:
             sys.exit()
     else:
@@ -486,7 +543,9 @@ def quickPicks():
         release_date = video['releaseDate'][0:10]
 
         info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
-        addLink(name,url,title,icon,info,fanart=None)
+        video_info = { 'codec': 'h264', 'width' : 960, 'height' : 540, 'aspect' : 1.78 }
+        audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }
+        addLink(name,url,title,icon,info,video_info,audio_info)
 
     xbmc.executebuiltin("Container.SetViewMode(504)")
 
@@ -522,11 +581,11 @@ try:
 except:
     pass
 try:
-    live_feeds=urllib.unquote_plus(params["live_feeds"])
+    live_feeds=int(urllib.unquote_plus(params["live_feeds"]))
 except:
     pass
 try:
-    archive_feeds=urllib.unquote_plus(params["archive_feeds"])
+    archive_feeds=int(urllib.unquote_plus(params["archive_feeds"]))
 except:
     pass
 
@@ -550,13 +609,15 @@ elif mode == 200:
     dialog = xbmcgui.Dialog()
     game_day = dialog.input('Enter date (yyyy-mm-dd)', type=xbmcgui.INPUT_ALPHANUM)
     print game_day
-    mat=re.match('(\d{4})-(\d{2})-(\d{2})$', game_day)
+    mat=re.match('(\d{4})-(\d{2})-(\d{2})$', game_day)        
     if mat is not None:    
         todaysGames(game_day)
-    else:
-        msg = "The date entered is not in the format required."
-        dialog = xbmcgui.Dialog() 
-        ok = dialog.ok('Invalid Date', msg)
+    else:    
+        if game_day != '':    
+            msg = "The date entered is not in the format required."
+            dialog = xbmcgui.Dialog() 
+            ok = dialog.ok('Invalid Date', msg)
+
         sys.exit()
 
 elif mode == 300:
