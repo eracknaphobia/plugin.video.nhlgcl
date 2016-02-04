@@ -295,8 +295,7 @@ def streamSelect(game_id, epg):
 
     if stream_url != '':
         listitem = xbmcgui.ListItem(path=stream_url)
-        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
-        #logout()
+        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)        
     else:
         sys.exit()
         
@@ -368,32 +367,8 @@ def fetchStream(game_id, content_id,event_id):
 
     #cj.close()
 
-    epoch_time_now = str(int(round(time.time()*1000)))    
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now
-
-    req = urllib2.Request(url)       
-    req.add_header("Accept", "application/json")
-    req.add_header("Accept-Encoding", "deflate")
-    req.add_header("Accept-Language", "en-US,en;q=0.8")                       
-    req.add_header("Connection", "keep-alive")
-    req.add_header("Authorization", authorization)
-    req.add_header("User-Agent", UA_PC)
-    req.add_header("Origin", "https://www.nhl.com")
-    req.add_header("Referer", "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id)
-    
-    response = urllib2.urlopen(req)
-    json_source = json.load(response)   
-    response.close()
-
-    if json_source['status_code'] == 1:
-        session_key = json_source['session_key']
-    else:
-        msg = json_source['status_message']
-        dialog = xbmcgui.Dialog() 
-        ok = dialog.ok('Error Fetching Stream', msg)
-        sys.exit()
-
-   
+    #session_key = 'Y9djbtOX95xrnIUiQgdUbnKyN8g='
+    session_key = getSessionKey(game_id,event_id,content_id,authorization)
     epoch_time_now = str(int(round(time.time()*1000)))
 
     #url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_WIRED_WEB&sessionKey='+session_key+'&auth=response&format=json&platform=WEB_MEDIAPLAYER&_='+epoch_time_now       
@@ -419,6 +394,9 @@ def fetchStream(game_id, content_id,event_id):
     '''
     stream_url = ''
     media_auth = ''
+
+    #media_auth_file = os.path.join(ADDON_PATH_PROFILE, 'media_auth.txt')
+
 
     if json_source['status_code'] == 1:
         if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
@@ -462,6 +440,51 @@ def fetchStream(game_id, content_id,event_id):
     
     return stream_url, media_auth    
 
+
+
+def getSessionKey(game_id,event_id,content_id,authorization):    
+
+    fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
+    if os.path.isfile(fname):                
+        session_key_file = open(fname,'r') 
+        session_key = session_key_file.readline()
+        session_key_file.close()
+        print "READ FROM FILE"
+    else:
+        epoch_time_now = str(int(round(time.time()*1000)))    
+        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now
+
+        req = urllib2.Request(url)       
+        req.add_header("Accept", "application/json")
+        req.add_header("Accept-Encoding", "deflate")
+        req.add_header("Accept-Language", "en-US,en;q=0.8")                       
+        req.add_header("Connection", "keep-alive")
+        req.add_header("Authorization", authorization)
+        req.add_header("User-Agent", UA_PC)
+        req.add_header("Origin", "https://www.nhl.com")
+        req.add_header("Referer", "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id)
+        
+        response = urllib2.urlopen(req)
+        json_source = json.load(response)   
+        response.close()
+        print "REQUESTED SESSION KEY"
+        if json_source['status_code'] == 1:
+            session_key = json_source['session_key']
+            #Save auth token to file for         
+            fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
+            #if not os.path.isfile(fname):            
+            session_key_file = open(fname,'w')   
+            session_key_file.write(session_key)
+            session_key_file.close()
+        else:
+            msg = json_source['status_message']
+            dialog = xbmcgui.Dialog() 
+            ok = dialog.ok('Error Fetching Stream', msg)
+            sys.exit()
+    
+    return session_key
+    
+    
 
 def login():    
     #Check if username and password are provided    
@@ -553,6 +576,10 @@ def logout():
     #clear session cookies since they're no longer valid
     cj.clear()
     cj.save(ignore_discard=True);
+
+    #Delete sessionKey
+    fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
+    os.remove(fname)
 
 
 
