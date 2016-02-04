@@ -1,3 +1,6 @@
+2016.2.3
+- beta testing for nhl.tv overhaul
+
 2016.1.29
 - Added support for addition camera angles (i.e. Rogers Cams) *most games don't offer these*
 - Added 5000kbps support for full and condensed archived games

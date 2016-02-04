@@ -7,7 +7,7 @@
 	<setting id="rogers" type="bool" label="155" default="false" />  
   </category>
   <category label="159">
-    <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)" default="HD (5000 kbps)" />
+    <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1200 kbps)|HD (2500 kbps)|HD (3500 kbps)|HD (5000 kbps)" default="HD (5000 kbps)" />
     <setting id="no_spoilers" type="enum" label="170" lvalues="1700|1701|1702" />  
     <setting id="fav_team" type="labelenum" label="180" default="None" values="None|Winnipeg|Washington|Vancouver|Toronto|Tampa Bay|St. Louis|San Jose|Ottawa|Pittsburgh|Philadelphia|New York Rangers|New York Islanders|New Jersey|Nashville|Montréal|Minnesota|Los Angeles|Florida|Edmonton|Detroit|Dallas|Columbus|Colorado|Chicago|Carolina|Calgary|Buffalo|Boston|Arizona|Anaheim" />
 	<setting id="team_names" type="select" label="190" lvalues="1900|1901|1902|1903" default="0" />
@@ -15,7 +15,7 @@
   </category>
   <category label="300">
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
-  	<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />
+  	<!--<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />-->
   	<setting label="330" type="number" id="display_seconds" default="5"/>
   </category>
 </settings>

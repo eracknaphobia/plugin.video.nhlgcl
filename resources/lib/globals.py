@@ -49,12 +49,14 @@ PREV_ICON = ROOTDIR+"/resources/images/prev.png"
 NEXT_ICON = ROOTDIR+"/resources/images/next.png"
 
 #User Agents
+UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
 UA_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H143 iphone nhl 5.0925'
 UA_IPAD = 'Mozilla/5.0 (iPad; CPU OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H143 ipad nhl 5.0925'
-UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
+UA_NHL = 'NHL/2542 CFNetwork/758.2.8 Darwin/15.0.0'
+UA_PC = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36'
 UA_PS3 = 'PS3Application libhttp/4.7.6-000 (CellOS)'
-UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.00 (PlayStation 4)'
-
+UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)'
+    
 
 def find(source,start_str,end_str):    
     start = source.find(start_str)
@@ -91,6 +93,13 @@ def easternToLocal(eastern_time):
     assert utc_time.resolution >= timedelta(microseconds=1)
     return local_dt.replace(microsecond=utc_time.microsecond)
 
+def UTCToLocal(utc_dt):
+    # get integer timestamp to avoid precision lost
+    timestamp = calendar.timegm(utc_dt.timetuple())
+    local_dt = datetime.fromtimestamp(timestamp)
+    assert utc_dt.resolution >= timedelta(microseconds=1)
+    return local_dt.replace(microsecond=utc_dt.microsecond)
+
 
 def localToEastern():    
     eastern = pytz.timezone('US/Eastern')    
@@ -119,9 +128,9 @@ def get_params():
 
 
 
-def addStream(name,link_url,title,game_id,live_feeds,archive_feeds,icon=None,fanart=None,info=None,video_info=None,audio_info=None):
+def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,video_info=None,audio_info=None):
     ok=True
-    u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&live_feeds="+urllib.quote_plus(str(live_feeds))+"&archive_feeds="+urllib.quote_plus(str(archive_feeds))
+    u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&epg="+urllib.quote_plus(str(epg))
     
     if icon != None:
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=icon) 
@@ -180,6 +189,7 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
         #Set day to today if none given
         #game_day = time.strftime("%Y-%m-%d")
         game_day = localToEastern()
+        #game_day = '2016-01-27'
 
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)+"&game_day="+urllib.quote_plus(game_day)
 
@@ -253,10 +263,10 @@ def getFavTeamColor():
 def getAudioVideoInfo():
     #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)
     if QUALITY == 'SD (800 kbps)':        
+        video_info = { 'codec': 'h264', 'width' : 512, 'height' : 288, 'aspect' : 1.78 }        
+    elif QUALITY == 'SD (1200 kbps)':
         video_info = { 'codec': 'h264', 'width' : 640, 'height' : 360, 'aspect' : 1.78 }        
-    elif QUALITY == 'SD (1600 kbps)':
-        video_info = { 'codec': 'h264', 'width' : 960, 'height' : 540, 'aspect' : 1.78 }        
-    elif QUALITY == 'HD (3000 kbps)' or QUALITY == 'HD (5000 kbps)':
+    elif QUALITY == 'HD (2500 kbps)' or QUALITY == 'HD (3500 kbps)' or QUALITY == 'HD (5000 kbps)':
         video_info = { 'codec': 'h264', 'width' : 1280, 'height' : 720, 'aspect' : 1.78 }        
 
     audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }
