@@ -356,8 +356,8 @@ def fetchStream(game_id, content_id,event_id):
     except:
         pass
 
-
-    if authorization == '':
+    fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')            
+    if authorization == '' or not os.path.isfile(fname):
         login()
         cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))     
         cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)    
@@ -451,6 +451,7 @@ def getSessionKey(game_id,event_id,content_id,authorization):
         session_key_file.close()
         print "READ FROM FILE"
     else:
+        
         epoch_time_now = str(int(round(time.time()*1000)))    
         url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now
 
@@ -467,9 +468,12 @@ def getSessionKey(game_id,event_id,content_id,authorization):
         response = urllib2.urlopen(req)
         json_source = json.load(response)   
         response.close()
+        
         print "REQUESTED SESSION KEY"
         if json_source['status_code'] == 1:
+        #if 1 == 1:
             session_key = json_source['session_key']
+            #session_key = 'Y9djbtOX95xrnIUiQgdUbnKyN8g='
             #Save auth token to file for         
             fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
             #if not os.path.isfile(fname):            
@@ -555,6 +559,13 @@ def login():
 
 
 def logout():
+    #Delete sessionKey
+    try:
+        fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
+        os.remove(fname)
+    except:
+        pass
+
     cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))     
     cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))                
@@ -577,9 +588,7 @@ def logout():
     cj.clear()
     cj.save(ignore_discard=True);
 
-    #Delete sessionKey
-    fname = os.path.join(ADDON_PATH_PROFILE, 'sessionKey.txt')
-    os.remove(fname)
+   
 
 
 
@@ -684,6 +693,10 @@ elif mode == 300:
 
 elif mode == 400:
     logout()
+    dialog = xbmcgui.Dialog() 
+    title = "Logout Successful" 
+    dialog.notification(title, 'You have been successfully been logged out', ICON, 5000, False)   
+    categories()
 
 elif mode == 999:
     sys.exit()
@@ -691,7 +704,7 @@ elif mode == 999:
 
 if mode == 100:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
-elif mode == 101 or mode == 400:
+elif mode == 101:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False, updateListing=True)
 else:
     xbmcplugin.endOfDirectory(addon_handle)
