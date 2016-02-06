@@ -369,8 +369,27 @@ def fetchStream(game_id, content_id,event_id):
 
     #session_key = 'Y9djbtOX95xrnIUiQgdUbnKyN8g='
     session_key = getSessionKey(game_id,event_id,content_id,authorization)
-    epoch_time_now = str(int(round(time.time()*1000)))
 
+    #Second Event call    
+    epoch_time_now = str(int(round(time.time()*1000)))
+    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&sessionKey='+session_key+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now
+    req = urllib2.Request(url)       
+    req.add_header("Accept", "application/json")
+    req.add_header("Accept-Encoding", "deflate")
+    req.add_header("Accept-Language", "en-US,en;q=0.8")                       
+    req.add_header("Connection", "keep-alive")
+    req.add_header("Authorization", authorization)
+    req.add_header("User-Agent", UA_PC)
+    req.add_header("Origin", "https://www.nhl.com")
+    req.add_header("Referer", "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id)
+    
+    response = urllib2.urlopen(req)
+    #json_source = json.load(response)   
+    response.close()
+
+    print "SECOND EVENT CALL " + url
+
+    epoch_time_now = str(int(round(time.time()*1000)))
     #url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_WIRED_WEB&sessionKey='+session_key+'&auth=response&format=json&platform=WEB_MEDIAPLAYER&_='+epoch_time_now       
     url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_WIRED_WEB&sessionKey='+session_key+'&auth=response&format=json&platform=WEB_MEDIAPLAYER&_='+epoch_time_now       
     req = urllib2.Request(url)       
@@ -396,7 +415,7 @@ def fetchStream(game_id, content_id,event_id):
     media_auth = ''
 
     #media_auth_file = os.path.join(ADDON_PATH_PROFILE, 'media_auth.txt')
-
+    print "SECOND Content CALL " + url
 
     if json_source['status_code'] == 1:
         if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
@@ -453,8 +472,8 @@ def getSessionKey(game_id,event_id,content_id,authorization):
     else:
         
         epoch_time_now = str(int(round(time.time()*1000)))    
-        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now
 
+        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now        
         req = urllib2.Request(url)       
         req.add_header("Accept", "application/json")
         req.add_header("Accept-Encoding", "deflate")
