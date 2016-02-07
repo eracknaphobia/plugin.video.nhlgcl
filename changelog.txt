@@ -1,3 +1,10 @@
+2016.2.7
+- Fix for Usage errors
+- Changed fanart
+- New Color scheme for game status
+- More intuitive stream naming
+- Code clean up
+
 2016.2.3
 - beta testing for nhl.tv overhaul
 

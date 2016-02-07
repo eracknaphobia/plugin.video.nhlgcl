@@ -36,7 +36,17 @@ TIME_FORMAT = settings.getSetting(id="time_format")
 SCORE_COLOR = 'FF00B7EB'
 GAMETIME_COLOR = 'FFFFFF66'
 #FAV_TEAM_COLOR = 'FFFF0000'
+FREE_GAME_COLOR = 'FF43CD80'
 
+#Game Time Colors
+#Upcoming - Light Grey
+UPCOMING = 'FFD2D2D2'
+#Live - Yellow
+LIVE = 'FFF69E20'
+#Power Play/ Final Minues - Red
+CRITICAL ='FFD10D0D'
+#Final - Dark Grey
+FINAL = 'FF666666'
 
 #Localization
 local_string = xbmcaddon.Addon(id='plugin.video.nhlgcl').getLocalizedString
@@ -54,7 +64,6 @@ UA_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/6
 UA_IPAD = 'Mozilla/5.0 (iPad; CPU OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H143 ipad nhl 5.0925'
 UA_NHL = 'NHL/2542 CFNetwork/758.2.8 Darwin/15.0.0'
 UA_PC = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36'
-UA_PS3 = 'PS3Application libhttp/4.7.6-000 (CellOS)'
 UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)'
     
 

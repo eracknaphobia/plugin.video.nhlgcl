@@ -4,7 +4,8 @@
   <category label="100">    
     <setting id="username" type="text" label="140" default=""/>
     <setting id="password" type="text" label="150" option="hidden" default=""/>
-	<setting id="rogers" type="bool" label="155" default="false" />  
+	  <setting id="rogers" type="bool" label="155" default="false" />  
+    <setting label="156" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/logout.py)" option="close" />
   </category>
   <category label="159">
     <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1200 kbps)|HD (2500 kbps)|HD (3500 kbps)|HD (5000 kbps)" default="HD (5000 kbps)" />
