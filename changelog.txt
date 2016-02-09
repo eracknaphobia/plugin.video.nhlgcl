@@ -1,8 +1,10 @@
-2016.2.7
+2016.2.9
+- Another attempt to fix usage errors
+
+2016.2.6
 - Fix for Usage errors
 - Changed fanart
-- New Color scheme for game status
-- More intuitive stream naming
+- New Color scheme for game types
 - Code clean up
 
 2016.2.3

@@ -5,7 +5,9 @@
     <setting id="username" type="text" label="140" default=""/>
     <setting id="password" type="text" label="150" option="hidden" default=""/>
 	  <setting id="rogers" type="bool" label="155" default="false" />  
-    <setting label="156" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/logout.py)" option="close" />
+    <setting label="156" type="action" action="RunPlugin(plugin://plugin.video.nhlgcl/?url=junk&mode=400)" option="close" />
+    
+    <!-- <setting label="156" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/logout.py)" option="close" /> -->
   </category>
   <category label="159">
     <setting id="quality" type="labelenum" label="160" values="SD (800 kbps)|SD (1200 kbps)|HD (2500 kbps)|HD (3500 kbps)|HD (5000 kbps)" default="HD (5000 kbps)" />
@@ -18,5 +20,12 @@
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
   	<!--<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />-->
   	<setting label="330" type="number" id="display_seconds" default="5"/>
+
+
+    
+    <setting id="stream_date" type="text" label="900" default="" visible="false"/>    
+    <setting id="session_key" type="text" label="902" default="" visible="false"/>
+    <setting id="media_auth" type="text" label="903" default="" visible="false"/>
   </category>
 </settings>
+

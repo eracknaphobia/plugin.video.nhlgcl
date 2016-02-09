@@ -32,6 +32,7 @@ FAV_TEAM = str(settings.getSetting(id="fav_team"))
 TEAM_NAMES = settings.getSetting(id="team_names")
 TIME_FORMAT = settings.getSetting(id="time_format")
 
+
 #Colors
 SCORE_COLOR = 'FF00B7EB'
 GAMETIME_COLOR = 'FFFFFF66'
@@ -116,6 +117,15 @@ def localToEastern():
     local_to_eastern = local_to_utc.astimezone(eastern).strftime('%Y-%m-%d')
     return local_to_eastern
 
+def easternToUTC(eastern_time):    
+    utc = pytz.utc
+    eastern = pytz.timezone('US/Eastern')    
+    eastern_time = eastern.localize(eastern_time)
+    # Convert it from Eastern to UTC
+    utc_time = eastern_time.astimezone(utc)
+    return utc_time
+
+
 
 def get_params():
     param=[]
@@ -137,9 +147,9 @@ def get_params():
 
 
 
-def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,video_info=None,audio_info=None):
+def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,video_info=None,audio_info=None,teams_stream=None,stream_date=None):
     ok=True
-    u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&epg="+urllib.quote_plus(str(epg))
+    u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&epg="+urllib.quote_plus(str(epg))+"&teams_stream="+urllib.quote_plus(str(teams_stream))+"&stream_date="+urllib.quote_plus(str(stream_date))
     
     if icon != None:
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=icon) 
@@ -280,4 +290,20 @@ def getAudioVideoInfo():
 
     audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }
     return audio_info, video_info
+
+def getConfigFile():
+    '''
+    GET http://lwsa.mlb.com/partner-config/config?company=sony-tri&type=nhl&productYear=2015&model=PS4&firmware=default&app_version=1_0 HTTP/1.0
+    Host: lwsa.mlb.com
+    User-Agent: PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)
+    Connection: close
+    '''
+    url = 'http://lwsa.mlb.com/partner-config/config?company=sony-tri&type=nhl&productYear=2015&model=PS4&firmware=default&app_version=1_0'
+    req = urllib2.Request(url)       
+    req.add_header("Connection", "close")
+    req.add_header("User-Agent", UA_PS4)
+
+    response = urllib2.urlopen(req, '')
+    json_source = json.load(response)   
+    response.close()
 
