@@ -1,3 +1,11 @@
+2016.2.11
+- Yet Another attempt to fix usage errors
+- Added yesterday's games selection from main menu
+- Added NHL Videos section
+- Added No spoilers setting for live games only
+- Added video info for archive games
+- Switched default display to media info
+
 2016.2.9
 - Another attempt to fix usage errors
 

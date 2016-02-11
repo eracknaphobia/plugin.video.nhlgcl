@@ -40,13 +40,9 @@ GAMETIME_COLOR = 'FFFFFF66'
 FREE_GAME_COLOR = 'FF43CD80'
 
 #Game Time Colors
-#Upcoming - Light Grey
 UPCOMING = 'FFD2D2D2'
-#Live - Yellow
 LIVE = 'FFF69E20'
-#Power Play/ Final Minues - Red
 CRITICAL ='FFD10D0D'
-#Final - Dark Grey
 FINAL = 'FF666666'
 
 #Localization
@@ -56,8 +52,10 @@ ROOTDIR = xbmcaddon.Addon(id='plugin.video.nhlgcl').getAddonInfo('path')
 #Images
 ICON = ROOTDIR+"/icon.png"
 FANART = ROOTDIR+"/fanart.jpg"
-PREV_ICON = ROOTDIR+"/resources/images/prev.png"
-NEXT_ICON = ROOTDIR+"/resources/images/next.png"
+#PREV_ICON = ROOTDIR+"/resources/images/prev.png"
+#NEXT_ICON = ROOTDIR+"/resources/images/next.png"
+PREV_ICON = ROOTDIR+"/icon.png"
+NEXT_ICON = ROOTDIR+"/icon.png"
 
 #User Agents
 UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
@@ -176,7 +174,7 @@ def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,vi
     return ok
 
 
-def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None):
+def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None,fanart=None):
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)    
     liz.setProperty("IsPlayable", "true")
@@ -193,6 +191,11 @@ def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None):
         liz.addStreamInfo('video', video_info)
     if audio_info != None:
         liz.addStreamInfo('audio', audio_info)
+
+    if fanart != None:
+        liz.setProperty('fanart_image', fanart)
+    else:
+        liz.setProperty('fanart_image', FANART)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
     xbmcplugin.setContent(addon_handle, 'episodes')

@@ -12,7 +12,8 @@
 	<string id="170">No Spoilers</string>
 		<string id="1700">Off</string>
 		<string id="1701">On</string>
-		<string id="1702">Only for Favorite Team</string>
+		<string id="1702">Only Favorite Team</string>
+		<string id="1703">Only Live Games</string>
 	<string id ="180">Favorite Team</string>
 	<string id ="190">Display Team Name as</string>
 		<string id ="1900">City (ex: Detroit)</string>
