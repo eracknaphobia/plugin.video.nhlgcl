@@ -1,3 +1,9 @@
+2016.2.13
+- Added No spoilers setting for archive games only
+- Fix the way session keys are retrieved and stored
+- Label Free game of the day
+- Added Best Available for Stream Quality settings
+
 2016.2.11
 - Yet Another attempt to fix usage errors
 - Added yesterday's games selection from main menu

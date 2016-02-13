@@ -44,6 +44,7 @@ UPCOMING = 'FFD2D2D2'
 LIVE = 'FFF69E20'
 CRITICAL ='FFD10D0D'
 FINAL = 'FF666666'
+FREE = 'FF43CD80'
 
 #Localization
 local_string = xbmcaddon.Addon(id='plugin.video.nhlgcl').getLocalizedString
@@ -56,6 +57,8 @@ FANART = ROOTDIR+"/fanart.jpg"
 #NEXT_ICON = ROOTDIR+"/resources/images/next.png"
 PREV_ICON = ROOTDIR+"/icon.png"
 NEXT_ICON = ROOTDIR+"/icon.png"
+
+MASTER_FILE_TYPE = 'master_tablet60.m3u8'
 
 #User Agents
 UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
@@ -288,7 +291,8 @@ def getAudioVideoInfo():
         video_info = { 'codec': 'h264', 'width' : 512, 'height' : 288, 'aspect' : 1.78 }        
     elif QUALITY == 'SD (1200 kbps)':
         video_info = { 'codec': 'h264', 'width' : 640, 'height' : 360, 'aspect' : 1.78 }        
-    elif QUALITY == 'HD (2500 kbps)' or QUALITY == 'HD (3500 kbps)' or QUALITY == 'HD (5000 kbps)':
+    else:
+        #elif QUALITY == 'HD (2500 kbps)' or QUALITY == 'HD (3500 kbps)' or QUALITY == 'HD (5000 kbps)':
         video_info = { 'codec': 'h264', 'width' : 1280, 'height' : 720, 'aspect' : 1.78 }        
 
     audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }

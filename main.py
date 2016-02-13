@@ -31,7 +31,7 @@ def todaysGames(game_day):
     addDir(date_display,'/nothing',999,ICON,FANART)
 
     #url = 'https://statsapi.web.nhl.com/api/v1/schedule?teamId=&startDate=2016-02-09&endDate=2016-02-09&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'
-    url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform=playstation'
+    url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform=playstation'    
     req = urllib2.Request(url)    
     req.add_header('Connection', 'close')
     req.add_header('User-Agent', UA_PS4)
@@ -53,7 +53,7 @@ def todaysGames(game_day):
     
     next_day = display_day + timedelta(days=1)
     addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))
-    xbmc.executebuiltin("Container.SetViewMode(504)")
+    #xbmc.executebuiltin("Container.SetViewMode(504)")
 
 def createGameListItem(game, game_day):
     away = game['teams']['away']['team']
@@ -133,32 +133,16 @@ def createGameListItem(game, game_day):
     archive_feeds = 0
     teams_stream = away['abbreviation'] + home['abbreviation']    
     stream_date = str(game['gameDate'])
-    '''
-    for item in epg:
-
-    archive_video = game['gameHighlightVideo']
-    archive_feeds = 0
-    if len(archive_video) > 0:
-
-        if bool(archive_video['hasArchiveAwayVideo']):
-                archive_feeds += 2
-
-        if bool(archive_video['hasArchiveHomeVideo']):
-            archive_feeds += 4
-
-        #For some reason the live french stream is set to true when the game has a french archive stream            
-        if bool(archive_video['hasArchiveFrenchVideo']) or bool(live_video['hasLiveFrenchVideo']):
-            archive_feeds += 8
-
-    '''    
+      
     fanart = None    
     desc = ''       
-    if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (NO_SPOILERS == '3' and game_day == localToEastern()) or game['status']['detailedState'] == 'Scheduled':
+    if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (NO_SPOILERS == '3' and game_day == localToEastern()) or (NO_SPOILERS == '4' and game_day < localToEastern()) or game['status']['detailedState'] == 'Scheduled':
         name = game_time + ' ' + away_team + ' at ' + home_team    
     else:
         name = game_time + ' ' + away_team + ' ' + colorString(str(game['teams']['away']['score']),SCORE_COLOR) + ' at ' + home_team + ' ' + colorString(str(game['teams']['home']['score']),SCORE_COLOR) 
         try:
-            fanart = str(game['content']['editorial']['recap']['items'][0]['media']['image']['cuts']['1136x640']['src'])
+            #fanart = str(game['content']['editorial']['recap']['items'][0]['media']['image']['cuts']['1136x640']['src'])
+            fanart = str(game['content']['media']['epg'][3]['items'][0]['image']['cuts']['1136x640']['src'])
         except:
             pass
 
@@ -177,11 +161,12 @@ def createGameListItem(game, game_day):
     title = away_team + ' at ' + home_team
     title = title.encode('utf-8')
 
-    #Free game of the week check    
-    #if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
-    #name = name + " *Free*"
+    #Label free game of the day if applicable
+    #if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']) and game_day >= localToEastern():
+    #name = name + colorString(" Free", FREE)
     
     #Set audio/video info based on stream quality setting
+
     audio_info, video_info = getAudioVideoInfo()
     #'duration':length
     info = {'plot':desc,'tvshowtitle':'NHL','title':title,'originaltitle':title,'aired':game_day,'genre':'Sports'}
@@ -209,43 +194,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
     free_game = []
     media_state = []
     archive_type = ['Recap','Extended Highlights','Full Game']    
-    #archive_gs = ['dvr','condensed','highlights']
-    #archive_gs = ['archive','condensed','highlights']
-
-    '''
-    ARCHIVE
-    "mediaState": "MEDIA_ARCHIVE",
-    "mediaPlaybackId": "40465403",
-    "mediaFeedType": "HOME",
-    "callLetters": "Sun",
-    "eventId": "221-1000843",
-    "language": "eng",
-    "freeGame": false,
-    "feedName": "",
-    "gamePlus": false
-
-    UPCOMING
-    "mediaState" : "MEDIA_OFF",
-    "mediaPlaybackId" : "40893303",
-    "mediaFeedType" : "NATIONAL",
-    "callLetters" : "",
-    "eventId" : "221-1000890",
-    "language" : "eng",
-    "freeGame" : false,
-    "feedName" : "",
-    "gamePlus" : false
-
-    LIVE
-    "mediaState" : "MEDIA_ON",
-    "mediaPlaybackId" : "40699203",
-    "mediaFeedType" : "AWAY",
-    "callLetters" : "TSN4",
-    "eventId" : "221-1000847",
-    "language" : "eng",
-    "freeGame" : true,
-    "feedName" : "",
-    "gamePlus" : false
-    '''
+    
     multi_angle = 0
     multi_cam = 0
     if len(full_game_items) > 0:
@@ -308,30 +257,11 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         if n > -1:            
             stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
             stream_url = createFullGameStream(stream_url,media_auth,media_state[n])            
-            
-        
-    #--------------------------
-    # Stream Examples
-    #--------------------------
-    #HOME
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/03/NHL_GAME_VIDEO_OTTPIT_M2_HOME_20160203/master_wired_web.m3u8'
-    #AWAY
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/03/NHL_GAME_VIDEO_OTTPIT_M2_VISIT_20160203/master_wired_web.m3u8'
-    #FRENCH
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/05/NHL_GAME_VIDEO_EDMOTT_M2_FRENCH_20160203/master_wired_web.m3u8
-    #COMPOSITE
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/03/NHL_GAME_VIDEO_TORBOS_M2_COMPOSITE_3X_20160203/master_wired_web.m3u8
-    #ISO
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/05/NHL_GAME_VIDEO_EDMOTT_M2_ISO_1_20160205/master_wired_web.m3u8
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/03/NHL_GAME_VIDEO_CBJEDM_M2_ISO_2_20160203/master_wired_web.m3u8
-    #http://hlslive-l3c.med2.med.nhl.com/ls04/nhl/2016/02/03/NHL_GAME_VIDEO_CBJEDM_M2_ISO_3_20160203/master_wired_web.m3u8
-    #--------------------------
-
+       
+    
     listitem = xbmcgui.ListItem(path=stream_url)
 
-    if stream_url != '':        
-        #global LAST_STREAM
-        #LAST_STREAM = stream_url
+    if stream_url != '':            
         listitem.setMimeType("application/x-mpegURL")
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)        
     else:        
@@ -339,9 +269,8 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         
 
 def createHighlightStream(stream_url):
-    bandwidth = find(QUALITY,'(',' kbps)')
-    #asset_5000k.m3u8
-    stream_url = stream_url.replace('master_wired.m3u8', 'asset_'+bandwidth+'k.m3u8')
+    bandwidth = find(QUALITY,'(',' kbps)')    
+    stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
     stream_url = stream_url + '|User-Agent='+UA_PS4
     print stream_url
     return stream_url
@@ -349,24 +278,27 @@ def createHighlightStream(stream_url):
 
 def createFullGameStream(stream_url, media_auth, media_state):
     #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)        
+    bandwidth = ''
     bandwidth = find(QUALITY,'(',' kbps)')
 
-    #Reduce convert bandwidth if composite video selected   
-    if ('COMPOSITE' in stream_url or 'ISO' in stream_url) :
-        if int(bandwidth) == 5000:
-            bandwidth = '3500'
-        elif int(bandwidth) == 1200:
-            bandwidth = '1500'
-    
-    if media_state == 'MEDIA_ARCHIVE':                
-        #ARCHIVE
-        stream_url = stream_url.replace('master_wired_web.m3u8', bandwidth+'K/'+bandwidth+'_complete-trimmed.m3u8') 
+    #Only set bandwidth if it's explicitly set
+    if bandwidth != '':
+        #Reduce convert bandwidth if composite video selected   
+        if ('COMPOSITE' in stream_url or 'ISO' in stream_url) :
+            if int(bandwidth) == 5000:
+                bandwidth = '3500'
+            elif int(bandwidth) == 1200:
+                bandwidth = '1500'
+        
+        if media_state == 'MEDIA_ARCHIVE':                
+            #ARCHIVE
+            stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete-trimmed.m3u8') 
 
-    elif media_state == 'MEDIA_ON':
-        #LIVE    
-        #5000K/5000_slide.m3u8 OR #3500K/3500_complete.m3u8
-        # Slide = Live, Complete = Watch from beginning?
-        stream_url = stream_url.replace('master_wired_web.m3u8', bandwidth+'K/'+bandwidth+'_complete.m3u8') 
+        elif media_state == 'MEDIA_ON':
+            #LIVE    
+            #5000K/5000_slide.m3u8 OR #3500K/3500_complete.m3u8
+            # Slide = Live, Complete = Watch from beginning?
+            stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete.m3u8') 
                 
     
     cj = cookielib.LWPCookieJar()
@@ -385,7 +317,6 @@ def createFullGameStream(stream_url, media_auth, media_state):
                 
 def getAuthCookie():
     authorization = ''    
-    login()
     try:
         cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))     
         cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)    
@@ -402,26 +333,23 @@ def getAuthCookie():
 
 def fetchStream(game_id, content_id,event_id):        
     stream_url = ''
-    media_auth = ''
+    media_auth = ''    
    
-    authorization = getAuthCookie()   
-
-    #if authorization == '' or str(settings.getSetting(id="session_key")) == '':        
-    #logout()            
-    #login()
-    cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))     
-    cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)    
-    for cookie in cj:            
-        if cookie.name == "Authorization":
-            authorization = cookie.value 
-
+    authorization = getAuthCookie()            
     
+    if authorization == '':  
+        login()
+        authorization = getAuthCookie()   
+        if authorization == '':
+            return stream_url, media_auth
+
+    cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
+    cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)         
     session_key = getSessionKey(game_id,event_id,content_id,authorization)    
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))   
+        
 
     if session_key == '':
-        msg = "The session key code not be retrieved."
-        dialog = xbmcgui.Dialog() 
-        ok = dialog.ok('Error Fetching Stream', msg)
         return stream_url, media_auth
     elif session_key == 'blackout':
         msg = "You do not have access to view this content. To watch live games and learn more about blackout restrictions, please visit NHL.TV"
@@ -429,48 +357,22 @@ def fetchStream(game_id, content_id,event_id):
         ok = dialog.ok('Game Blacked Out', msg) 
         return stream_url, media_auth
 
-    
-
-    #Second Event call    
-    epoch_time_now = str(int(round(time.time()*1000)))    
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&sessionKey='+session_key+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now    
+    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPAD&sessionKey='+urllib.quote_plus(session_key)
     req = urllib2.Request(url)       
-    req.add_header("Accept", "application/json")
+    req.add_header("Accept", "*/*")
     req.add_header("Accept-Encoding", "deflate")
     req.add_header("Accept-Language", "en-US,en;q=0.8")                       
     req.add_header("Connection", "keep-alive")
     req.add_header("Authorization", authorization)
-    req.add_header("User-Agent", UA_PC)
-    req.add_header("Origin", "https://www.nhl.com")
-    req.add_header("Referer", "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id)
-    
-    try:
-        response = urllib2.urlopen(req)
-        #json_source = json.load(response)   
-        response.close()
-    except:
-        return stream_url, media_auth    
+    req.add_header("User-Agent", UA_NHL)
+    req.add_header("Proxy-Connection", "keep-alive")        
 
-    print "SECOND EVENT CALL " + url
 
-    epoch_time_now = str(int(round(time.time()*1000)))
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_WIRED_WEB&sessionKey='+session_key+'&auth=response&format=json&platform=WEB_MEDIAPLAYER&_='+epoch_time_now       
-    req = urllib2.Request(url)       
-    req.add_header("Accept", "application/json")
-    req.add_header("Accept-Encoding", "deflate")
-    req.add_header("Accept-Language", "en-US,en;q=0.8")                       
-    req.add_header("Connection", "keep-alive")
-    req.add_header("Authorization", authorization)
-    req.add_header("User-Agent", UA_PC)
-    req.add_header("Origin", "https://www.nhl.com")    
-    req.add_header("Referer", "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id)
-    
-    try:
-        response = urllib2.urlopen(req)
-        json_source = json.load(response)   
-        response.close()
-    except:
-        return stream_url, media_auth    
+    response = opener.open(req)
+    json_source = json.load(response)       
+    response.close()
+         
+           
 
     '''
     return codes
@@ -490,7 +392,10 @@ def fetchStream(game_id, content_id,event_id):
         else:
             stream_url = json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['url']    
             media_auth = str(json_source['session_info']['sessionAttributes'][0]['attributeName']) + "=" + str(json_source['session_info']['sessionAttributes'][0]['attributeValue'])
+            session_key = json_source['session_key']
             settings.setSetting(id='media_auth', value=media_auth) 
+            #Update Session Key
+            settings.setSetting(id='session_key', value=session_key)   
     else:
         msg = json_source['status_message']
         dialog = xbmcgui.Dialog() 
@@ -531,7 +436,7 @@ def getSessionKey(game_id,event_id,content_id,authorization):
                 session_key = 'blackout'
             else:    
                 session_key = str(json_source['session_key'])
-                settings.setSetting(id="session_key", value=session_key)                
+                settings.setSetting(id='session_key', value=session_key)                              
         else:
             msg = json_source['status_message']
             dialog = xbmcgui.Dialog() 
@@ -577,7 +482,9 @@ def login():
 
         response = opener.open(req, '')
         json_source = json.load(response)   
-        authorization = json_source['access_token']
+        authorization = getAuthCookie()
+        if authorization == '':
+            authorization = json_source['access_token']
         response.close()
  
         if ROGERS_SUBSCRIBER == 'true':                        
@@ -585,7 +492,7 @@ def login():
             login_data = '{"rogerCredentials":{"email":"'+USERNAME+'","password":"'+PASSWORD+'"}}'
             #referer = "https://www.nhl.com/login/rogers"              
         else:                   
-            url = 'https://gateway.web.nhl.com/ws/subscription/flow/nhlPurchase.login'
+            url = 'https://gateway.web.nhl.com/ws/subscription/flow/nhlPurchase.login'            
             login_data = '{"nhlCredentials":{"email":"'+USERNAME+'","password":"'+PASSWORD+'"}}'
 
 
@@ -599,8 +506,21 @@ def login():
              "Connection": "keep-alive",
              "User-Agent": UA_PC})     
        
-        response = opener.open(req)              
-        user_data = response.read()
+        try:
+            response = opener.open(req) 
+        except HTTPError as e:
+            print 'The server couldn\'t fulfill the request.'
+            print 'Error code: ', e.code    
+            print url   
+            
+            #Error 401 for invalid login
+            if e.code == 401:
+                msg = "Please check that your username and password are correct"
+                dialog = xbmcgui.Dialog() 
+                ok = dialog.ok('Invalid Login', msg)
+
+        #response = opener.open(req)              
+        #user_data = response.read()
         response.close()
       
 
@@ -627,12 +547,19 @@ def logout(display_msg=None):
                     "Connection": "close",
                     "User-Agent": UA_PC})
 
-    response = opener.open(req)              
-    user_data = response.read()
+    try:
+        response = opener.open(req) 
+    except HTTPError as e:
+        print 'The server couldn\'t fulfill the request.'
+        print 'Error code: ', e.code    
+        print url 
+
+    #response = opener.open(req)              
+    #user_data = response.read()
     response.close()
   
     #Clear session key and media auth variables
-    settings.setSetting(id='session_key', value='') 
+    #settings.setSetting(id='session_key', value='') 
     
 
     #clear session cookies since they're no longer valid    
@@ -640,6 +567,7 @@ def logout(display_msg=None):
     #cj.save(ignore_discard=True);   
 
     if display_msg == 'true':
+        settings.setSetting(id='session_key', value='') 
         dialog = xbmcgui.Dialog() 
         title = "Logout Successful" 
         dialog.notification(title, 'Logout completed successfully', ICON, 5000, False) 
@@ -676,7 +604,7 @@ def nhlVideos():
         info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
         addLink(name,url,title,icon,info,video_info,audio_info,icon)
 
-    xbmc.executebuiltin("Container.SetViewMode(504)")
+    #xbmc.executebuiltin("Container.SetViewMode(504)")
 
 params=get_params()
 url=None
