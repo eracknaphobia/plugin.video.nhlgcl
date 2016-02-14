@@ -134,25 +134,49 @@ def createGameListItem(game, game_day):
     teams_stream = away['abbreviation'] + home['abbreviation']    
     stream_date = str(game['gameDate'])
       
-    fanart = None    
+     
     desc = ''       
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (NO_SPOILERS == '3' and game_day == localToEastern()) or (NO_SPOILERS == '4' and game_day < localToEastern()) or game['status']['detailedState'] == 'Scheduled':
         name = game_time + ' ' + away_team + ' at ' + home_team    
     else:
-        name = game_time + ' ' + away_team + ' ' + colorString(str(game['teams']['away']['score']),SCORE_COLOR) + ' at ' + home_team + ' ' + colorString(str(game['teams']['home']['score']),SCORE_COLOR) 
-        try:
-            #fanart = str(game['content']['editorial']['recap']['items'][0]['media']['image']['cuts']['1136x640']['src'])
-            fanart = str(game['content']['media']['epg'][3]['items'][0]['image']['cuts']['1136x640']['src'])
-        except:
-            pass
-
+        name = game_time + ' ' + away_team + ' ' + colorString(str(game['teams']['away']['score']),SCORE_COLOR) + ' at ' + home_team + ' ' + colorString(str(game['teams']['home']['score']),SCORE_COLOR)         
         try:            
             soup = BeautifulSoup(str(game['content']['editorial']['recap']['items'][0]['preview']))
             desc = soup.get_text()
         except:
             pass
 
+    fanart = None   
+    try:        
+        if game_day < localToEastern():
+            fanart = str(game['content']['media']['epg'][3]['items'][0]['image']['cuts']['1136x640']['src'])
+        else:
+            '''
+            GET https://statsapi.web.nhl.com/api/v1/game/2015020839/content?site=en_nhl HTTP/1.1
+            Host: statsapi.web.nhl.com
+            Connection: keep-alive
+            User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36
+            Origin: https://www.nhl.com
+            Accept: */*
+            Referer: https://www.nhl.com/gamecenter/phi-vs-nyr/2016/02/14/2015020839
+            Accept-Encoding: gzip, deflate, sdch
+            Accept-Language: en-US,en;q=0.8
+            '''
+            url = 'http://statsapi.web.nhl.com/api/v1/game/'+str(game['gamePk'])+'/content?site=en_nhl'
+            req = urllib2.Request(url)    
+            req.add_header('Connection', 'close')
+            req.add_header('User-Agent', UA_PS4)
 
+            try:    
+                response = urllib2.urlopen(req)            
+                json_source = json.load(response)     
+                fanart = str(json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])                      
+                response.close()                
+            except HTTPError as e:
+                print 'The server couldn\'t fulfill the request.'
+                print 'Error code: ', e.code                                  
+    except:
+        pass
 
     name = name.encode('utf-8')
     if fav_game:
@@ -208,7 +232,11 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
                 multi_angle += 1
                 stream_title.append("Multi-Angle " + str(multi_angle))
             else:
-                stream_title.append(item['mediaFeedType'].encode('utf-8').title())
+                temp_item = item['mediaFeedType'].encode('utf-8').title()
+                if item['callLetters'].encode('utf-8') != '':
+                    temp_item = temp_item+' ('+item['callLetters'].encode('utf-8')+')'
+
+                stream_title.append(temp_item)
 
             content_id.append(item['mediaPlaybackId'])
             event_id.append(item['eventId'])
@@ -269,9 +297,15 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         
 
 def createHighlightStream(stream_url):
-    bandwidth = find(QUALITY,'(',' kbps)')    
-    stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
-    stream_url = stream_url + '|User-Agent='+UA_PS4
+    bandwidth = ''
+    bandwidth = find(QUALITY,'(',' kbps)') 
+    #Switch to ipad master file
+    stream_url = stream_url.replace('master_wired.m3u8', MASTER_FILE_TYPE)
+
+    if bandwidth != '':
+        stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
+        stream_url = stream_url + '|User-Agent='+UA_PS4
+
     print stream_url
     return stream_url
 
@@ -352,12 +386,13 @@ def fetchStream(game_id, content_id,event_id):
     if session_key == '':
         return stream_url, media_auth
     elif session_key == 'blackout':
-        msg = "You do not have access to view this content. To watch live games and learn more about blackout restrictions, please visit NHL.TV"
+        msg = "The game you are trying to access is not currently available due to local or national blackout restrictions.\n Full game archives will be available 48 hours after completion of this game."
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Game Blacked Out', msg) 
         return stream_url, media_auth
 
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPAD&sessionKey='+urllib.quote_plus(session_key)
+    #Org
+    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPAD&sessionKey='+urllib.quote_plus(session_key)    
     req = urllib2.Request(url)       
     req.add_header("Accept", "*/*")
     req.add_header("Accept-Encoding", "deflate")
@@ -371,18 +406,7 @@ def fetchStream(game_id, content_id,event_id):
     response = opener.open(req)
     json_source = json.load(response)       
     response.close()
-         
-           
-
-    '''
-    return codes
-    {"status_code":1,"status_message":"Success Status","session_key":"803U9tXqp8+2O+dr0ESCF67QZNo=","session_info":{...
-    {"status_code":-1600,"status_message":"Invalid media state: Media is not in a playable state","session_key":"803U9tXqp8+2O+dr0ESCF67QZNo="}
-    {"status_code":-3500,"status_message":"Sign-on restriction: Too many usage attempts"}
-    '''    
-
-    #media_auth_file = os.path.join(ADDON_PATH_PROFILE, 'media_auth.txt')
-    
+       
 
     if json_source['status_code'] == 1:
         if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
