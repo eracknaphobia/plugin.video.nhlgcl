@@ -19,14 +19,13 @@
     <setting id="stream_date" type="text" label="900" default="" visible="false"/>    
     <setting id="session_key" type="text" label="902" default="" visible="false"/>
     <setting id="media_auth" type="text" label="903" default="" visible="false"/>
-  </category>
+  </category>  
   
-  <!--
   <category label="300" visible="false">    
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
   	<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />
   	<setting label="330" type="number" id="display_seconds" default="5"/>
   </category>
-  -->
+  
 </settings>
 

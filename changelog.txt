@@ -1,3 +1,8 @@
+2016.2.16
+- Brought back scoring notifications
+- Added Favorite Team Recent Games option (past 30 days)
+- Added ability to view all recaps, extended highlights for a single day. Simply select the date list item and an option will pop on the screen to play recaps or extended highlights
+
 2016.2.14
 - Fixed Recap and Extended Highlights stream quality issue
 - Added station identification to stream selection list items when applicable

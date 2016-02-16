@@ -67,7 +67,10 @@ UA_IPAD = 'Mozilla/5.0 (iPad; CPU OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHT
 UA_NHL = 'NHL/2542 CFNetwork/758.2.8 Darwin/15.0.0'
 UA_PC = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36'
 UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)'
-    
+
+#Playlists
+RECAP_PLAYLIST = xbmc.PlayList(0)
+EXTENDED_PLAYLIST = xbmc.PlayList(1)
 
 def find(source,start_str,end_str):    
     start = source.find(start_str)
@@ -172,7 +175,7 @@ def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,vi
         liz.addStreamInfo('audio', audio_info)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
-    xbmcplugin.setContent(addon_handle, 'episodes')
+    #xbmcplugin.setContent(addon_handle, 'episodes')
     
     return ok
 
@@ -201,7 +204,7 @@ def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None,f
         liz.setProperty('fanart_image', FANART)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
-    xbmcplugin.setContent(addon_handle, 'episodes')
+    #xbmcplugin.setContent(addon_handle, 'episodes')
     return ok
 
 
@@ -232,7 +235,29 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
 
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)    
-    xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+    #xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+    return ok
+
+
+def addPlaylist(name,url,mode,iconimage,fanart=None):       
+    ok=True
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)
+
+    if iconimage != None:
+        liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage) 
+    else:
+        liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=ICON) 
+
+    liz.setInfo( type="Video", infoLabels={ "Title": name } )
+
+    if fanart != None:
+        liz.setProperty('fanart_image', fanart)
+    else:
+        liz.setProperty('fanart_image', FANART)
+
+
+    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)    
+    #xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
     return ok
 
 

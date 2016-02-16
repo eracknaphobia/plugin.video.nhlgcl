@@ -14,6 +14,7 @@ from resources.lib.globals import *
 def categories():      
     addDir('Today\'s Games','/live',100,ICON,FANART)
     addDir('Yesterday\'s Games','/live',105,ICON,FANART)
+    addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
     addDir('NHL Videos','/qp',300,ICON,FANART)  
         
@@ -28,7 +29,7 @@ def todaysGames(game_day):
     addDir('[B]<< Previous Day[/B]','/live',101,PREV_ICON,FANART,prev_day.strftime("%Y-%m-%d"))
 
     date_display = '[B][I]'+ colorString(display_day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
-    addDir(date_display,'/nothing',999,ICON,FANART)
+    addPlaylist(date_display,'/playhighlights',900,ICON,FANART)
 
     #url = 'https://statsapi.web.nhl.com/api/v1/schedule?teamId=&startDate=2016-02-09&endDate=2016-02-09&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'
     url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform=playstation'    
@@ -45,11 +46,15 @@ def todaysGames(game_day):
         print 'Error code: ', e.code          
         sys.exit()
 
-    try:
-        for game in json_source['dates'][0]['games']:        
-            createGameListItem(game, game_day)
-    except:
-        pass
+    global RECAP_PLAYLIST
+    global EXTENDED_PLAYLIST
+    RECAP_PLAYLIST.clear()
+    EXTENDED_PLAYLIST.clear()
+    #try:
+    for game in json_source['dates'][0]['games']:        
+        createGameListItem(game, game_day)
+    #except:
+    #pass
     
     next_day = display_day + timedelta(days=1)
     addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))
@@ -133,8 +138,8 @@ def createGameListItem(game, game_day):
     archive_feeds = 0
     teams_stream = away['abbreviation'] + home['abbreviation']    
     stream_date = str(game['gameDate'])
-      
-     
+
+
     desc = ''       
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (NO_SPOILERS == '3' and game_day == localToEastern()) or (NO_SPOILERS == '4' and game_day < localToEastern()) or game['status']['detailedState'] == 'Scheduled':
         name = game_time + ' ' + away_team + ' at ' + home_team    
@@ -150,18 +155,7 @@ def createGameListItem(game, game_day):
     try:        
         if game_day < localToEastern():
             fanart = str(game['content']['media']['epg'][3]['items'][0]['image']['cuts']['1136x640']['src'])
-        else:
-            '''
-            GET https://statsapi.web.nhl.com/api/v1/game/2015020839/content?site=en_nhl HTTP/1.1
-            Host: statsapi.web.nhl.com
-            Connection: keep-alive
-            User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36
-            Origin: https://www.nhl.com
-            Accept: */*
-            Referer: https://www.nhl.com/gamecenter/phi-vs-nyr/2016/02/14/2015020839
-            Accept-Encoding: gzip, deflate, sdch
-            Accept-Language: en-US,en;q=0.8
-            '''
+        else:            
             url = 'http://statsapi.web.nhl.com/api/v1/game/'+str(game['gamePk'])+'/content?site=en_nhl'
             req = urllib2.Request(url)    
             req.add_header('Connection', 'close')
@@ -190,11 +184,27 @@ def createGameListItem(game, game_day):
     #name = name + colorString(" Free", FREE)
     
     #Set audio/video info based on stream quality setting
-
     audio_info, video_info = getAudioVideoInfo()
     #'duration':length
     info = {'plot':desc,'tvshowtitle':'NHL','title':title,'originaltitle':title,'aired':game_day,'genre':'Sports'}
-    
+
+    #Create Playlist for all highlights    
+    try:
+        global RECAP_PLAYLIST    
+        temp_recap_stream_url = createHighlightStream(game['content']['media']['epg'][3]['items'][0]['playbacks'][3]['url'])   
+        listitem = xbmcgui.ListItem(title, thumbnailImage=icon)    
+        listitem.setInfo( type="Video", infoLabels={ "Title": title })
+        RECAP_PLAYLIST.add(temp_recap_stream_url, listitem)
+
+        global EXTENDED_PLAYLIST
+        temp_extended_stream_url = createHighlightStream(game['content']['media']['epg'][2]['items'][0]['playbacks'][3]['url'])   
+        listitem = xbmcgui.ListItem(title, thumbnailImage=icon)      
+        listitem.setInfo( type="Video", infoLabels={ "Title": title } )
+        EXTENDED_PLAYLIST.add(temp_extended_stream_url, listitem)
+    except:
+        pass
+
+
     addStream(name,'',title,game_id,epg,icon,fanart,info,video_info,audio_info,teams_stream,stream_date)
 
 
@@ -296,6 +306,17 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)        
         
 
+def playAllHighlights():
+    stream_title = ['Recap','Extended Highlights'] 
+    dialog = xbmcgui.Dialog() 
+    n = dialog.select('View All', stream_title)
+
+    if n == 0:
+        xbmc.Player().play(RECAP_PLAYLIST)
+    elif n == 1:
+        xbmc.Player().play(EXTENDED_PLAYLIST)
+
+
 def createHighlightStream(stream_url):
     bandwidth = ''
     bandwidth = find(QUALITY,'(',' kbps)') 
@@ -304,7 +325,7 @@ def createHighlightStream(stream_url):
 
     if bandwidth != '':
         stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
-        stream_url = stream_url + '|User-Agent='+UA_PS4
+        stream_url = stream_url + '|User-Agent='+UA_IPAD
 
     print stream_url
     return stream_url
@@ -343,7 +364,7 @@ def createFullGameStream(stream_url, media_auth, media_state):
         if cookie.name == "Authorization":
             cookies = cookies + cookie.name + "=" + cookie.value + "; "
     #stream_url = stream_url + '|User-Agent='+UA_PS4+'&Cookie='+cookies+media_auth
-    stream_url = stream_url + '|User-Agent='+UA_PS4+'&Cookie='+cookies+media_auth
+    stream_url = stream_url + '|User-Agent='+UA_IPAD+'&Cookie='+cookies+media_auth
 
     print "STREAM URL: "+stream_url
     return stream_url
@@ -597,6 +618,48 @@ def logout(display_msg=None):
         dialog.notification(title, 'Logout completed successfully', ICON, 5000, False) 
 
 
+def myTeamsGames():    
+    if FAV_TEAM != 'None':
+        url = 'http://statsapi.web.nhl.com/api/v1/teams'
+        req = urllib2.Request(url)   
+        req.add_header('User-Agent', UA_IPAD)
+        response = urllib2.urlopen(req)    
+        json_source = json.load(response)                           
+        response.close()
+
+        fav_team_id = "0"
+        for team in json_source['teams']:
+            if FAV_TEAM in team['name'].encode('utf-8'):
+                fav_team_id = str(team['id'])
+                break
+
+        end_day = localToEastern()
+        end_date = stringToDate(end_day, "%Y-%m-%d")            
+        start_date = end_date - timedelta(days=30) 
+        start_day = start_date.strftime("%Y-%m-%d")
+        
+
+        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg'
+        #${expand},schedule.ticket&${optionalParams}'
+        req = urllib2.Request(url)   
+        req.add_header('User-Agent', UA_IPAD)
+        response = urllib2.urlopen(req)    
+        json_source = json.load(response)                           
+        response.close()
+
+        for date in reversed(json_source['dates']):        
+            #temp_date = stringToDate(date['date'], "%Y-%m-%d") 
+            #date_display = '[B][I]'+ colorString(temp_date.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
+            #addDir(date_display,'/nothing',999,ICON,FANART)
+            for game in date['games']:        
+                createGameListItem(game, date['date'])  
+    else:
+        msg = "Please select your favorite team from the addon settings"
+        dialog = xbmcgui.Dialog() 
+        ok = dialog.ok('Favorite Team Not Set', msg)
+
+
+
 def nhlVideos():    
     url = 'http://nhl.bamcontent.com/nhl/en/section/v1/video/nhl/ios-tablet-v1.json'    
     req = urllib2.Request(url)   
@@ -682,14 +745,18 @@ print "Name: "+str(name)
 
 if mode==None or url==None:        
     categories()  
+
 elif mode == 100:      
     #Todays Games
     todaysGames(game_day)         
+
 elif mode == 101:
     #Prev and Next 
     todaysGames(game_day)    
+
 elif mode == 104:    
     streamSelect(game_id, epg, teams_stream, stream_date)
+
 elif mode == 105:
     #Yesterday's Games
     game_day = localToEastern()
@@ -716,9 +783,17 @@ elif mode == 200:
 
 elif mode == 300:
     nhlVideos()
+
 elif mode == 400:    
     logout('true')
+
+elif mode == 500:
+    myTeamsGames()
+
+elif mode == 900:
+    playAllHighlights()
     
+
 elif mode == 999:
     sys.exit()
 
