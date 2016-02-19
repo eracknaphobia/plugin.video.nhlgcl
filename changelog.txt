@@ -1,3 +1,9 @@
+2016.2.19
+- Fix for Todays Games saved to favorites
+- Added new artwork
+- Fix for scoring notification error
+- Added game preview paragraph to todays games
+
 2016.2.16
 - Brought back scoring notifications
 - Added Favorite Team Recent Games option (past 30 days)

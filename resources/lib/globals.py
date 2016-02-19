@@ -1,12 +1,18 @@
 # coding=utf-8
-
 import sys
 import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 import re, os, time
-from datetime import date, datetime, timedelta
 import calendar
 import pytz
 import urllib, urllib2
+import json
+import cookielib
+import time
+from bs4 import BeautifulSoup 
+from datetime import date, datetime, timedelta
+from urllib2 import URLError, HTTPError
+from PIL import Image
+from cStringIO import StringIO
 
 
 addon_handle = int(sys.argv[1])
@@ -81,6 +87,32 @@ def find(source,start_str,end_str):
     else:
         return ''
 
+def getGameIcon(home,away):
+    #Check if game image already exists
+    image_path = ROOTDIR+'/resources/images/'+away+'vs'+home+'.png'
+    file_name = os.path.join(image_path)
+    if not os.path.isfile(file_name): 
+        try:
+            createGameIcon(home,away,image_path)
+        except:
+            pass
+
+    return image_path
+
+def createGameIcon(home,away,image_path):    
+    bg = Image.new('RGB', (400,225), (255,255,255))    
+    img_file = urllib.urlopen('http://nhl.bamcontent.com/images/logos/132x132/'+home.lower()+'.png ')
+    im = StringIO(img_file.read())
+    home_image = Image.open(im)
+
+    img_file = urllib.urlopen('http://nhl.bamcontent.com/images/logos/132x132/'+away.lower()+'.png ')    
+    im = StringIO(img_file.read())
+    away_image = Image.open(im)
+
+    bg.paste(away_image, (40,46), away_image)
+    bg.paste(home_image, (228,46), home_image)
+    bg.save(image_path)        
+    
 
 def colorString(string, color):
     return '[COLOR='+color+']'+string+'[/COLOR]'
@@ -175,7 +207,7 @@ def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,vi
         liz.addStreamInfo('audio', audio_info)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
-    #xbmcplugin.setContent(addon_handle, 'episodes')
+    xbmcplugin.setContent(addon_handle, 'episodes')
     
     return ok
 
@@ -204,22 +236,23 @@ def addLink(name,url,title,iconimage,info=None,video_info=None,audio_info=None,f
         liz.setProperty('fanart_image', FANART)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
-    #xbmcplugin.setContent(addon_handle, 'episodes')
+    xbmcplugin.setContent(addon_handle, 'episodes')
     return ok
 
 
 
 
 def addDir(name,url,mode,iconimage,fanart=None,game_day=None):       
-    ok=True
+    ok=True    
     
-    if game_day == None:
-        #Set day to today if none given
-        #game_day = time.strftime("%Y-%m-%d")
-        game_day = localToEastern()
-        #game_day = '2016-01-27'
+    #Set day to today if none given
+    #game_day = time.strftime("%Y-%m-%d")
+    #game_day = localToEastern()
+    #game_day = '2016-01-27'
 
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)+"&game_day="+urllib.quote_plus(game_day)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)
+    if game_day != None:
+        u = u+"&game_day="+urllib.quote_plus(game_day)
 
     if iconimage != None:
         liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage) 
@@ -235,7 +268,7 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
 
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)    
-    #xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
+    xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
     return ok
 
 

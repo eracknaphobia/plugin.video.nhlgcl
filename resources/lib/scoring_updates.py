@@ -3,6 +3,7 @@ from time import sleep
 from datetime import datetime
 import urllib, urllib2
 import json
+import pytz
 
 ADDON = xbmcaddon.Addon(id='plugin.video.nhlgcl')
 ADDON_PATH = xbmc.translatePath(ADDON.getAddonInfo('path'))
@@ -13,6 +14,11 @@ nhl_logo = ADDON_PATH+'/resources/lib/nhl_logo.png'
 SCORE_COLOR = 'FF00B7EB'
 GAMETIME_COLOR = 'FFFFFF66'
 
+def localToEastern():    
+    eastern = pytz.timezone('US/Eastern')    
+    local_to_utc = datetime.now(pytz.timezone('UTC'))    
+    local_to_eastern = local_to_utc.astimezone(eastern).strftime('%Y-%m-%d')
+    return local_to_eastern
 
 def getScoreBoard(date):
     #url = "http://live.nhle.com/GameData/GCScoreboard/"+date+".jsonp"    
@@ -43,7 +49,8 @@ def startScoringUpdates():
         
     FIRST_TIME_THRU = 1  
     OLD_GAME_STATS = []   
-    todays_date = datetime.now().strftime("%Y-%m-%d")          
+    #todays_date = datetime.now().strftime("%Y-%m-%d")          
+    todays_date = localToEastern()
     
     while ADDON.getSetting(id="score_updates") == 'true':  
         game_url = ''
@@ -63,20 +70,20 @@ def startScoringUpdates():
                 break
 
             gid = str(game['gamePk'])
-            ateam = game['teams']['away']['team']['abbreviation']
-            hteam = game['teams']['home']['team']['abbreviation']
-            ascore = str(game['linescore']['teams']['away']['goals'])
-            hscore = str(game['linescore']['teams']['home']['goals'])
+            ateam = game['teams']['away']['team']['abbreviation'].encode('utf-8')
+            hteam = game['teams']['home']['team']['abbreviation'].encode('utf-8')
+            ascore = str(game['linescore']['teams']['away']['goals']).encode('utf-8')
+            hscore = str(game['linescore']['teams']['home']['goals']).encode('utf-8')
             
             print gid
             #Team names (these can be found in the live streams url)
-            atcommon = game['teams']['away']['team']['abbreviation']
-            htcommon = game['teams']['home']['team']['abbreviation']
+            atcommon = game['teams']['away']['team']['abbreviation'].encode('utf-8')
+            htcommon = game['teams']['home']['team']['abbreviation'].encode('utf-8')
 
-            gameclock = game['status']['detailedState']
+            gameclock = game['status']['detailedState'].encode('utf-8')
             
             if 'In Progress' in gameclock:            
-                gameclock = game['linescore']['currentPeriodTimeRemaining']+' '+game['linescore']['currentPeriodOrdinal']
+                gameclock = game['linescore']['currentPeriodTimeRemaining'].encode('utf-8')+' '+game['linescore']['currentPeriodOrdinal'].encode('utf-8')
             
             #Disable spoiler by not showing score notifications for the game the user is currently watching
             if game_url.find(atcommon.lower()) == -1 and game_url.find(htcommon.lower()) == -1:

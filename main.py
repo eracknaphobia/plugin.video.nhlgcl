@@ -1,13 +1,4 @@
-import sys
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon
-import re, os, time
-from datetime import date, datetime, timedelta
-import urllib, urllib2
-from urllib2 import URLError, HTTPError
-import json
-import cookielib
-import time
-from bs4 import BeautifulSoup 
+
 from resources.lib.globals import *
 
 
@@ -20,6 +11,9 @@ def categories():
         
 
 def todaysGames(game_day):    
+    if game_day == None:
+        game_day = localToEastern()
+
     print "GAME DAY = " + str(game_day)            
     settings.setSetting(id='stream_date', value=game_day)    
 
@@ -58,14 +52,15 @@ def todaysGames(game_day):
     
     next_day = display_day + timedelta(days=1)
     addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))
-    #xbmc.executebuiltin("Container.SetViewMode(504)")
+    xbmc.executebuiltin("Container.SetViewMode(504)")
 
 def createGameListItem(game, game_day):
     away = game['teams']['away']['team']
     home = game['teams']['home']['team']
     #http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
     #icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['abbreviation']+'_at_'+home['abbreviation']+'.jpg'
-    icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['abbreviation']+'vs'+home['abbreviation']+'.png'
+    #icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['abbreviation']+'vs'+home['abbreviation']+'.png'    
+    icon = getGameIcon(home['abbreviation'],away['abbreviation'])    
 
 
     
@@ -141,20 +136,21 @@ def createGameListItem(game, game_day):
 
 
     desc = ''       
+    hide_spoilers = 0
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (NO_SPOILERS == '3' and game_day == localToEastern()) or (NO_SPOILERS == '4' and game_day < localToEastern()) or game['status']['detailedState'] == 'Scheduled':
         name = game_time + ' ' + away_team + ' at ' + home_team    
+        hide_spoilers = 1
     else:
         name = game_time + ' ' + away_team + ' ' + colorString(str(game['teams']['away']['score']),SCORE_COLOR) + ' at ' + home_team + ' ' + colorString(str(game['teams']['home']['score']),SCORE_COLOR)         
-        try:            
-            soup = BeautifulSoup(str(game['content']['editorial']['recap']['items'][0]['preview']))
-            desc = soup.get_text()
-        except:
-            pass
+        
 
     fanart = None   
     try:        
         if game_day < localToEastern():
             fanart = str(game['content']['media']['epg'][3]['items'][0]['image']['cuts']['1136x640']['src'])
+            if hide_spoilers == 0:
+                soup = BeautifulSoup(str(game['content']['editorial']['recap']['items'][0]['preview']))
+                desc = soup.get_text()
         else:            
             url = 'http://statsapi.web.nhl.com/api/v1/game/'+str(game['gamePk'])+'/content?site=en_nhl'
             req = urllib2.Request(url)    
@@ -164,7 +160,9 @@ def createGameListItem(game, game_day):
             try:    
                 response = urllib2.urlopen(req)            
                 json_source = json.load(response)     
-                fanart = str(json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])                      
+                fanart = str(json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])                                      
+                soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
+                desc = soup.get_text()
                 response.close()                
             except HTTPError as e:
                 print 'The server couldn\'t fulfill the request.'
@@ -653,6 +651,8 @@ def myTeamsGames():
             #addDir(date_display,'/nothing',999,ICON,FANART)
             for game in date['games']:        
                 createGameListItem(game, date['date'])  
+
+        xbmc.executebuiltin("Container.SetViewMode(504)")
     else:
         msg = "Please select your favorite team from the addon settings"
         dialog = xbmcgui.Dialog() 
@@ -691,7 +691,7 @@ def nhlVideos():
         info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
         addLink(name,url,title,icon,info,video_info,audio_info,icon)
 
-    #xbmc.executebuiltin("Container.SetViewMode(504)")
+    xbmc.executebuiltin("Container.SetViewMode(504)")
 
 params=get_params()
 url=None
@@ -717,7 +717,7 @@ except:
     pass
 try:
     game_day=urllib.unquote_plus(params["game_day"])
-except:
+except:    
     pass
 try:
     game_id=urllib.unquote_plus(params["game_id"])
@@ -747,8 +747,8 @@ if mode==None or url==None:
     categories()  
 
 elif mode == 100:      
-    #Todays Games
-    todaysGames(game_day)         
+    #Todays Games            
+    todaysGames(None)
 
 elif mode == 101:
     #Prev and Next 
