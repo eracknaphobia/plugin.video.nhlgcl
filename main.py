@@ -284,14 +284,14 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
             dialog = xbmcgui.Dialog() 
             n = dialog.select('Choose Stream', stream_title)
             if n > -1:                
-                stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])                   
-                stream_url = createFullGameStream(stream_url,media_auth,media_state[n])    
+                stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
+                stream_url = createFullGameStream(stream_url,media_auth,media_state[n])           
     else:
         dialog = xbmcgui.Dialog() 
         n = dialog.select('Choose Stream', stream_title)
         if n > -1:            
             stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
-            stream_url = createFullGameStream(stream_url,media_auth,media_state[n])            
+            stream_url = createFullGameStream(stream_url,media_auth,media_state[n])           
        
     
     listitem = xbmcgui.ListItem(path=stream_url)
@@ -301,7 +301,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)        
     else:        
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)        
-        
+
 
 def playAllHighlights():
     stream_title = ['Recap','Extended Highlights'] 
@@ -795,11 +795,13 @@ elif mode == 900:
 elif mode == 999:
     sys.exit()
 
-#Always set view mode unless initial open
-if mode==None or url==None: 
+print mode
+if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500: 
+   setViewMode()
+elif mode==None:
     getViewMode()
-else:
-    setViewMode()
+    
+print "My view mode " + VIEW_MODE
 
 if mode == 100:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)

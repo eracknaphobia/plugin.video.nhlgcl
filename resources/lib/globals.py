@@ -389,7 +389,7 @@ def setViewMode():
     global VIEW_MODE
     window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
     current_view_mode = str(window.getFocusId())
-    if current_view_mode != VIEW_MODE:
+    if current_view_mode != VIEW_MODE and current_view_mode != "0":
         settings.setSetting(id='view_mode', value=current_view_mode) 
         VIEW_MODE = settings.getSetting(id='view_mode')
 
