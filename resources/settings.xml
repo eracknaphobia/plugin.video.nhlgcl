@@ -19,6 +19,7 @@
     <setting id="stream_date" type="text" label="900" default="" visible="false"/>    
     <setting id="session_key" type="text" label="902" default="" visible="false"/>
     <setting id="media_auth" type="text" label="903" default="" visible="false"/>
+    <setting id="view_mode" type="text" label="904" default="504" visible="false"/>
   </category>  
   
   <category label="300" visible="false">    

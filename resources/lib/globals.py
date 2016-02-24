@@ -37,6 +37,7 @@ NO_SPOILERS = settings.getSetting(id="no_spoilers")
 FAV_TEAM = str(settings.getSetting(id="fav_team"))
 TEAM_NAMES = settings.getSetting(id="team_names")
 TIME_FORMAT = settings.getSetting(id="time_format")
+VIEW_MODE = settings.getSetting(id='view_mode')
 
 
 #Colors
@@ -77,6 +78,7 @@ UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)'
 #Playlists
 RECAP_PLAYLIST = xbmc.PlayList(0)
 EXTENDED_PLAYLIST = xbmc.PlayList(1)
+
 
 def find(source,start_str,end_str):    
     start = source.find(start_str)
@@ -272,7 +274,7 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
     return ok
 
 
-def addPlaylist(name,url,mode,iconimage,fanart=None):       
+def addPlaylist(name,game_day,url,mode,iconimage,fanart=None):       
     ok=True
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)
 
@@ -287,6 +289,17 @@ def addPlaylist(name,url,mode,iconimage,fanart=None):
         liz.setProperty('fanart_image', fanart)
     else:
         liz.setProperty('fanart_image', FANART)
+
+
+    info = {'plot':'Watch all the days highlights for '+game_day.strftime("%m/%d/%Y"),'tvshowtitle':'NHL','title':name,'originaltitle':name,'aired':game_day.strftime("%Y-%m-%d"),'genre':'Sports'}
+    audio_info, video_info = getAudioVideoInfo()
+
+    if info != None:
+        liz.setInfo( type="Video", infoLabels=info)
+    if video_info != None:
+        liz.addStreamInfo('video', video_info)
+    if audio_info != None:
+        liz.addStreamInfo('audio', audio_info)
 
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)    
@@ -372,3 +385,15 @@ def getConfigFile():
     json_source = json.load(response)   
     response.close()
 
+def setViewMode():
+    global VIEW_MODE
+    window = xbmcgui.Window(xbmcgui.getCurrentWindowId())
+    current_view_mode = str(window.getFocusId())
+    if current_view_mode != VIEW_MODE:
+        settings.setSetting(id='view_mode', value=current_view_mode) 
+        VIEW_MODE = settings.getSetting(id='view_mode')
+
+    getViewMode()
+    
+def getViewMode():
+    xbmc.executebuiltin("Container.SetViewMode("+VIEW_MODE+")")

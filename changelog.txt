@@ -1,3 +1,10 @@
+2016.2.24
+- Fix for no spoilers in scoring notifications
+- Fix for other bugs in scoring notificications
+- User selected view mode is now saved and used throughout the addon
+- Renamed NHL Videos to Featured Videos
+- Added description info for the date list item (play all highlights item)
+
 2016.2.19
 - Fix for Todays Games saved to favorites
 - Added new artwork

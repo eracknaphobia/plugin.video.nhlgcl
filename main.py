@@ -7,7 +7,7 @@ def categories():
     addDir('Yesterday\'s Games','/live',105,ICON,FANART)
     addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
-    addDir('NHL Videos','/qp',300,ICON,FANART)  
+    addDir('Featured Videos','/qp',300,ICON,FANART)  
         
 
 def todaysGames(game_day):    
@@ -23,7 +23,7 @@ def todaysGames(game_day):
     addDir('[B]<< Previous Day[/B]','/live',101,PREV_ICON,FANART,prev_day.strftime("%Y-%m-%d"))
 
     date_display = '[B][I]'+ colorString(display_day.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
-    addPlaylist(date_display,'/playhighlights',900,ICON,FANART)
+    addPlaylist(date_display,display_day,'/playhighlights',900,ICON,FANART)
 
     #url = 'https://statsapi.web.nhl.com/api/v1/schedule?teamId=&startDate=2016-02-09&endDate=2016-02-09&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'
     url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform=playstation'    
@@ -51,8 +51,7 @@ def todaysGames(game_day):
     #pass
     
     next_day = display_day + timedelta(days=1)
-    addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))
-    xbmc.executebuiltin("Container.SetViewMode(504)")
+    addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))    
 
 def createGameListItem(game, game_day):
     away = game['teams']['away']['team']
@@ -652,7 +651,7 @@ def myTeamsGames():
             for game in date['games']:        
                 createGameListItem(game, date['date'])  
 
-        xbmc.executebuiltin("Container.SetViewMode(504)")
+        
     else:
         msg = "Please select your favorite team from the addon settings"
         dialog = xbmcgui.Dialog() 
@@ -691,8 +690,7 @@ def nhlVideos():
         info = {'plot':desc,'tvshowtitle':'NHL','title':name,'originaltitle':name,'duration':'','aired':release_date}
         addLink(name,url,title,icon,info,video_info,audio_info,icon)
 
-    xbmc.executebuiltin("Container.SetViewMode(504)")
-
+    
 params=get_params()
 url=None
 name=None
@@ -797,6 +795,11 @@ elif mode == 900:
 elif mode == 999:
     sys.exit()
 
+#Always set view mode unless initial open
+if mode==None or url==None: 
+    getViewMode()
+else:
+    setViewMode()
 
 if mode == 100:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
