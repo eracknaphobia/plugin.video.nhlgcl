@@ -151,8 +151,15 @@ def UTCToLocal(utc_dt):
 
 def localToEastern():    
     eastern = pytz.timezone('US/Eastern')    
-    local_to_utc = datetime.now(pytz.timezone('UTC'))    
-    local_to_eastern = local_to_utc.astimezone(eastern).strftime('%Y-%m-%d')
+    local_to_utc = datetime.now(pytz.timezone('UTC'))  
+
+    eastern_hour = local_to_utc.astimezone(eastern).strftime('%H')    
+    eastern_date = local_to_utc.astimezone(eastern)
+    #Don't switch to the current day until 4:01 AM est
+    if int(eastern_hour) <= 3:
+        eastern_date = eastern_date - timedelta(days=1)  
+
+    local_to_eastern = eastern_date.strftime('%Y-%m-%d')
     return local_to_eastern
 
 def easternToUTC(eastern_time):    

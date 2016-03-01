@@ -108,7 +108,7 @@ def startScoringUpdates():
                     if ADDON.getSetting(id="score_updates") == 'false':                                       
                         break
                     #Check if all games have finished
-                    if new_item[5].find('FINAL') == -1:
+                    if new_item[5].find('Final') == -1:
                         all_games_finished = 0
 
                     for old_item in OLD_GAME_STATS:                    
