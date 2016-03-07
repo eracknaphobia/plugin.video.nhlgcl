@@ -690,7 +690,7 @@ def playTodaysFavoriteTeam():
         stream_url = ''
         if json_source['dates']:
             todays_game = json_source['dates'][0]['games'][0]
-            streams = todays_game['media']['epg'][0]['items']
+            streams = todays_game['content']['media']['epg'][0]['items']
             local_stream = {}
             natl_stream = {}
             for stream in streams:
