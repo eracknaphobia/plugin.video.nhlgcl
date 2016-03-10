@@ -701,25 +701,6 @@ def playTodaysFavoriteTeam():
             away = todays_game['teams']['away']['team']
             home = todays_game['teams']['home']['team']
 
-            if TEAM_NAMES == "1":
-                away_team = away['teamName']
-                home_team = home['teamName']
-            elif TEAM_NAMES == "2":
-                away_team = away['name']
-                home_team = home['name']
-            elif TEAM_NAMES == "3":
-                away_team = away['abbreviation']
-                home_team = home['abbreviation']
-            else:
-                away_team = away['locationName']
-                home_team = home['locationName']
-
-            if away_team == "New York":
-                away_team = away['name']
-
-            if home_team == "New York":
-                home_team = home['name']
-
             if away['locationName'].encode('utf-8') == FAV_TEAM or away['name'].encode('utf-8') == FAV_TEAM:
                 fav_team_homeaway = 'AWAY'
 
