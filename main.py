@@ -683,7 +683,7 @@ def playTodaysFavoriteTeam():
         start_day = end_day
         
 
-        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.game.content.media.epg'
+        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.game.content.media.epg,schedule.teams'
         req = urllib2.Request(url)   
         req.add_header('User-Agent', UA_IPAD)
         response = urllib2.urlopen(req)    
