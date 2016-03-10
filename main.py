@@ -8,8 +8,14 @@ def categories():
     addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
     addDir('Featured Videos','/qp',300,ICON,FANART)
-    addDir('Favorite Team Current Game','/favteamCurrent', 510, ICON, FANART)
-        
+    liz = xbmcgui.ListItem('Favorite Team Current Game', iconImage="DefaultVideo.png", thumbnailImage=ICON)
+    liz.setProperty('fanart_image', FANART)
+    #liz.setProperty("IsPlayable", "true")
+    liz.setInfo(type="Video", infoLabels={ "Title": "Favorite Team Current Game" })
+    audio_info, video_info = getAudioVideoInfo()
+    liz.addStreamInfo('video', video_info)
+    liz.addStreamInfo('audio', audio_info)
+    xbmcplugin.addDirectoryItem(addon_handle, sys.argv[0] + '?url=/favteamCurrent&mode=510', listitem=liz)
 
 def todaysGames(game_day):    
     if game_day == None:
@@ -299,7 +305,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
 
     if stream_url != '':            
         listitem.setMimeType("application/x-mpegURL")
-        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)        
+        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
     else:        
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)        
 
@@ -690,11 +696,12 @@ def playTodaysFavoriteTeam():
         stream_url = ''
         if json_source['dates']:
             todays_game = json_source['dates'][0]['games'][0]
-            streams = todays_game['content']['media']['epg'][0]['items']
+            epg = todays_game['content']['media']['epg']
+            streams = epg[0]['items']
             local_stream = {}
             natl_stream = {}
             for stream in streams:
-                feedType = stream['mediaFieldType']
+                feedType = stream['mediaFeedType']
                 if feedType == fav_team_homeaway:
                     local_stream = stream
                     break
@@ -702,9 +709,15 @@ def playTodaysFavoriteTeam():
                     natl_stream = stream
             if not local_stream:
                 local_stream = natl_stream
-        
-            stream_url, media_auth = fetchStream(todays_game['gamePk'], local_stream['mediaPlaybackId'], local_stream['eventId'])
+       
+            game_id = str(todays_game['gamePk'])
+
+            stream_url, media_auth = fetchStream(str(game_id), local_stream['mediaPlaybackId'], local_stream['eventId'])
             stream_url = createFullGameStream(stream_url, media_auth, local_stream['mediaState'])
+
+        else:
+            dialog = xbmcgui.Dialog()
+            dialog.ok('No Game Today', FAV_TEAM + " doesn't play today")
 
         listitem = xbmcgui.ListItem(path=stream_url)
         if stream_url != '':
@@ -858,8 +871,8 @@ elif mode == 999:
     sys.exit()
 
 print mode
-if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500: 
-   setViewMode()
+if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500 or mode==510: 
+    setViewMode()
 elif mode==None:
     getViewMode()
     
