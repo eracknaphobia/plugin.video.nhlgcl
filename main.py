@@ -690,12 +690,44 @@ def playTodaysFavoriteTeam():
         json_source = json.load(response)                           
         response.close()
 
-        #TODO: get favorite team home/away
-        fav_team_homeaway = 'HOME'
 
         stream_url = ''
         if json_source['dates']:
             todays_game = json_source['dates'][0]['games'][0]
+
+            # Determine if favorite team is home or away
+            fav_team_homeaway = ''
+
+            away = todays_game['teams']['away']['team']
+            home = todays_game['teams']['home']['team']
+
+            if TEAM_NAMES == "1":
+                away_team = away['teamName']
+                home_team = home['teamName']
+            elif TEAM_NAMES == "2":
+                away_team = away['name']
+                home_team = home['name']
+            elif TEAM_NAMES == "3":
+                away_team = away['abbreviation']
+                home_team = home['abbreviation']
+            else:
+                away_team = away['locationName']
+                home_team = home['locationName']
+
+            if away_team == "New York":
+                away_team = away['name']
+
+            if home_team == "New York":
+                home_team = home['name']
+
+            if away['locationName'].encode('utf-8') == FAV_TEAM or away['name'].encode('utf-8') == FAV_TEAM:
+                fav_team_homeaway = 'AWAY'
+
+            if home['locationName'].encode('utf-8') == FAV_TEAM or home['name'].encode('utf-8') == FAV_TEAM:
+                fav_team_homeaway = 'HOME'
+
+
+            # Grab the correct feed (home/away/national)
             epg = todays_game['content']['media']['epg']
             streams = epg[0]['items']
             local_stream = {}
@@ -712,6 +744,7 @@ def playTodaysFavoriteTeam():
        
             game_id = str(todays_game['gamePk'])
 
+            # Create the stream url
             stream_url, media_auth = fetchStream(str(game_id), local_stream['mediaPlaybackId'], local_stream['eventId'])
             stream_url = createFullGameStream(stream_url, media_auth, local_stream['mediaState'])
 
