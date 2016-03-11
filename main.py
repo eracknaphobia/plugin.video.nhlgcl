@@ -176,9 +176,9 @@ def createGameListItem(game, game_day):
     title = away_team + ' at ' + home_team
     title = title.encode('utf-8')
 
-    #Label free game of the day if applicable
-    #if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']) and game_day >= localToEastern():
-    #name = name + colorString(" Free", FREE)
+    #Label free game of the day
+    if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
+        name = colorString(name,FREE)
     
     #Set audio/video info based on stream quality setting
     audio_info, video_info = getAudioVideoInfo()
@@ -319,10 +319,12 @@ def createHighlightStream(stream_url):
     bandwidth = find(QUALITY,'(',' kbps)') 
     #Switch to ipad master file
     stream_url = stream_url.replace('master_wired.m3u8', MASTER_FILE_TYPE)
-
+    print "bandwidth"
+    print bandwidth
     if bandwidth != '':
         stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
-        stream_url = stream_url + '|User-Agent='+UA_IPAD
+
+    stream_url = stream_url + '|User-Agent='+UA_IPAD
 
     print stream_url
     return stream_url
@@ -354,7 +356,11 @@ def createFullGameStream(stream_url, media_auth, media_state):
                 
     
     cj = cookielib.LWPCookieJar()
-    cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
+    cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))
+    try:
+        cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)
+    except:
+        pass
 
     cookies = ''
     for cookie in cj:            
@@ -431,6 +437,10 @@ def fetchStream(game_id, content_id,event_id):
             msg = "You do not have access to view this content. To watch live games and learn more about blackout restrictions, please visit NHL.TV"
             dialog = xbmcgui.Dialog() 
             ok = dialog.ok('Game Blacked Out', msg) 
+        elif json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['auth_status'] == 'NotAuthorizedStatus':
+            msg = "You do not have an active NHL.TV subscription. To access this content please purchase at www.NHL.TV or call customer support at 800-559-2333"
+            dialog = xbmcgui.Dialog() 
+            ok = dialog.ok('Account Not Authorized', msg) 
         else:
             stream_url = json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['url']    
             media_auth = str(json_source['session_info']['sessionAttributes'][0]['attributeName']) + "=" + str(json_source['session_info']['sessionAttributes'][0]['attributeValue'])
@@ -683,7 +693,8 @@ def nhlVideos():
         duration = video['duration']
 
         bandwidth = find(QUALITY,'(',' kbps)')
-        url = url.replace('master_tablet60.m3u8', 'asset_'+bandwidth+'k.m3u8')
+        if bandwidth != '':
+            url = url.replace('master_tablet60.m3u8', 'asset_'+bandwidth+'k.m3u8')
         url = url + '|User-Agent='+UA_IPAD
 
         audio_info, video_info = getAudioVideoInfo()

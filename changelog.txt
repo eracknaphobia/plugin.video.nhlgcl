@@ -1,3 +1,10 @@
+2016.3.11
+- Change today roll over to occur at 3 AM EST
+- Added Game updates to scoring notifications. This displays a notification when a game starts or period starts (including OT & SO starts)
+- To prevent any spoilers if the user is watching a game the "All games have finished notification" won't display now
+- Fixed Featured Videos not playing when best available stream quality was selected
+- Support free game of the day *Requires a nhl.com account (game will be highlighted in green)
+
 2016.3.1
 - Fix for scoring notifications not shutting down when all live games have finished
 - Fix for Todays games rolling to the next day (est) when late games are still live

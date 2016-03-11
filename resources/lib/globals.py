@@ -156,7 +156,7 @@ def localToEastern():
     eastern_hour = local_to_utc.astimezone(eastern).strftime('%H')    
     eastern_date = local_to_utc.astimezone(eastern)
     #Don't switch to the current day until 4:01 AM est
-    if int(eastern_hour) <= 3:
+    if int(eastern_hour) < 3:
         eastern_date = eastern_date - timedelta(days=1)  
 
     local_to_eastern = eastern_date.strftime('%Y-%m-%d')
