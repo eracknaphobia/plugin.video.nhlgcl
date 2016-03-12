@@ -8,14 +8,8 @@ def categories():
     addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
     addDir('Featured Videos','/qp',300,ICON,FANART)
-    liz = xbmcgui.ListItem('Favorite Team Current Game', iconImage="DefaultVideo.png", thumbnailImage=ICON)
-    liz.setProperty('fanart_image', FANART)
-    #liz.setProperty("IsPlayable", "true")
-    liz.setInfo(type="Video", infoLabels={ "Title": "Favorite Team Current Game" })
     audio_info, video_info = getAudioVideoInfo()
-    liz.addStreamInfo('video', video_info)
-    liz.addStreamInfo('audio', audio_info)
-    xbmcplugin.addDirectoryItem(addon_handle, sys.argv[0] + '?url=/favteamCurrent&mode=510', listitem=liz)
+    addLink("Favorite Team's Game Today", sys.argv[0] + '?url=/favteamCurrent&mode=510',"Today's " +  FAV_TEAM + ' Game', ICON, None, video_info, audio_info)
 
 def todaysGames(game_day):    
     if game_day == None:
@@ -689,7 +683,6 @@ def playTodaysFavoriteTeam():
         response = urllib2.urlopen(req)    
         json_source = json.load(response)                           
         response.close()
-
 
         stream_url = ''
         if json_source['dates']:
