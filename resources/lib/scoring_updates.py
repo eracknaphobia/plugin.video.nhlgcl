@@ -20,9 +20,8 @@ def localToEastern():
     local_to_eastern = local_to_utc.astimezone(eastern).strftime('%Y-%m-%d')
     return local_to_eastern
 
-def getScoreBoard(date):
-    #url = "http://live.nhle.com/GameData/GCScoreboard/"+date+".jsonp"    
-    url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId=&date='+date+'&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'     
+def getScoreBoard(date):     
+    url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId=&date='+date+'&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'         
     req = urllib2.Request(url)    
     req.add_header('Connection', 'keep-alive')
     req.add_header('Accept', 'application/json')
@@ -31,15 +30,8 @@ def getScoreBoard(date):
     req.add_header('Accept-Encoding', 'deflate')
 
     response = urllib2.urlopen(req)    
-    json_source = json.load(response)  
-    #content = response.read()
+    json_source = json.load(response)      
     response.close()
-    #jsonData = content.strip()
-
-    #jsonData = jsonData.replace('loadScoreboard(', '')
-    #jsonData = jsonData.rstrip(')')
-
-    #json_source = json.loads(jsonData)
 
     return json_source
 
@@ -47,25 +39,23 @@ def getScoreBoard(date):
 def startScoringUpdates():
         
     FIRST_TIME_THRU = 1  
-    OLD_GAME_STATS = []   
-    #todays_date = datetime.now().strftime("%Y-%m-%d")          
+    OLD_GAME_STATS = []              
     todays_date = localToEastern()
     
     while ADDON.getSetting(id="score_updates") == 'true':  
-        game_url = ''
+        video_playing = ''
         try:   
             #Get the url of the video that is currently playing
             if xbmc.Player().isPlayingVideo():
-                game_url = xbmc.Player().getPlayingFile()                                                    
-                game_url = game_url.lower()
+                video_playing = xbmc.Player().getPlayingFile()                                                    
+                video_playing = video_playing.lower()
         except:
             pass
         
         try:
             json_source = getScoreBoard(todays_date)   
             NEW_GAME_STATS = []
-            #refreshInterval = json_source['refreshInterval']
-            #refreshInterval = 60
+            wait = json_source['wait']            
             for game in json_source['dates'][0]['games']:
                 #Break out of loop if updates disabled
                 if ADDON.getSetting(id="score_updates") == 'false':                                       
@@ -76,20 +66,24 @@ def startScoringUpdates():
                 hteam = game['teams']['home']['team']['abbreviation'].encode('utf-8')
                 ascore = str(game['linescore']['teams']['away']['goals']).encode('utf-8')
                 hscore = str(game['linescore']['teams']['home']['goals']).encode('utf-8')
-                
-                print gid
+                                
                 #Team names (these can be found in the live streams url)
                 atcommon = game['teams']['away']['team']['abbreviation'].encode('utf-8')
                 htcommon = game['teams']['home']['team']['abbreviation'].encode('utf-8')
-
                 gameclock = game['status']['detailedState'].encode('utf-8')
+
+                current_period = game['linescore']['currentPeriod']
+                try:
+                    current_period = game['linescore']['currentPeriodOrdinal'].encode('utf-8')
+                except:
+                    pass
                 
                 if 'In Progress' in gameclock:            
                     gameclock = game['linescore']['currentPeriodTimeRemaining'].encode('utf-8')+' '+game['linescore']['currentPeriodOrdinal'].encode('utf-8')
                 
                 #Disable spoiler by not showing score notifications for the game the user is currently watching
-                if game_url.find(atcommon.lower()) == -1 and game_url.find(htcommon.lower()) == -1:
-                    NEW_GAME_STATS.append([gid,ateam,hteam,ascore,hscore,gameclock])
+                if video_playing.find(atcommon.lower()) == -1 and video_playing.find(htcommon.lower()) == -1:
+                    NEW_GAME_STATS.append([gid,ateam,hteam,ascore,hscore,gameclock,current_period])
                     
 
             if FIRST_TIME_THRU != 1:
@@ -104,11 +98,12 @@ def startScoringUpdates():
                 #Convert to milliseconds
                 display_milliseconds = display_seconds * 1000
                 all_games_finished = 1
-                for new_item in NEW_GAME_STATS:                    
+                for new_item in NEW_GAME_STATS:                                    
+
                     if ADDON.getSetting(id="score_updates") == 'false':                                       
                         break
                     #Check if all games have finished
-                    if new_item[5].find('FINAL') == -1:
+                    if new_item[5].upper().find('FINAL') == -1:
                         all_games_finished = 0
 
                     for old_item in OLD_GAME_STATS:                    
@@ -116,22 +111,43 @@ def startScoringUpdates():
                         if ADDON.getSetting(id="score_updates") == 'false':                                       
                             break
                         if new_item[0] == old_item[0]:
-                            #If the score for either team has changed and is greater than zero.                                                       #Or if the game has just ended show the final score
-                            if  ((new_item[3] != old_item[3] and int(new_item[3]) != 0) or (new_item[4] != old_item[4] and int(new_item[4]) != 0)) or (new_item[5].find('Final') != -1 and old_item[5].find('Final') == -1):
+                            #--------------------------
+                            # Array key
+                            #--------------------------
+                            # 0 = game id
+                            # 1 = away team
+                            # 2 = home team
+                            # 3 = away score
+                            # 4 = home score
+                            # 5 = game clock
+                            # 6 = current period
+                            #--------------------------
+                            
+                            #If the score for either team has changed and is greater than zero.                                                       #Or if the game has just ended show the final score                  #Or the current peroid has changed
+                            if  ((new_item[3] != old_item[3] and int(new_item[3]) != 0) or (new_item[4] != old_item[4] and int(new_item[4]) != 0)) or (new_item[5].upper().find('FINAL') != -1 and old_item[5].upper().find('FINAL') == -1) or (new_item[6] != old_item[6]):
                                 #Game variables                                                    
                                 ateam = new_item[1]
                                 hteam = new_item[2]
                                 ascore = new_item[3]
                                 hscore = new_item[4]
-                                gameclock = new_item[5]                            
+                                gameclock = new_item[5]             
+                                current_period = new_item[6]               
                                 
+
+
                                 #Highlight goal(s) or the winning team
-                                if new_item[5].find('Final') != -1:
-                                    title = 'Final Score'
+                                if new_item[5].upper().find('FINAL') != -1:
+                                    title1 = 'Final Score'
                                     if int(ascore) > int(hscore):
-                                        message = '[COLOR='+SCORE_COLOR+']' + ateam + ' ' + ascore + '[/COLOR]    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
+                                        message1 = '[COLOR='+SCORE_COLOR+']' + ateam + ' ' + ascore + '[/COLOR]    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
                                     else:
-                                        message = ateam + ' ' + ascore + '    [COLOR='+SCORE_COLOR+']' + hteam + ' ' + hscore + '[/COLOR]    [COLOR='+GAMETIME_COLOR+']' + gameclock  + '[/COLOR]'
+                                        message1 = ateam + ' ' + ascore + '    [COLOR='+SCORE_COLOR+']' + hteam + ' ' + hscore + '[/COLOR]    [COLOR='+GAMETIME_COLOR+']' + gameclock  + '[/COLOR]'
+
+                                elif new_item[6] != old_item[6]:                                    
+                                    #Notify user that the game has started / period has changed
+                                    title = "Game Update"
+                                    message = ateam + '    ' + hteam + '   [COLOR='+GAMETIME_COLOR+']' + current_period + ' has started[/COLOR]'
+                                
                                 else:                                
                                     title = 'Score Update'
                                     #Highlight if changed
@@ -148,12 +164,15 @@ def startScoringUpdates():
                                     dialog = xbmcgui.Dialog()
                                     dialog.notification(title, message, nhl_logo, display_milliseconds, False)
                                     sleep(display_seconds)
+
                 #if all games have finished for the night kill the thread
-                if all_games_finished == 1 and ADDON.getSetting(id="score_updates") == 'true':
+                if all_games_finished == 1 and ADDON.getSetting(id="score_updates") == 'true':                    
                     ADDON.setSetting(id='score_updates', value='false')
-                    dialog = xbmcgui.Dialog() 
-                    title = "Score Notifications"
-                    dialog.notification(title, 'All games have ended, good night.', nhl_logo, 5000, False)
+                    #If the user is watching a game don't display the all games finished message
+                    if 'nhl_game_video' not in video_playing:
+                        dialog = xbmcgui.Dialog() 
+                        title = "Score Notifications"
+                        dialog.notification(title, 'All games have ended, good night.', nhl_logo, 5000, False)
 
             OLD_GAME_STATS = []
             OLD_GAME_STATS = NEW_GAME_STATS 
@@ -162,7 +181,8 @@ def startScoringUpdates():
 
                     
         FIRST_TIME_THRU = 0          
-        sleep(int(60))   
+        #sleep(int(60))   
+        sleep(int(wait))
     
 
 dialog = xbmcgui.Dialog()  
