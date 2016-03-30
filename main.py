@@ -7,8 +7,9 @@ def categories():
     addDir('Yesterday\'s Games','/live',105,ICON,FANART)
     addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
-    addDir('Featured Videos','/qp',300,ICON,FANART)  
-        
+    addDir('Featured Videos','/qp',300,ICON,FANART)
+    audio_info, video_info = getAudioVideoInfo()
+    addLink("Favorite Team's Game Today", sys.argv[0] + '?url=/favteamCurrent&mode=510',"Today's " +  FAV_TEAM + ' Game', ICON, None, video_info, audio_info)
 
 def todaysGames(game_day):    
     if game_day == None:
@@ -298,7 +299,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
 
     if stream_url != '':            
         listitem.setMimeType("application/x-mpegURL")
-        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)        
+        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
     else:        
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)        
 
@@ -667,7 +668,85 @@ def myTeamsGames():
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Favorite Team Not Set', msg)
 
+def playTodaysFavoriteTeam():
+    if FAV_TEAM != 'None':
+        url = 'http://statsapi.web.nhl.com/api/v1/teams'
+        req = urllib2.Request(url)   
+        req.add_header('User-Agent', UA_IPAD)
+        response = urllib2.urlopen(req)    
+        json_source = json.load(response)                           
+        response.close()
 
+        fav_team_id = "0"
+        for team in json_source['teams']:
+            if FAV_TEAM in team['name'].encode('utf-8'):
+                fav_team_id = str(team['id'])
+                break
+
+        end_day = localToEastern()
+        start_day = end_day
+        
+
+        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.game.content.media.epg,schedule.teams'
+        req = urllib2.Request(url)   
+        req.add_header('User-Agent', UA_IPAD)
+        response = urllib2.urlopen(req)    
+        json_source = json.load(response)                           
+        response.close()
+
+        stream_url = ''
+        if json_source['dates']:
+            todays_game = json_source['dates'][0]['games'][0]
+
+            # Determine if favorite team is home or away
+            fav_team_homeaway = ''
+
+            away = todays_game['teams']['away']['team']
+            home = todays_game['teams']['home']['team']
+
+            if away['locationName'].encode('utf-8') == FAV_TEAM or away['name'].encode('utf-8') == FAV_TEAM:
+                fav_team_homeaway = 'AWAY'
+
+            if home['locationName'].encode('utf-8') == FAV_TEAM or home['name'].encode('utf-8') == FAV_TEAM:
+                fav_team_homeaway = 'HOME'
+
+
+            # Grab the correct feed (home/away/national)
+            epg = todays_game['content']['media']['epg']
+            streams = epg[0]['items']
+            local_stream = {}
+            natl_stream = {}
+            for stream in streams:
+                feedType = stream['mediaFeedType']
+                if feedType == fav_team_homeaway:
+                    local_stream = stream
+                    break
+                elif feedType == 'NATIONAL':
+                    natl_stream = stream
+            if not local_stream:
+                local_stream = natl_stream
+       
+            game_id = str(todays_game['gamePk'])
+
+            # Create the stream url
+            stream_url, media_auth = fetchStream(str(game_id), local_stream['mediaPlaybackId'], local_stream['eventId'])
+            stream_url = createFullGameStream(stream_url, media_auth, local_stream['mediaState'])
+
+        else:
+            dialog = xbmcgui.Dialog()
+            dialog.ok('No Game Today', FAV_TEAM + " doesn't play today")
+
+        listitem = xbmcgui.ListItem(path=stream_url)
+        if stream_url != '':
+            listitem.setMimeType("application/x-mpegURL")
+            xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
+        else:
+            xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
+
+    else:
+        msg = "Please select your favorite team from the addon settings"
+        dialog = xbmcgui.Dialog() 
+        ok = dialog.ok('Favorite Team Not Set', msg)
 
 def nhlVideos():    
     url = 'http://nhl.bamcontent.com/nhl/en/section/v1/video/nhl/ios-tablet-v1.json'    
@@ -799,6 +878,9 @@ elif mode == 400:
 elif mode == 500:
     myTeamsGames()
 
+elif mode == 510:
+    playTodaysFavoriteTeam()
+
 elif mode == 900:
     playAllHighlights()
     
@@ -807,8 +889,8 @@ elif mode == 999:
     sys.exit()
 
 print mode
-if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500: 
-   setViewMode()
+if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500 or mode==510: 
+    setViewMode()
 elif mode==None:
     getViewMode()
     
