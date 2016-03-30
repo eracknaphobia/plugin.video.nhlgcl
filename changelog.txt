@@ -1,3 +1,9 @@
+2016.3.30
+- Added Favorite Team's Game Today item that launches your favorite team's game and the team's feed. You can then add this as a favorite to make it easy to start your team's game and have it autopick your team's feed. (Thanks to Str8AWay for adding this feature!)
+- Added setting to disable Game Preview Info (Today's Game fanart, game preview), which should help speed up load times for the Today's Games section
+- Removed PIL requirement
+- Added Score to Game Update notifications
+
 2016.3.11
 - Change today roll over to occur at 3 AM EST
 - Added Game updates to scoring notifications. This displays a notification when a game starts or period starts (including OT & SO starts)

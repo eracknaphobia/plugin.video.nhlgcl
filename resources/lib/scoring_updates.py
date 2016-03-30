@@ -146,7 +146,7 @@ def startScoringUpdates():
                                 elif new_item[6] != old_item[6]:                                    
                                     #Notify user that the game has started / period has changed
                                     title = "Game Update"
-                                    message = ateam + '    ' + hteam + '   [COLOR='+GAMETIME_COLOR+']' + current_period + ' has started[/COLOR]'
+                                    message = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '   [COLOR='+GAMETIME_COLOR+']' + current_period + ' has started[/COLOR]'
                                 
                                 else:                                
                                     title = 'Score Update'

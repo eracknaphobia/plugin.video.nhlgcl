@@ -5,11 +5,12 @@ from resources.lib.globals import *
 def categories():      
     addDir('Today\'s Games','/live',100,ICON,FANART)
     addDir('Yesterday\'s Games','/live',105,ICON,FANART)
-    addDir('Favorite Team Recent Games','favteam',500,ICON,FANART)
-    addDir('Goto Date','/date',200,ICON,FANART)
-    addDir('Featured Videos','/qp',300,ICON,FANART)
     audio_info, video_info = getAudioVideoInfo()
     addLink("Favorite Team's Game Today", sys.argv[0] + '?url=/favteamCurrent&mode=510',"Today's " +  FAV_TEAM + ' Game', ICON, None, video_info, audio_info)
+    addDir('Favorite Team\'s Recent Games','favteam',500,ICON,FANART)
+    addDir('Goto Date','/date',200,ICON,FANART)
+    addDir('Featured Videos','/qp',300,ICON,FANART)
+    
 
 def todaysGames(game_day):    
     if game_day == None:
@@ -151,22 +152,23 @@ def createGameListItem(game, game_day):
             if hide_spoilers == 0:
                 soup = BeautifulSoup(str(game['content']['editorial']['recap']['items'][0]['preview']))
                 desc = soup.get_text()
-        else:            
-            url = 'http://statsapi.web.nhl.com/api/v1/game/'+str(game['gamePk'])+'/content?site=en_nhl'
-            req = urllib2.Request(url)    
-            req.add_header('Connection', 'close')
-            req.add_header('User-Agent', UA_PS4)
+        else:  
+            if PREVIEW_INFO == 'true':          
+                url = 'http://statsapi.web.nhl.com/api/v1/game/'+str(game['gamePk'])+'/content?site=en_nhl'
+                req = urllib2.Request(url)    
+                req.add_header('Connection', 'close')
+                req.add_header('User-Agent', UA_PS4)
 
-            try:    
-                response = urllib2.urlopen(req)            
-                json_source = json.load(response)     
-                fanart = str(json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])                                      
-                soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
-                desc = soup.get_text()
-                response.close()                
-            except HTTPError as e:
-                print 'The server couldn\'t fulfill the request.'
-                print 'Error code: ', e.code                                  
+                try:    
+                    response = urllib2.urlopen(req)            
+                    json_source = json.load(response)     
+                    fanart = str(json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])                                      
+                    soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
+                    desc = soup.get_text()
+                    response.close()                
+                except HTTPError as e:
+                    print 'The server couldn\'t fulfill the request.'
+                    print 'Error code: ', e.code                                  
     except:
         pass
 
@@ -742,6 +744,7 @@ def playTodaysFavoriteTeam():
             xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
         else:
             xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
+
 
     else:
         msg = "Please select your favorite team from the addon settings"

@@ -11,7 +11,7 @@ import time
 from bs4 import BeautifulSoup 
 from datetime import date, datetime, timedelta
 from urllib2 import URLError, HTTPError
-from PIL import Image
+#from PIL import Image
 from cStringIO import StringIO
 
 
@@ -38,6 +38,7 @@ FAV_TEAM = str(settings.getSetting(id="fav_team"))
 TEAM_NAMES = settings.getSetting(id="team_names")
 TIME_FORMAT = settings.getSetting(id="time_format")
 VIEW_MODE = settings.getSetting(id='view_mode')
+PREVIEW_INFO = str(settings.getSetting(id='game_preview_info'))
 
 
 #Colors
@@ -93,11 +94,14 @@ def getGameIcon(home,away):
     #Check if game image already exists
     image_path = ROOTDIR+'/resources/images/'+away+'vs'+home+'.png'
     file_name = os.path.join(image_path)
-    if not os.path.isfile(file_name): 
-        try:
-            createGameIcon(home,away,image_path)
-        except:
-            pass
+    if not os.path.isfile(file_name):
+        image_path = ICON
+    '''
+    try:
+        createGameIcon(home,away,image_path)
+    except:
+        pass
+    '''
 
     return image_path
 
@@ -404,3 +408,19 @@ def setViewMode():
     
 def getViewMode():
     xbmc.executebuiltin("Container.SetViewMode("+VIEW_MODE+")")
+
+
+def getAuthCookie():
+    authorization = ''    
+    try:
+        cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'))     
+        cj.load(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp'),ignore_discard=True)    
+
+        #If authorization cookie is missing or stale, perform login    
+        for cookie in cj:            
+            if cookie.name == "Authorization" and not cookie.is_expired():            
+                authorization = cookie.value 
+    except:
+        pass
+
+    return authorization
