@@ -1,3 +1,9 @@
+2016.3.31
+- Fixed some bugs with Favorite Team's Game Today
+- Added favorite teams logo as icon for Favorite Teams list items
+- Replaced "Favorite Team's..." with teams actual city in main menu
+- Re-wrote favorite team code so favorite team variables are stored (less calls to the web)
+
 2016.3.30
 - Added Favorite Team's Game Today item that launches your favorite team's game and the team's feed. You can then add this as a favorite to make it easy to start your team's game and have it autopick your team's feed. (Thanks to Str8AWay for adding this feature!)
 - Added setting to disable Game Preview Info (Today's Game fanart, game preview), which should help speed up load times for the Today's Games section

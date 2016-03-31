@@ -14,9 +14,7 @@ from urllib2 import URLError, HTTPError
 #from PIL import Image
 from cStringIO import StringIO
 
-
 addon_handle = int(sys.argv[1])
-
 
 #Addon Info
 ADDON = xbmcaddon.Addon()
@@ -39,7 +37,6 @@ TEAM_NAMES = settings.getSetting(id="team_names")
 TIME_FORMAT = settings.getSetting(id="time_format")
 VIEW_MODE = settings.getSetting(id='view_mode')
 PREVIEW_INFO = str(settings.getSetting(id='game_preview_info'))
-
 
 #Colors
 SCORE_COLOR = 'FF00B7EB'
@@ -196,6 +193,7 @@ def get_params():
 
 
 
+
 def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,video_info=None,audio_info=None,teams_stream=None,stream_date=None):
     ok=True
     u=sys.argv[0]+"?url="+urllib.quote_plus(link_url)+"&mode="+str(104)+"&name="+urllib.quote_plus(name)+"&game_id="+urllib.quote_plus(str(game_id))+"&epg="+urllib.quote_plus(str(epg))+"&teams_stream="+urllib.quote_plus(str(teams_stream))+"&stream_date="+urllib.quote_plus(str(stream_date))
@@ -220,6 +218,36 @@ def addStream(name,link_url,title,game_id,epg,icon=None,fanart=None,info=None,vi
         liz.addStreamInfo('audio', audio_info)
 
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False)
+    xbmcplugin.setContent(addon_handle, 'episodes')
+    
+    return ok
+
+
+def addFavToday(name,title,icon,fanart=None):
+    info = {'plot':'','tvshowtitle':'NHL','title':name,'originaltitle':name,'aired':'','genre':'Sports'}
+    audio_info, video_info = getAudioVideoInfo()
+    ok=True    
+    url = sys.argv[0] + '?url=/favteamCurrent&mode=510'
+    if icon != None:
+        liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=icon) 
+    else:
+        liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=ICON) 
+    
+    if fanart != None:
+        liz.setProperty('fanart_image', fanart)
+    else:
+        liz.setProperty('fanart_image', FANART)
+
+    liz.setProperty("IsPlayable", "true")
+    liz.setInfo( type="Video", infoLabels={ "Title": title } )
+    if info != None:
+        liz.setInfo( type="Video", infoLabels=info)
+    if video_info != None:
+        liz.addStreamInfo('video', video_info)
+    if audio_info != None:
+        liz.addStreamInfo('audio', audio_info)
+
+    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz,isFolder=False)
     xbmcplugin.setContent(addon_handle, 'episodes')
     
     return ok
@@ -285,6 +313,7 @@ def addDir(name,url,mode,iconimage,fanart=None,game_day=None):
     return ok
 
 
+
 def addPlaylist(name,game_day,url,mode,iconimage,fanart=None):       
     ok=True
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&icon="+urllib.quote_plus(iconimage)
@@ -323,8 +352,54 @@ def scoreUpdates():
     t = threading.Thread(target = scoringUpdates)
     t.start() 
 
+
+
+def getFavTeamId():
+    url = 'http://statsapi.web.nhl.com/api/v1/teams/'
+    req = urllib2.Request(url)   
+    req.add_header('User-Agent', UA_IPAD)
+    response = urllib2.urlopen(req)    
+    json_source = json.load(response)                           
+    response.close()
+
+    fav_team_id = "0"
+    print "get id"
+    print FAV_TEAM    
+    for team in json_source['teams']:
+        if FAV_TEAM in team['name'].encode('utf-8'):
+            fav_team_id = str(team['id'])
+            break
+
+    print fav_team_id
+    return fav_team_id
+
+
 def getFavTeamColor():
-    #Hex code taken from http://teamcolors.arc90.com/    
+    url = 'http://nhl.bamcontent.com/data/config/nhl/teamColors.json'
+    req = urllib2.Request(url)   
+    req.add_header('User-Agent', UA_IPAD)
+    response = urllib2.urlopen(req)    
+    json_source = json.load(response)                           
+    response.close()
+
+    fav_team_color = ''
+    fav_team_id = settings.getSetting(id="fav_team_id")
+    for team in json_source['teams']:
+        if fav_team_id == str(team['id']):
+            #Pick the lightest color
+            fav_team_color = str(team['colors']['foreground'])
+            if fav_team_color < str(team['colors']['background']):
+                fav_team_color = str(team['colors']['background'])
+            if fav_team_color < str(team['colors']['highlight']):
+                fav_team_color = str(team['colors']['highlight'])
+            
+            fav_team_color = fav_team_color.replace('#','FF')
+            break
+
+    return fav_team_color
+
+    '''
+    #Hex code taken from http://teamcolors.arc90.com/        
     team_colors = {"Anaheim":"FF91764B",
                 "Arizona":"FF841F27",
                 "Boston":"FFFFC422",
@@ -364,8 +439,31 @@ def getFavTeamColor():
     print fav_team_color
     #except:
     #pass
-
+    '''
     return  fav_team_color
+
+
+def getFavTeamLogo():
+    logo_url = ''
+    
+    url = 'http://statsapi.web.nhl.com/api/v1/teams'
+    req = urllib2.Request(url)   
+    req.add_header('User-Agent', UA_IPAD)
+    response = urllib2.urlopen(req)    
+    json_source = json.load(response)                           
+    response.close()
+
+    fav_team_abbr = ''
+    for team in json_source['teams']:
+        if FAV_TEAM in team['name'].encode('utf-8'):
+            fav_team_abbr = str(team['abbreviation']).lower()
+            break
+
+    if fav_team_abbr != '':        
+        logo_url = 'http://nhl.bamcontent.com/images/logos/250x250/'+fav_team_abbr+'.png'
+        
+    return logo_url
+
 
 def getAudioVideoInfo():
     #SD (800 kbps)|SD (1600 kbps)|HD (3000 kbps)|HD (5000 kbps)
@@ -424,3 +522,22 @@ def getAuthCookie():
         pass
 
     return authorization
+
+
+#Refresh Fav team info if fav team changed
+if FAV_TEAM != str(settings.getSetting(id="fav_team_name")):
+    if FAV_TEAM == 'None':
+        settings.setSetting(id="fav_team_name", value='')
+        settings.setSetting(id="fav_team_id", value='')
+        settings.setSetting(id="fav_team_color", value='')
+        settings.setSetting(id="fav_team_logo", value='')
+    else:
+        settings.setSetting(id="fav_team_name", value=FAV_TEAM)
+        settings.setSetting(id="fav_team_id", value=getFavTeamId())
+        settings.setSetting(id="fav_team_color", value=getFavTeamColor())
+        settings.setSetting(id="fav_team_logo", value=getFavTeamLogo())
+
+
+FAV_TEAM_ID = settings.getSetting(id="fav_team_id")
+FAV_TEAM_COLOR = settings.getSetting(id="fav_team_color")
+FAV_TEAM_LOGO = settings.getSetting(id="fav_team_logo")

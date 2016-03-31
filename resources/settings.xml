@@ -21,6 +21,12 @@
     <setting id="media_auth" type="text" label="903" default="" visible="false"/>
     <setting id="view_mode" type="text" label="904" default="504" visible="false"/>
 
+    <!-- Fav team variables -->    
+    <setting id="fav_team_name" type="text" label="990" default="" visible="false"/>
+    <setting id="fav_team_id" type="text" label="991" default="" visible="false"/>
+    <setting id="fav_team_color" type="text" label="992" default="" visible="false"/>
+    <setting id="fav_team_logo" type="text" label="993" default="" visible="false"/>
+
   </category>  
   
   <category label="300" visible="false">    

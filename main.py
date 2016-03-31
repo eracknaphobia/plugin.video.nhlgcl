@@ -4,10 +4,9 @@ from resources.lib.globals import *
 
 def categories():      
     addDir('Today\'s Games','/live',100,ICON,FANART)
-    addDir('Yesterday\'s Games','/live',105,ICON,FANART)
-    audio_info, video_info = getAudioVideoInfo()
-    addLink("Favorite Team's Game Today", sys.argv[0] + '?url=/favteamCurrent&mode=510',"Today's " +  FAV_TEAM + ' Game', ICON, None, video_info, audio_info)
-    addDir('Favorite Team\'s Recent Games','favteam',500,ICON,FANART)
+    addDir('Yesterday\'s Games','/live',105,ICON,FANART)        
+    addFavToday(FAV_TEAM+'\'s Game Today', 'Today\'s ' +  FAV_TEAM + ' Game', FAV_TEAM_LOGO, 'https://www.nhl.com/site-core/images/team/logo/current/'+FAV_TEAM_ID+'_light.svg')
+    addDir(FAV_TEAM+'\'s Recent Games','favteam',500, FAV_TEAM_LOGO,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
     addDir('Featured Videos','/qp',300,ICON,FANART)
     
@@ -55,6 +54,7 @@ def todaysGames(game_day):
     next_day = display_day + timedelta(days=1)
     addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))    
 
+
 def createGameListItem(game, game_day):
     away = game['teams']['away']['team']
     home = game['teams']['home']['team']
@@ -87,13 +87,13 @@ def createGameListItem(game, game_day):
 
 
     fav_game = False
-    if away['locationName'].encode('utf-8') == FAV_TEAM or away['name'].encode('utf-8') == FAV_TEAM:
-        fav_game = True
-        away_team = colorString(away_team,getFavTeamColor())           
+    if FAV_TEAM_ID == str(away['id']):
+        fav_game = True        
+        away_team = colorString(away_team,FAV_TEAM_COLOR)           
     
-    if home['locationName'].encode('utf-8') == FAV_TEAM or home['name'].encode('utf-8') == FAV_TEAM:
-        fav_game = True
-        home_team = colorString(home_team,getFavTeamColor())
+    if FAV_TEAM_ID == str(home['id']):
+        fav_game = True        
+        home_team = colorString(home_team,FAV_TEAM_COLOR)
 
 
     game_time = ''
@@ -630,26 +630,13 @@ def logout(display_msg=None):
 
 def myTeamsGames():    
     if FAV_TEAM != 'None':
-        url = 'http://statsapi.web.nhl.com/api/v1/teams'
-        req = urllib2.Request(url)   
-        req.add_header('User-Agent', UA_IPAD)
-        response = urllib2.urlopen(req)    
-        json_source = json.load(response)                           
-        response.close()
-
-        fav_team_id = "0"
-        for team in json_source['teams']:
-            if FAV_TEAM in team['name'].encode('utf-8'):
-                fav_team_id = str(team['id'])
-                break
-
         end_day = localToEastern()
         end_date = stringToDate(end_day, "%Y-%m-%d")            
         start_date = end_date - timedelta(days=30) 
         start_day = start_date.strftime("%Y-%m-%d")
         
 
-        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg'
+        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+FAV_TEAM_ID+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg'
         #${expand},schedule.ticket&${optionalParams}'
         req = urllib2.Request(url)   
         req.add_header('User-Agent', UA_IPAD)
@@ -670,26 +657,16 @@ def myTeamsGames():
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Favorite Team Not Set', msg)
 
-def playTodaysFavoriteTeam():
+
+def playTodaysFavoriteTeam():   
+
     if FAV_TEAM != 'None':
-        url = 'http://statsapi.web.nhl.com/api/v1/teams'
-        req = urllib2.Request(url)   
-        req.add_header('User-Agent', UA_IPAD)
-        response = urllib2.urlopen(req)    
-        json_source = json.load(response)                           
-        response.close()
-
-        fav_team_id = "0"
-        for team in json_source['teams']:
-            if FAV_TEAM in team['name'].encode('utf-8'):
-                fav_team_id = str(team['id'])
-                break
-
-        end_day = localToEastern()
+        #end_day = localToEastern()
+        end_day = '2016-03-30'
         start_day = end_day
         
 
-        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+fav_team_id+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.game.content.media.epg,schedule.teams'
+        url = 'http://statsapi.web.nhl.com/api/v1/schedule?teamId='+FAV_TEAM_ID+'&startDate='+start_day+'&endDate='+end_day+'&expand=schedule.game.content.media.epg,schedule.teams'
         req = urllib2.Request(url)   
         req.add_header('User-Agent', UA_IPAD)
         response = urllib2.urlopen(req)    
@@ -706,10 +683,10 @@ def playTodaysFavoriteTeam():
             away = todays_game['teams']['away']['team']
             home = todays_game['teams']['home']['team']
 
-            if away['locationName'].encode('utf-8') == FAV_TEAM or away['name'].encode('utf-8') == FAV_TEAM:
+            if FAV_TEAM_ID == str(away['id']):
                 fav_team_homeaway = 'AWAY'
 
-            if home['locationName'].encode('utf-8') == FAV_TEAM or home['name'].encode('utf-8') == FAV_TEAM:
+            if FAV_TEAM_ID == str(home['id']):
                 fav_team_homeaway = 'HOME'
 
 
