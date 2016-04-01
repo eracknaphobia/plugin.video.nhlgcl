@@ -661,8 +661,7 @@ def myTeamsGames():
 def playTodaysFavoriteTeam():   
 
     if FAV_TEAM != 'None':
-        #end_day = localToEastern()
-        end_day = '2016-03-30'
+        end_day = localToEastern()        
         start_day = end_day
         
 

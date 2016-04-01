@@ -1,3 +1,6 @@
+2016.4.1
+- Fixed debug code in Favorite Team' Game Today
+
 2016.3.31
 - Fixed some bugs with Favorite Team's Game Today
 - Added favorite teams logo as icon for Favorite Teams list items
