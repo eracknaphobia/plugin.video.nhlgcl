@@ -4,9 +4,11 @@ from resources.lib.globals import *
 
 def categories():      
     addDir('Today\'s Games','/live',100,ICON,FANART)
-    addDir('Yesterday\'s Games','/live',105,ICON,FANART)        
-    addFavToday(FAV_TEAM+'\'s Game Today', 'Today\'s ' +  FAV_TEAM + ' Game', FAV_TEAM_LOGO, 'https://www.nhl.com/site-core/images/team/logo/current/'+FAV_TEAM_ID+'_light.svg')
-    addDir(FAV_TEAM+'\'s Recent Games','favteam',500, FAV_TEAM_LOGO,FANART)
+    addDir('Yesterday\'s Games','/live',105,ICON,FANART)     
+    if FAV_TEAM != 'None' and FAV_TEAM != '':
+        #'https://www.nhl.com/site-core/images/team/logo/current/'+FAV_TEAM_ID+'_light.svg'
+        addFavToday(FAV_TEAM+'\'s Game Today', 'Today\'s ' +  FAV_TEAM + ' Game', FAV_TEAM_LOGO, FANART)
+        addDir(FAV_TEAM+'\'s Recent Games','favteam',500, FAV_TEAM_LOGO,FANART)
     addDir('Goto Date','/date',200,ICON,FANART)
     addDir('Featured Videos','/qp',300,ICON,FANART)
     
@@ -27,7 +29,7 @@ def todaysGames(game_day):
     addPlaylist(date_display,display_day,'/playhighlights',900,ICON,FANART)
 
     #url = 'https://statsapi.web.nhl.com/api/v1/schedule?teamId=&startDate=2016-02-09&endDate=2016-02-09&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg,schedule.broadcasts,schedule.scoringplays,team.leaders,leaders.person,schedule.ticket,schedule.game.content.highlights.scoreboard,schedule.ticket&leaderCategories=points'
-    url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform=playstation'    
+    url = 'http://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.teams,schedule.linescore,schedule.scoringplays,schedule.game.content.media.epg&date='+game_day+'&site=en_nhl&platform='+PLATFORM
     req = urllib2.Request(url)    
     req.add_header('Connection', 'close')
     req.add_header('User-Agent', UA_PS4)
@@ -45,11 +47,11 @@ def todaysGames(game_day):
     global EXTENDED_PLAYLIST
     RECAP_PLAYLIST.clear()
     EXTENDED_PLAYLIST.clear()
-    #try:
-    for game in json_source['dates'][0]['games']:        
-        createGameListItem(game, game_day)
-    #except:
-    #pass
+    try:
+        for game in json_source['dates'][0]['games']:        
+            createGameListItem(game, game_day)
+    except:
+        pass
     
     next_day = display_day + timedelta(days=1)
     addDir('[B]Next Day >>[/B]','/live',101,NEXT_ICON,FANART,next_day.strftime("%Y-%m-%d"))    
@@ -129,7 +131,11 @@ def createGameListItem(game, game_day):
     game_id = str(game['gamePk'])
 
     #live_video = game['gameLiveVideo']
-    epg = json.dumps(game['content']['media']['epg'])
+    epg = ''
+    try:
+        epg = json.dumps(game['content']['media']['epg'])
+    except:
+        pass
     live_feeds = 0
     archive_feeds = 0
     teams_stream = away['abbreviation'] + home['abbreviation']    
@@ -180,8 +186,11 @@ def createGameListItem(game, game_day):
     title = title.encode('utf-8')
 
     #Label free game of the day
-    if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
-        name = colorString(name,FREE)
+    try:
+        if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
+            name = colorString(name,FREE)
+    except:
+        pass
     
     #Set audio/video info based on stream quality setting
     audio_info, video_info = getAudioVideoInfo()
@@ -419,7 +428,7 @@ def fetchStream(game_id, content_id,event_id):
         return stream_url, media_auth
 
     #Org
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPAD&sessionKey='+urllib.quote_plus(session_key)    
+    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform='+PLATFORM+'&sessionKey='+urllib.quote_plus(session_key)    
     req = urllib2.Request(url)       
     req.add_header("Accept", "*/*")
     req.add_header("Accept-Encoding", "deflate")
@@ -469,7 +478,7 @@ def getSessionKey(game_id,event_id,content_id,authorization):
     if session_key == '':        
         epoch_time_now = str(int(round(time.time()*1000)))    
 
-        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform=WEB_MEDIAPLAYER&subject=NHLTV&_='+epoch_time_now        
+        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform='+PLATFORM+'&subject=NHLTV&_='+epoch_time_now        
         req = urllib2.Request(url)       
         req.add_header("Accept", "application/json")
         req.add_header("Accept-Encoding", "deflate")

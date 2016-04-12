@@ -1,3 +1,6 @@
+2016.4.12
+- Fixed error when no games were available for date
+
 2016.4.1
 - Fixed debug code in Favorite Team' Game Today
 
