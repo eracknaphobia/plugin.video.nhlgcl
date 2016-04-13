@@ -265,7 +265,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         msg = "No playable streams found."
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Streams Not Found', msg)        
-
+        sys.exit()
     
     #Reverse Order for display purposes
     #stream_title.reverse()
