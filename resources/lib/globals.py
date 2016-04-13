@@ -65,6 +65,13 @@ NEXT_ICON = ROOTDIR+"/icon.png"
 
 MASTER_FILE_TYPE = 'master_tablet60.m3u8'
 
+#----------
+#IPAD
+#playstation
+#WEB_MEDIAPLAYER
+#----------
+PLATFORM = "IPAD"
+
 #User Agents
 UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
 UA_IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H143 iphone nhl 5.0925'

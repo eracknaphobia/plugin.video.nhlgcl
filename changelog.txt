@@ -1,3 +1,6 @@
+2016.4.13
+- Fixed bug
+
 2016.4.12
 - Fixed error when no games were available for date
 
