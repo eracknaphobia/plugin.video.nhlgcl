@@ -381,6 +381,47 @@ def getFavTeamId():
     return fav_team_id
 
 
+def getThumbnails():        
+    try:
+        from PIL import Image
+    except:
+        try:
+            from pil import Image
+        except:
+            xbmc.log("PIL not available")
+            sys.exit()
+    
+    url = 'http://statsapi.web.nhl.com/api/v1/teams/'
+    req = urllib2.Request(url)   
+    req.add_header('User-Agent', UA_IPAD)
+    response = urllib2.urlopen(req)    
+    json_source = json.load(response)                           
+    response.close()
+    
+    team_list = []
+    for team in json_source['teams']:
+        team_list.append(team['abbreviation'].lower())
+
+    img_url = 'http://nhl.bamcontent.com/images/logos/132x132/'
+    for home_team in team_list:
+        for away_team in team_list:
+            if home_team != away_team:
+                image_path = ROOTDIR+'/resources/images/'+away_team+'vs'+home_team+'.png'
+                bg = Image.new('RGB', (400,225), (255,255,255))    
+                img_file = urllib.urlopen('http://nhl.bamcontent.com/images/logos/132x132/'+home_team+'.png ')
+                im = StringIO(img_file.read())
+                home_image = Image.open(im)
+
+                img_file = urllib.urlopen('http://nhl.bamcontent.com/images/logos/132x132/'+away_team+'.png ')    
+                im = StringIO(img_file.read())
+                away_image = Image.open(im)
+
+                bg.paste(away_image, (40,46), away_image)
+                bg.paste(home_image, (228,46), home_image)
+                bg.save(image_path)
+
+        
+
 def getFavTeamColor():
     url = 'http://nhl.bamcontent.com/data/config/nhl/teamColors.json'
     req = urllib2.Request(url)   
@@ -484,6 +525,7 @@ def getAudioVideoInfo():
 
     audio_info = { 'codec': 'aac', 'language': 'en', 'channels': 2 }
     return audio_info, video_info
+
 
 def getConfigFile():
     '''

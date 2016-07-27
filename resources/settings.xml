@@ -14,7 +14,8 @@
     <setting id="fav_team" type="labelenum" label="180" default="None" values="None|Winnipeg|Washington|Vancouver|Toronto|Tampa Bay|St. Louis|San Jose|Ottawa|Pittsburgh|Philadelphia|New York Rangers|New York Islanders|New Jersey|Nashville|Montréal|Minnesota|Los Angeles|Florida|Edmonton|Detroit|Dallas|Columbus|Colorado|Chicago|Carolina|Calgary|Buffalo|Boston|Arizona|Anaheim" />
     <setting id="team_names" type="select" label="190" lvalues="1900|1901|1902|1903" default="0" />
     <setting id="time_format" type="select" label="200" lvalues="2000|2001" default="0" />
-     <setting id="game_preview_info" type="bool" label="250" default="false" />  
+    <setting id="game_preview_info" type="bool" label="250" default="false" />  
+    <!--<setting label="251" type="action" action="RunPlugin(plugin://plugin.video.nhlgcl/?url=junk&mode=515)" option="close" />-->
 
     <setting id="stream_date" type="text" label="900" default="" visible="false"/>    
     <setting id="session_key" type="text" label="902" default="" visible="false"/>
@@ -32,6 +33,8 @@
   <category label="300" visible="false">    
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
   	<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />
+
+    getThumbnails()
   	<setting label="330" type="number" id="display_seconds" default="5"/>
   </category>
   

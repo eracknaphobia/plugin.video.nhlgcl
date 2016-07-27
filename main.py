@@ -225,7 +225,14 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
     #2 = Extended Highlights
     #3 = Recap
     
-    epg = json.loads(epg)    
+    try:
+        epg = json.loads(epg)    
+    except:
+        msg = "No playable streams found."
+        dialog = xbmcgui.Dialog() 
+        ok = dialog.ok('Streams Not Found', msg)        
+        sys.exit()
+
     full_game_items = epg[0]['items']
     audio_items = epg[1]['items']
     highlight_items = epg[2]['items']
@@ -251,7 +258,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
                 multi_angle += 1
                 stream_title.append("Multi-Angle " + str(multi_angle))
             else:
-                temp_item = item['mediaFeedType'].encode('utf-8').title()
+                temp_item = item['mediaFeedType'].encode('utf-8').title()                
                 if item['callLetters'].encode('utf-8') != '':
                     temp_item = temp_item+' ('+item['callLetters'].encode('utf-8')+')'
 
@@ -358,7 +365,10 @@ def createFullGameStream(stream_url, media_auth, media_state):
         
         if media_state == 'MEDIA_ARCHIVE':                
             #ARCHIVE
-            stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete-trimmed.m3u8') 
+            if checkArchiveType(stream_url,media_auth) == 'asset':
+                stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8') 
+            else:
+                stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete-trimmed.m3u8') 
 
         elif media_state == 'MEDIA_ON':
             #LIVE    
@@ -399,6 +409,27 @@ def getAuthCookie():
         pass
 
     return authorization
+
+
+def checkArchiveType(stream_url, media_auth):
+    req = urllib2.Request(stream_url)       
+    req.add_header("Accept", "*/*")
+    req.add_header("Accept-Encoding", "deflate")
+    req.add_header("Accept-Language", "en-US,en;q=0.8")                       
+    req.add_header("Connection", "keep-alive")    
+    req.add_header("User-Agent", UA_NHL)
+    req.add_header("Cookie", media_auth) 
+
+
+    response = urllib2.urlopen(req)
+    playlist = response.read()
+    response.close()
+
+    stream_type = 'complete-trimmed'
+    if 'asset_' in playlist:
+        stream_type = 'asset'
+
+    return stream_type
 
 
 def fetchStream(game_id, content_id,event_id):        
@@ -468,7 +499,6 @@ def fetchStream(game_id, content_id,event_id):
     
     return stream_url, media_auth    
    
-
 
 
 def getSessionKey(game_id,event_id,content_id,authorization):    
@@ -736,6 +766,59 @@ def playTodaysFavoriteTeam():
         dialog = xbmcgui.Dialog() 
         ok = dialog.ok('Favorite Team Not Set', msg)
 
+
+def gotoDate():
+    #Goto Date
+    search_txt = ''
+    dialog = xbmcgui.Dialog()
+    #game_day = dialog.input('Enter date (yyyy-mm-dd)', type=xbmcgui.INPUT_ALPHANUM)    
+    game_day = ''
+    
+    #Year
+    year_list = []
+    #year_item = datetime.now().year
+    year_item = 2015
+    while year_item <= datetime.now().year:
+        year_list.append(str(year_item))
+        year_item = year_item + 1
+    
+    ret = dialog.select('Choose Year', year_list)
+
+    if ret > -1:
+        year = year_list[ret]    
+
+        #Month
+        #mnth_name = ['September','October','November','December','Janurary','February','March','April','May','June'] 
+        #mnth_num = ['9','10','11','12','1','2','3','4','5','6']        
+
+        mnth_name = ['Janurary','February','March','April','May','June','September','October','November','December'] 
+        mnth_num = ['1','2','3','4','5','6','9','10','11','12']        
+        
+        ret = dialog.select('Choose Month', mnth_name)
+
+        if ret > -1:
+            mnth = mnth_num[ret]    
+
+            #Day
+            day_list = []
+            day_item = 1
+            last_day = calendar.monthrange(int(year), int(mnth))[1]
+            while day_item <= last_day:                
+                day_list.append(str(day_item))
+                day_item = day_item + 1
+            
+            ret = dialog.select('Choose Day', day_list)
+
+            if ret > -1:
+                day = day_list[ret]
+                game_day = year+'-'+mnth.zfill(2)+'-'+day.zfill(2)                
+                
+    
+    if game_day != '':        
+        todaysGames(game_day)
+    else:
+        sys.exit()
+
 def nhlVideos():    
     url = 'http://nhl.bamcontent.com/nhl/en/section/v1/video/nhl/ios-tablet-v1.json'    
     req = urllib2.Request(url)   
@@ -840,22 +923,8 @@ elif mode == 105:
     prev_day = display_day - timedelta(days=1)                
     todaysGames(prev_day.strftime("%Y-%m-%d"))
 
-elif mode == 200:
-    #Goto Date
-    search_txt = ''
-    dialog = xbmcgui.Dialog()
-    game_day = dialog.input('Enter date (yyyy-mm-dd)', type=xbmcgui.INPUT_ALPHANUM)
-    print game_day
-    mat=re.match('(\d{4})-(\d{2})-(\d{2})$', game_day)        
-    if mat is not None:    
-        todaysGames(game_day)
-    else:    
-        if game_day != '':    
-            msg = "The date entered is not in the format required."
-            dialog = xbmcgui.Dialog() 
-            ok = dialog.ok('Invalid Date', msg)
-
-        sys.exit()        
+elif mode == 200:    
+    gotoDate()
 
 elif mode == 300:
     nhlVideos()
@@ -868,6 +937,9 @@ elif mode == 500:
 
 elif mode == 510:
     playTodaysFavoriteTeam()
+
+elif mode == 515:
+    getThumbnails()
 
 elif mode == 900:
     playAllHighlights()
