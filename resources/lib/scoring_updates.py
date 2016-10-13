@@ -41,6 +41,7 @@ def startScoringUpdates():
     FIRST_TIME_THRU = 1  
     OLD_GAME_STATS = []              
     todays_date = localToEastern()
+    wait = 30
     
     while ADDON.getSetting(id="score_updates") == 'true':  
         video_playing = ''
@@ -55,7 +56,7 @@ def startScoringUpdates():
         try:
             json_source = getScoreBoard(todays_date)   
             NEW_GAME_STATS = []
-            wait = json_source['wait']            
+            #wait = json_source['wait']            
             for game in json_source['dates'][0]['games']:
                 #Break out of loop if updates disabled
                 if ADDON.getSetting(id="score_updates") == 'false':                                       

@@ -304,6 +304,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
             n = dialog.select('Choose Stream', stream_title)
             if n > -1:                
                 stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
+                xbmc.log(stream_url)                
                 stream_url = createFullGameStream(stream_url,media_auth,media_state[n])           
     else:
         dialog = xbmcgui.Dialog() 
@@ -412,6 +413,8 @@ def getAuthCookie():
 
 
 def checkArchiveType(stream_url, media_auth):
+    xbmc.log('test--------------------------------------------------------')
+    xbmc.log(stream_url)
     req = urllib2.Request(stream_url)       
     req.add_header("Accept", "*/*")
     req.add_header("Accept-Encoding", "deflate")
@@ -460,6 +463,7 @@ def fetchStream(game_id, content_id,event_id):
 
     #Org
     url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform='+PLATFORM+'&sessionKey='+urllib.quote_plus(session_key)    
+    #      https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId=45149903&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPHONE&sessionKey=4pCvl2hwtHSeVtfrPV8R%2B9VY3FY%3D&deviceId=616a7ed090e8523b3fd6b9ca847c97eb0bc22bf2&postalCode=16503&country=US&latitude=42.129613440000&longitude=-80.045989680000 
     req = urllib2.Request(url)       
     req.add_header("Accept", "*/*")
     req.add_header("Accept-Encoding", "deflate")
@@ -586,8 +590,9 @@ def login():
             login_data = '{"rogerCredentials":{"email":"'+USERNAME+'","password":"'+PASSWORD+'"}}'
             #referer = "https://www.nhl.com/login/rogers"              
         else:                   
-            url = 'https://gateway.web.nhl.com/ws/subscription/flow/nhlPurchase.login'            
-            login_data = '{"nhlCredentials":{"email":"'+USERNAME+'","password":"'+PASSWORD+'"}}'
+            #url = 'https://gateway.web.nhl.com/ws/subscription/flow/nhlPurchase.login'            
+            url = 'https://user.svc.nhl.com/v2/user/identity'            
+            login_data = '{"email":{"address":"'+USERNAME+'"},"type":"email-password","password":{"value":"'+PASSWORD+'"}}'
 
 
         req = urllib2.Request(url, data=login_data, headers=
@@ -779,7 +784,7 @@ def gotoDate():
     #year_item = datetime.now().year
     year_item = 2015
     while year_item <= datetime.now().year:
-        year_list.append(str(year_item))
+        year_list.insert(0,str(year_item))
         year_item = year_item + 1
     
     ret = dialog.select('Choose Year', year_list)

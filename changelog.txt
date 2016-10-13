@@ -1,3 +1,7 @@
+2016.10.13
+- Fixed scoring notification error
+- Updated login url
+
 2016.7.27
 - Fixed bug with Full Game Archive (Winter Classics didn't work)
 - Goto date now employs select dialogs instead of text input
