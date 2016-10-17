@@ -27,8 +27,8 @@ LOCAL_STRING = ADDON.getLocalizedString
 
 #Settings
 settings = xbmcaddon.Addon(id='plugin.video.nhlgcl')
-USERNAME = str(settings.getSetting(id="username"))
-PASSWORD = str(settings.getSetting(id="password"))
+USERNAME = json.dumps(str(settings.getSetting(id="username")))
+PASSWORD = json.dumps(str(settings.getSetting(id="password")))
 ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
 QUALITY = str(settings.getSetting(id="quality"))
 NO_SPOILERS = settings.getSetting(id="no_spoilers")
@@ -369,15 +369,12 @@ def getFavTeamId():
     json_source = json.load(response)                           
     response.close()
 
-    fav_team_id = "0"
-    print "get id"
-    print FAV_TEAM    
+    fav_team_id = "0"    
     for team in json_source['teams']:
         if FAV_TEAM in team['name'].encode('utf-8'):
             fav_team_id = str(team['id'])
             break
-
-    print fav_team_id
+    
     return fav_team_id
 
 
@@ -552,6 +549,7 @@ def setViewMode():
         VIEW_MODE = settings.getSetting(id='view_mode')
 
     getViewMode()
+    
     
 def getViewMode():
     xbmc.executebuiltin("Container.SetViewMode("+VIEW_MODE+")")

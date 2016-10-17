@@ -1,3 +1,6 @@
+2016.10.17
+- Escape special characters in username and password (thanks Rel1k for pointing this out)
+
 2016.10.13
 - Fixed scoring notification error
 - Updated login url

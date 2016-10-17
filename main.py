@@ -17,7 +17,7 @@ def todaysGames(game_day):
     if game_day == None:
         game_day = localToEastern()
 
-    print "GAME DAY = " + str(game_day)            
+    xbmc.log("GAME DAY = " + str(game_day))
     settings.setSetting(id='stream_date', value=game_day)    
 
     display_day = stringToDate(game_day, "%Y-%m-%d")            
@@ -39,8 +39,8 @@ def todaysGames(game_day):
         json_source = json.load(response)                           
         response.close()                
     except HTTPError as e:
-        print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code          
+        xbmc.log('The server couldn\'t fulfill the request.')
+        xbmc.log('Error code: ', e.code)
         sys.exit()
 
     global RECAP_PLAYLIST
@@ -173,8 +173,8 @@ def createGameListItem(game, game_day):
                     desc = soup.get_text()
                     response.close()                
                 except HTTPError as e:
-                    print 'The server couldn\'t fulfill the request.'
-                    print 'Error code: ', e.code                                  
+                    xbmc.log('The server couldn\'t fulfill the request.')
+                    xbmc.log('Error code: ', e.code)            
     except:
         pass
 
@@ -277,8 +277,6 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
     #Reverse Order for display purposes
     #stream_title.reverse()
     #ft.reverse()
-    print "MEDIA STATE"
-    print media_state
 
     stream_url = ''
     media_auth = ''
@@ -339,14 +337,14 @@ def createHighlightStream(stream_url):
     bandwidth = find(QUALITY,'(',' kbps)') 
     #Switch to ipad master file
     stream_url = stream_url.replace('master_wired.m3u8', MASTER_FILE_TYPE)
-    print "bandwidth"
-    print bandwidth
+    xbmc.log("bandwidth")
+    xbmc.log(str(bandwidth))
     if bandwidth != '':
         stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
 
     stream_url = stream_url + '|User-Agent='+UA_IPAD
 
-    print stream_url
+    xbmc.log(stream_url)
     return stream_url
 
 
@@ -392,7 +390,7 @@ def createFullGameStream(stream_url, media_auth, media_state):
     #stream_url = stream_url + '|User-Agent='+UA_PS4+'&Cookie='+cookies+media_auth
     stream_url = stream_url + '|User-Agent='+UA_IPAD+'&Cookie='+cookies+media_auth
 
-    print "STREAM URL: "+stream_url
+    xbmc.log("STREAM URL: "+stream_url)
     return stream_url
     
                 
@@ -527,7 +525,7 @@ def getSessionKey(game_id,event_id,content_id,authorization):
         json_source = json.load(response)   
         response.close()
         
-        print "REQUESTED SESSION KEY"
+        xbmc.log("REQUESTED SESSION KEY")
         if json_source['status_code'] == 1:      
             if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
                 msg = "You do not have access to view this content. To watch live games and learn more about blackout restrictions, please visit NHL.TV"
@@ -550,13 +548,14 @@ def login():
         dialog = xbmcgui.Dialog()
         USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)        
         settings.setSetting(id='username', value=USERNAME)
+        USERNAME = json.dumps(USERNAME)
 
     global PASSWORD
     if PASSWORD == '':        
         dialog = xbmcgui.Dialog()
         PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
         settings.setSetting(id='password', value=PASSWORD)
-
+        PASSWORD = json.dumps(PASSWORD)
    
     if USERNAME != '' and PASSWORD != '':        
         cj = cookielib.LWPCookieJar(os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')) 
@@ -608,9 +607,9 @@ def login():
         try:
             response = opener.open(req) 
         except HTTPError as e:
-            print 'The server couldn\'t fulfill the request.'
-            print 'Error code: ', e.code    
-            print url   
+            xbmc.log('The server couldn\'t fulfill the request.')
+            xbmc.log('Error code: ', e.code)
+            xbmc.log(url)
             
             #Error 401 for invalid login
             if e.code == 401:
@@ -649,9 +648,9 @@ def logout(display_msg=None):
     try:
         response = opener.open(req) 
     except HTTPError as e:
-        print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code    
-        print url 
+        xbmc.log('The server couldn\'t fulfill the request.')
+        xbmc.log('Error code: ', e.code)
+        xbmc.log(url)
 
     #response = opener.open(req)              
     #user_data = response.read()
@@ -834,8 +833,8 @@ def nhlVideos():
         json_source = json.load(response)                           
         response.close()                
     except HTTPError as e:
-        print 'The server couldn\'t fulfill the request.'
-        print 'Error code: ', e.code          
+        xbmc.log('The server couldn\'t fulfill the request.')
+        xbmc.log('Error code: ', e.code)
         sys.exit()
     
     for video in json_source['videosLongList']:
@@ -901,9 +900,9 @@ except:
     pass
 
 
-print "Mode: "+str(mode)
-#print "URL: "+str(url)
-print "Name: "+str(name)
+xbmc.log("Mode: "+str(mode))
+#xbmc.log("URL: "+str(url))
+xbmc.log("Name: "+str(name))
 
 
 
@@ -953,13 +952,13 @@ elif mode == 900:
 elif mode == 999:
     sys.exit()
 
-print mode
+xbmc.log(str(mode))
 if mode==100 or mode==101 or mode==104 or mode==105 or mode==200 or mode==300 or mode==500 or mode==510: 
     setViewMode()
 elif mode==None:
     getViewMode()
     
-print "My view mode " + VIEW_MODE
+xbmc.log("My view mode " + VIEW_MODE)
 
 if mode == 100:
     xbmcplugin.endOfDirectory(addon_handle, cacheToDisc=False)
