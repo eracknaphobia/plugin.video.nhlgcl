@@ -586,20 +586,18 @@ def login():
  
         if ROGERS_SUBSCRIBER == 'true':                        
             url = 'https://activation-rogers.svc.nhl.com/ws/subscription/flow/rogers.login'            
-            login_data = '{"rogerCredentials":{"email":"'+USERNAME+'","password":"'+PASSWORD+'"}}'
+            login_data = '{"rogerCredentials":{"email":'+USERNAME+',"password":'+PASSWORD+'}}'
             #referer = "https://www.nhl.com/login/rogers"              
-        else:                   
-            #url = 'https://gateway.web.nhl.com/ws/subscription/flow/nhlPurchase.login'            
+        else:                               
             url = 'https://user.svc.nhl.com/v2/user/identity'            
-            login_data = '{"email":{"address":"'+USERNAME+'"},"type":"email-password","password":{"value":"'+PASSWORD+'"}}'
+            login_data = '{"email":{"address":'+USERNAME+'},"type":"email-password","password":{"value":'+PASSWORD+'}}'            
 
 
         req = urllib2.Request(url, data=login_data, headers=
             {"Accept": "*/*",
              "Accept-Encoding": "gzip, deflate",
              "Accept-Language": "en-US,en;q=0.8",
-             "Content-Type": "application/json",                            
-             "Origin": "https://www.nhl.com",
+             "Content-Type": "application/json", 
              "Authorization": authorization,
              "Connection": "keep-alive",
              "User-Agent": UA_PC})     
