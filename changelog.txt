@@ -1,3 +1,6 @@
+2016.11.11.2
+- Fixed CDN bug that could potentionally cause a too many sign-on restriction
+
 2016.11.11
 - Added a CDN option in settings (Under Login)
 

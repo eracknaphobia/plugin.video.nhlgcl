@@ -459,19 +459,7 @@ def fetchStream(game_id, content_id,event_id):
         ok = dialog.ok('Game Blacked Out', msg) 
         return stream_url, media_auth
 
-    #Org
-    url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform='+PLATFORM+'&sessionKey='+urllib.quote_plus(session_key)    
-    #      https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId=45149903&playbackScenario=HTTP_CLOUD_TABLET_60&platform=IPHONE&sessionKey=4pCvl2hwtHSeVtfrPV8R%2B9VY3FY%3D&deviceId=616a7ed090e8523b3fd6b9ca847c97eb0bc22bf2&postalCode=16503&country=US&latitude=42.129613440000&longitude=-80.045989680000 
-    req = urllib2.Request(url)       
-    req.add_header("Accept", "*/*")
-    req.add_header("Accept-Encoding", "deflate")
-    req.add_header("Accept-Language", "en-US,en;q=0.8")                       
-    req.add_header("Connection", "keep-alive")
-    req.add_header("Authorization", authorization)
-    req.add_header("User-Agent", UA_NHL)
-    req.add_header("Proxy-Connection", "keep-alive")        
-
-
+    
     #Get user set CDN
     if CDN == 'Akamai':
         cdn_url = 'akc.med2.med.nhl.com'
@@ -480,11 +468,23 @@ def fetchStream(game_id, content_id,event_id):
 
     i=0
     for i in range (0,10):
+        #Org
+        url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform='+PLATFORM+'&sessionKey='+urllib.quote_plus(session_key)        
+        req = urllib2.Request(url)       
+        req.add_header("Accept", "*/*")
+        req.add_header("Accept-Encoding", "deflate")
+        req.add_header("Accept-Language", "en-US,en;q=0.8")                       
+        req.add_header("Connection", "keep-alive")
+        req.add_header("Authorization", authorization)
+        req.add_header("User-Agent", UA_NHL)
+        req.add_header("Proxy-Connection", "keep-alive")  
         response = opener.open(req)    
         json_source = json.load(response)       
         response.close()
 
         try:
+            #Update session key to prevent sign-on a restriction in subsequent calls
+            session_key = json_source['session_key']
             stream_url = json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['url'] 
             if cdn_url in stream_url or json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
                 break
