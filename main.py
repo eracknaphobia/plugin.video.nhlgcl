@@ -472,9 +472,25 @@ def fetchStream(game_id, content_id,event_id):
     req.add_header("Proxy-Connection", "keep-alive")        
 
 
-    response = opener.open(req)
-    json_source = json.load(response)       
-    response.close()
+    #Get user set CDN
+    if CDN == 'Akamai':
+        cdn_url = 'akc.med2.med.nhl.com'
+    else:
+        cdn_url = 'l3c.med2.med.nhl.com'
+
+    i=0
+    for i in range (0,10):
+        response = opener.open(req)    
+        json_source = json.load(response)       
+        response.close()
+
+        try:
+            stream_url = json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['url'] 
+            if cdn_url in stream_url or json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
+                break
+        except:
+            i = i + 1
+            pass
        
 
     if json_source['status_code'] == 1:

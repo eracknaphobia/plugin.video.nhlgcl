@@ -2,6 +2,7 @@
 <strings>
 	<!-- Login -->
 	<string id="100">Login</string>
+	<string id="110">CDN</string>
 	<string id="140">Username</string>
 	<string id="150">Password</string>
 	<!-- Visual Settings -->

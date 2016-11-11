@@ -27,6 +27,7 @@ LOCAL_STRING = ADDON.getLocalizedString
 
 #Settings
 settings = xbmcaddon.Addon(id='plugin.video.nhlgcl')
+CDN = str(settings.getSetting(id="cdn"))
 USERNAME = json.dumps(str(settings.getSetting(id="username")))
 PASSWORD = json.dumps(str(settings.getSetting(id="password")))
 ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
@@ -70,7 +71,7 @@ MASTER_FILE_TYPE = 'master_tablet60.m3u8'
 #playstation
 #WEB_MEDIAPLAYER
 #----------
-PLATFORM = "IPAD"
+PLATFORM = "IPHONE"
 
 #User Agents
 UA_GCL = 'NHL1415/5.0925 CFNetwork/711.4.6 Darwin/14.0.0'
