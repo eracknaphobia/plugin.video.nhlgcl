@@ -467,7 +467,7 @@ def fetchStream(game_id, content_id,event_id):
         cdn_url = 'l3c.med2.med.nhl.com'
 
     i=0
-    for i in range (0,10):
+    for i in range (0,9):
         #Org
         url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?contentId='+content_id+'&playbackScenario=HTTP_CLOUD_TABLET_60&platform='+PLATFORM+'&sessionKey='+urllib.quote_plus(session_key)        
         req = urllib2.Request(url)       
@@ -486,8 +486,9 @@ def fetchStream(game_id, content_id,event_id):
             #Update session key to prevent sign-on a restriction in subsequent calls
             session_key = json_source['session_key']
             stream_url = json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['url'] 
-            if cdn_url in stream_url or json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
-                break
+            if cdn_url in stream_url: break
+            elif json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus': break
+            elif CDN == 'No Preference': break
         except:
             i = i + 1
             pass

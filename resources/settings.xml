@@ -2,7 +2,7 @@
 <settings>
   <!--Login-->
   <category label="100">    
-    <setting id="cdn" type="labelenum" label="110" values="Akamai|Level 3" default="Akamai"/>
+    <setting id="cdn" type="labelenum" label="110" values="Akamai|Level 3|No Preference" default="Akamai"/>
     <setting id="username" type="text" label="140" default=""/>
     <setting id="password" type="text" label="150" option="hidden" default=""/>
 	  <setting id="rogers" type="bool" label="155" default="false" />  
