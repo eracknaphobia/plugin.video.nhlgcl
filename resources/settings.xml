@@ -33,10 +33,9 @@
   
   <category label="300" visible="false">    
   	<setting id="score_updates" type="bool" label="310" default="false" visible="false"/>
-  	<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />
-
-    getThumbnails()
+  	<setting label="320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />    
   	<setting label="330" type="number" id="display_seconds" default="5"/>
+    <setting label="340" type="bool" id="goal_desc" default="true" />
   </category>
   
 </settings>

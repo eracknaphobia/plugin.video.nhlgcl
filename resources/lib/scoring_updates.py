@@ -40,7 +40,7 @@ def startScoringUpdates():
         
     FIRST_TIME_THRU = 1  
     OLD_GAME_STATS = []              
-    todays_date = localToEastern()    
+    todays_date = localToEastern() 
     wait = 30
     
     while ADDON.getSetting(id="score_updates") == 'true':  
@@ -147,7 +147,7 @@ def startScoringUpdates():
 
                             #Highlight goal(s) or the winning team
                             if new_item[5].upper().find('FINAL') != -1:
-                                title1 = 'Final Score'
+                                title = 'Final Score'
                                 if int(ascore) > int(hscore):
                                     message1 = '[COLOR='+SCORE_COLOR+']' + ateam + ' ' + ascore + '[/COLOR]    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
                                 else:
@@ -158,18 +158,17 @@ def startScoringUpdates():
                                 title = "Game Update"
                                 message = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '   [COLOR='+GAMETIME_COLOR+']' + current_period + ' has started[/COLOR]'
                             
-                            else:                                
-                                #title = 'Score Update'
+                            else:                                                                
                                 #Highlight if changed
-                                if new_item[3] != old_item[3]:
-                                    ascore = '[COLOR='+SCORE_COLOR+']'+new_item[3]+'[/COLOR]'                                
-                                
-                                if new_item[4] != old_item[4]:                                
-                                    hscore = '[COLOR='+SCORE_COLOR+']'+new_item[4]+'[/COLOR]'
-                                
-                                #message = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]' + ' ' + desc                            
-                                title = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
-                                message = desc
+                                if new_item[3] != old_item[3]: ascore = '[COLOR='+SCORE_COLOR+']'+new_item[3]+'[/COLOR]'                                                                
+                                if new_item[4] != old_item[4]: hscore = '[COLOR='+SCORE_COLOR+']'+new_item[4]+'[/COLOR]'
+                                                                
+                                if ADDON.getSetting(id="goal_desc") == 'false':
+                                    title = 'Score Update'
+                                    message = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
+                                else:                                
+                                    title = ateam + ' ' + ascore + '    ' + hteam + ' ' + hscore + '    [COLOR='+GAMETIME_COLOR+']' + gameclock + '[/COLOR]'
+                                    message = desc
 
                             if ADDON.getSetting(id="score_updates") != 'false':                                       
                                 #print message                   

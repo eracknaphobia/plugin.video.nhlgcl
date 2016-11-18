@@ -667,17 +667,11 @@ def logout(display_msg=None):
         xbmc.log('Error code: ', e.code)
         xbmc.log(url)
 
-    #response = opener.open(req)              
-    #user_data = response.read()
     response.close()
-  
-    #Clear session key and media auth variables
-    #settings.setSetting(id='session_key', value='') 
-    
 
-    #clear session cookies since they're no longer valid    
-    #cj.clear()
-    #cj.save(ignore_discard=True);   
+    #Delete cookie file
+    try: os.remove(ADDON_PATH_PROFILE+'cookies.lwp')
+    except: pass
 
     if display_msg == 'true':
         settings.setSetting(id='session_key', value='') 
