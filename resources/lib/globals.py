@@ -14,8 +14,6 @@ from urllib2 import URLError, HTTPError
 #from PIL import Image
 from cStringIO import StringIO
 
-#Disable all verification for https calls
-ssl._create_default_https_context = ssl._create_unverified_context
 
 addon_handle = int(sys.argv[1])
 
