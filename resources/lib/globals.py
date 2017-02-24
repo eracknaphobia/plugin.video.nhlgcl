@@ -4,7 +4,7 @@ import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 import re, os, time
 import calendar
 import pytz
-import urllib, urllib2, ssl
+import urllib, urllib2
 import json
 import cookielib
 import time
