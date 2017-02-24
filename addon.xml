@@ -20,6 +20,7 @@
 - Renamed "No Spoilers" to "Hide Scores"
 - Bumped the xbmc.python version
 - Restructered the addon as per the Kodi wiki
+- Patched bug released in previous version that affected Kodi 16.x users
     </news>
     <language>en</language>
     <platform>all</platform>
