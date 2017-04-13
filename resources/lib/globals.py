@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
 from urllib2 import URLError, HTTPError
 #from PIL import Image
+import requests
 from cStringIO import StringIO
 
 

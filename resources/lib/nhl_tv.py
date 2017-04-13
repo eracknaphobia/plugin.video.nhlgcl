@@ -495,7 +495,6 @@ def fetchStream(game_id, content_id,event_id):
             elif CDN == 'No Preference': break
         except:
             i = i + 1
-            pass
        
 
     if json_source['status_code'] == 1:
@@ -534,6 +533,7 @@ def getSessionKey(game_id,event_id,content_id,authorization):
         epoch_time_now = str(int(round(time.time()*1000)))    
 
         url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream?eventId='+event_id+'&format=json&platform='+PLATFORM+'&subject=NHLTV&_='+epoch_time_now        
+        '''
         req = urllib2.Request(url)       
         req.add_header("Accept", "application/json")
         req.add_header("Accept-Encoding", "deflate")
@@ -547,6 +547,18 @@ def getSessionKey(game_id,event_id,content_id,authorization):
         response = urllib2.urlopen(req)
         json_source = json.load(response)   
         response.close()
+        '''
+        headers = { "Accept": "application/json",
+                    "Accept-Encoding": "deflate",
+                    "Accept-Language": "en-US,en;q=0.8",
+                    "Connection": "keep-alive",
+                    "Authorization": authorization,
+                    "User-Agent": UA_PC,
+                    "Origin": "https://www.nhl.com",
+                    "Referer": "https://www.nhl.com/tv/"+game_id+"/"+event_id+"/"+content_id
+                    }
+
+        json_source = requests.get(url, headers=headers).json()
         
         xbmc.log("REQUESTED SESSION KEY")
         if json_source['status_code'] == 1:      
