@@ -602,22 +602,22 @@ def login():
             pass
 
         #Get Token
-        url = 'https://user.svc.nhl.com/oauth/token?grant_type=client_credentials'
-        req = urllib2.Request(url)       
-        req.add_header("Accept", "application/json")
-        req.add_header("Accept-Encoding", "gzip, deflate, sdch")
-        req.add_header("Accept-Language", "en-US,en;q=0.8")                                           
-        req.add_header("User-Agent", UA_PC)
-        req.add_header("Origin", "https://www.nhl.com")
-        #from https:/www.nhl.com/tv?affiliated=NHLTVLOGIN
-        req.add_header("Authorization", "Basic d2ViX25obC12MS4wLjA6MmQxZDg0NmVhM2IxOTRhMThlZjQwYWM5ZmJjZTk3ZTM=")
+        url = 'https://user.svc.nhl.com/oauth/token?grant_type=client_credentials'        
+        headers = { "Accept": "application/json",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Accept-Language": "en-US,en;q=0.8",
+                    "Connection": "keep-alive",                    
+                    "User-Agent": UA_PC,
+                    "Origin": "https://secure.web.nhl.com",
+                    "Authorization": "Basic d2ViX25obC12MS4wLjA6MmQxZDg0NmVhM2IxOTRhMThlZjQwYWM5ZmJjZTk3ZTM="
+                    }
 
-        response = opener.open(req, '')
-        json_source = json.load(response)   
+        json_source = requests.post(url, headers=headers, verify=False).json()
+
         authorization = getAuthCookie()
         if authorization == '':
             authorization = json_source['access_token']
-        response.close()
+        #response.close()
  
         if ROGERS_SUBSCRIBER == 'true':                        
             url = 'https://activation-rogers.svc.nhl.com/ws/subscription/flow/rogers.login'            
