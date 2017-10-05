@@ -336,7 +336,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
         listitem.setProperty('inputstream.adaptive.stream_headers', headers)
         listitem.setProperty('inputstream.adaptive.license_key', headers)
     '''
-    
+
     if stream_url != '':
         #listitem.setMimeType("application/x-mpegURL")
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
@@ -387,7 +387,7 @@ def createFullGameStream(stream_url, media_auth, media_state):
     if bandwidth != '':
         #Reduce convert bandwidth if composite video selected
         if ('COMPOSITE' in stream_url or 'ISO' in stream_url) :
-            if int(bandwidth) == 5000:
+            if int(bandwidth) >= 3500:
                 bandwidth = '3500'
             elif int(bandwidth) == 1200:
                 bandwidth = '1500'
@@ -397,13 +397,13 @@ def createFullGameStream(stream_url, media_auth, media_state):
             if checkArchiveType(stream_url,media_auth) == 'asset':
                 stream_url = stream_url.replace(MASTER_FILE_TYPE, 'asset_'+bandwidth+'k.m3u8')
             else:
-                stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete-trimmed.m3u8')
+                stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete_fwv2-trimmed.m3u8')
 
         elif media_state == 'MEDIA_ON':
             #LIVE
             #5000K/5000_slide.m3u8 OR #3500K/3500_complete.m3u8
             # Slide = Live, Complete = Watch from beginning?
-            stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete.m3u8')
+            stream_url = stream_url.replace(MASTER_FILE_TYPE, bandwidth+'K/'+bandwidth+'_complete_fwv2.m3u8')
 
 
     cj = cookielib.LWPCookieJar()
