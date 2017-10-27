@@ -557,20 +557,23 @@ def getSessionKey(game_id,event_id,content_id,authorization):
 def login():
     #Check if username and password are provided
     global USERNAME
-    if USERNAME == '':
+    xbmc.log("Username == "+USERNAME+"|")
+    if USERNAME == '""':
         dialog = xbmcgui.Dialog()
         USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
         settings.setSetting(id='username', value=USERNAME)
         USERNAME = json.dumps(USERNAME)
+        sys.exit()
 
     global PASSWORD
-    if PASSWORD == '':
+    if PASSWORD == '""':
         dialog = xbmcgui.Dialog()
         PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
         settings.setSetting(id='password', value=PASSWORD)
         PASSWORD = json.dumps(PASSWORD)
+        sys.exit()
 
-    if USERNAME != '' and PASSWORD != '':
+    if USERNAME != '""' and PASSWORD != '""':
         url = 'https://user.svc.nhl.com/oauth/token?grant_type=client_credentials'
         headers = {
             "Accept": "application/json",
