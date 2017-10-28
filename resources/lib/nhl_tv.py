@@ -557,7 +557,6 @@ def getSessionKey(game_id,event_id,content_id,authorization):
 def login():
     #Check if username and password are provided
     global USERNAME
-    xbmc.log("Username == "+USERNAME+"|")
     if USERNAME == '""':
         dialog = xbmcgui.Dialog()
         USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
