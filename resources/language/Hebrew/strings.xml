@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+	<!-- Login -->
+	<string id="100">התחברות</string>
+	<string id="110">CDN</string>
+	<string id="140">שם משתמש</string>
+	<string id="150">סיסמה</string>
+	<!-- Visual Settings -->
+	<string id="159">חזותי</string>
+	<string id="155">מינוי Rogers</string>
+	<string id="156">תתנתק</string>	
+	<string id="160">איכות הזרמה</string>
+	<string id="170">הסתרת ניקוד</string>
+	<string id="1700">כבוי</string>
+	<string id="1701">פועל</string>
+	<string id="1702">רק נבחרת מועדפת</string>
+	<string id="1703">רק משחקים חיים</string>
+	<string id="1704">רק משחקים מהארכיב</string>		
+	<string id ="180">נבחרת מועדפת</string>
+	<string id ="190">הצג את שם הנבחרת לפי</string>
+	<string id ="1900">עיר (לדוגמה: דטרויט)</string>
+	<string id ="1901">נבחרת (לדוגמה: Red Wings)</string>
+	<string id ="1902">שם מלא (לדוגמה: Detroit Red Wings)</string>
+	<string id ="1903">מקוצר (לדוגמה: DET)</string>
+	<string id ="200">תבנית זמן</string>
+	<string id ="2000">שעון 12 שעות (לדוגמה: 6.00pm)</string>
+	<string id ="2001">שעון 24 שעות (לדוגמה: 18:00)</string>
+	<string id ="250">הורד מידע תצוגה מקדימה של המשחק (משחקי היום)</string>
+	<string id ="251">צור תמונות ממוזערות של המשחק</string>
+
+	<!-- Scoring Updates -->
+	<string id='300'>הודעות ניקוד</string>
+	<string id='320'>הפעל או כבה הודעות ניקוד</string>
+	<string id='330'>מספר השניות להצגת תוצאות ניקוד</string>
+	<string id='340'>תאור מטרה</string>
+</strings>
