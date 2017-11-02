@@ -584,7 +584,7 @@ def login():
         }
 
         r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-        if r.status_code != 200:
+        if r.status_code >= 400:
             msg = "Authorization Cookie couldn't be downloaded."
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Authorization Not Found', msg)
@@ -617,7 +617,7 @@ def login():
 
         r = requests.post(url, headers=headers, data=login_data, cookies=load_cookies(), verify=VERIFY)
         json_source = r.json()
-        if r.status_code != 200:
+        if r.status_code >= 400:
             #msg = "Please check that your username and password are correct"
             msg = json_source['message']
             dialog = xbmcgui.Dialog()
@@ -640,7 +640,7 @@ def logout(display_msg=None):
     }
 
     r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-    if r.status_code != 200:
+    if r.status_code >= 400:
         xbmc.log('The server couldn\'t fulfill the request.')
         xbmc.log('Error code: ', e.code)
         xbmc.log(url)
