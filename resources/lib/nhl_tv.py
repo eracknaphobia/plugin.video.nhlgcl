@@ -616,10 +616,13 @@ def login():
          }
 
         r = requests.post(url, headers=headers, data=login_data, cookies=load_cookies(), verify=VERIFY)
-        json_source = r.json()
+
         if r.status_code >= 400:
-            #msg = "Please check that your username and password are correct"
-            msg = json_source['message']
+            try:
+                json_source = r.json()
+                msg = json_source['message']
+            except:
+                msg = "Please check that your username and password are correct"
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Login Error', msg)
             sys.exit()
