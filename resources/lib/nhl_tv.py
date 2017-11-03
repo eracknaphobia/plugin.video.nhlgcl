@@ -626,7 +626,7 @@ def login():
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Login Error', msg)
             sys.exit()
-♦
+
         save_cookies(r.cookies)
 
 
