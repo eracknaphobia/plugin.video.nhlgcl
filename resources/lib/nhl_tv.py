@@ -315,7 +315,7 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
             n = dialog.select('Choose Stream', stream_title)
             if n > -1:
                 stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
-                xbmc.log(stream_url)
+                #xbmc.log(stream_url)
                 stream_url = createFullGameStream(stream_url,media_auth,media_state[n])
     else:
         dialog = xbmcgui.Dialog()
@@ -324,13 +324,18 @@ def streamSelect(game_id, epg, teams_stream, stream_date):
             stream_url, media_auth = fetchStream(game_id, content_id[n],event_id[n])
             stream_url = createFullGameStream(stream_url,media_auth,media_state[n])
 
-
-    listitem = xbmcgui.ListItem(path=stream_url)
-    listitem.setMimeType("application/x-mpegURL")
-
-
     if stream_url != '':
-        #listitem.setMimeType("application/x-mpegURL")
+
+        if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+            listitem = xbmcgui.ListItem(path=stream_url.split("|")[0])
+            listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+            listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
+            listitem.setProperty('inputstream.adaptive.stream_headers', stream_url.split("|")[1])
+            listitem.setProperty('inputstream.adaptive.license_key', "|" + stream_url.split("|")[1])
+        else:
+            listitem = xbmcgui.ListItem(path=stream_url)
+            listitem.setMimeType("application/x-mpegURL")
+
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
     else:
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
@@ -723,6 +728,8 @@ def playTodaysFavoriteTeam():
             dialog.ok('No Game Today', FAV_TEAM + " doesn't play today")
 
         listitem = xbmcgui.ListItem(path=stream_url)
+
+
         if stream_url != '':
             listitem.setMimeType("application/x-mpegURL")
             xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
