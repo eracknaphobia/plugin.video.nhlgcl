@@ -187,11 +187,11 @@ def add_stream(name, link_url, title, game_id, epg, icon=None, fanart=None, info
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if video_info is not None:
-        liz.add_streamInfo('video', video_info)
+        liz.addStreamInfo('video', video_info)
     if audio_info is not None:
-        liz.add_streamInfo('audio', audio_info)
+        liz.addStreamInfo('audio', audio_info)
 
-    ok = xbmcplugin.add_directoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
 
     return ok
@@ -224,11 +224,11 @@ def add_fav_today(name, title, icon, fanart=None):
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if video_info is not None:
-        liz.add_streamInfo('video', video_info)
+        liz.addStreamInfo('video', video_info)
     if audio_info is not None:
-        liz.add_streamInfo('audio', audio_info)
+        liz.addStreamInfo('audio', audio_info)
 
-    ok = xbmcplugin.add_directoryItem(handle=int(sys.argv[1]), url=url, listitem=liz, isFolder=False)
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=liz, isFolder=False)
     xbmcplugin.setContent(addon_handle, 'tvshows')
 
     return ok
@@ -248,16 +248,16 @@ def add_link(name, url, title, iconimage, info=None, video_info=None, audio_info
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if video_info is not None:
-        liz.add_streamInfo('video', video_info)
+        liz.addStreamInfo('video', video_info)
     if audio_info is not None:
-        liz.add_streamInfo('audio', audio_info)
+        liz.addStreamInfo('audio', audio_info)
 
     if fanart is not None:
         liz.setProperty('fanart_image', fanart)
     else:
         liz.setProperty('fanart_image', FANART)
 
-    ok = xbmcplugin.add_directoryItem(handle=int(sys.argv[1]), url=url, listitem=liz)
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=liz)
     xbmcplugin.setContent(addon_handle, 'tvshows')
     return ok
 
@@ -281,7 +281,7 @@ def add_dir(name, url, mode, iconimage, fanart=None, game_day=None):
     else:
         liz.setProperty('fanart_image', FANART)
 
-    ok = xbmcplugin.add_directoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     return ok
 
@@ -310,11 +310,11 @@ def addPlaylist(name, game_day, url, mode, iconimage, fanart=None):
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if video_info is not None:
-        liz.add_streamInfo('video', video_info)
+        liz.addStreamInfo('video', video_info)
     if audio_info is not None:
-        liz.add_streamInfo('audio', audio_info)
+        liz.addStreamInfo('audio', audio_info)
 
-    ok = xbmcplugin.add_directoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
     # xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
     return ok
 
@@ -429,7 +429,7 @@ def get_thumbnails():
     # steps = number of teams * (number of teams -1)
     steps = len(team_list) * (len(team_list) - 1)
     progress = xbmcgui.DialogProgress()
-    progress.create('NHL TV™')
+    progress.create('NHL TV')
     progress.update(0, 'Generating Thumbnails...')
 
     i = 1
