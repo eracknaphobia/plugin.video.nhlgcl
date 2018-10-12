@@ -22,8 +22,7 @@
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
     <forum>http://forum.kodi.tv/showthread.php?tid=243756</forum>
-    <website></website>
-    <email></email>
+    <website>http://www.nhl.tv</website>
     <source>https://github.com/eracknaphobia/plugin.video.nhlgcl</source>
   </extension>
 </addon>
