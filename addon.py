@@ -27,10 +27,6 @@ if 'teams_stream' in params:
 if 'stream_date' in params:
     stream_date = urllib.unquote_plus(params["stream_date"])
 
-xbmc.log("Mode: "+str(mode))
-xbmc.log("URL: "+str(url))
-xbmc.log("Name: "+str(name))
-
 
 if mode is None or url is None:
     categories()
