@@ -456,7 +456,8 @@ def fetch_stream(game_id, content_id, event_id):
     if session_key == '':
         return stream_url, media_auth
     elif session_key == 'blackout':
-        msg = "The game you are trying to access is not currently available due to local or national blackout restrictions.\n Full game archives will be available 48 hours after completion of this game."
+        msg = "The game you are trying to access is not currently available due to local or national blackout " \
+              "restrictions.\n Full game archives will be available 48 hours after completion of this game."
         dialog = xbmcgui.Dialog()
         ok = dialog.ok('Game Blacked Out', msg)
         return stream_url, media_auth
@@ -487,15 +488,16 @@ def fetch_stream(game_id, content_id, event_id):
     json_source = r.json()
 
     if json_source['status_code'] == 1:
-        if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0][
-            'blackout_status']['status'] == 'BlackedOutStatus':
-            msg = "The game you are trying to access is not currently available due to local or national blackout restrictions.\n Full game archives will be available 48 hours after completion of this game."
+        if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
+            msg = "The game you are trying to access is not currently available due to local or national blackout" \
+                  " restrictions.\n Full game archives will be available 48 hours after completion of this game."
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Game Blacked Out', msg)
             sys.exit()
         elif json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0][
             'auth_status'] == 'NotAuthorizedStatus':
-            msg = "You do not have an active NHL.TV subscription. To access this content please purchase at www.NHL.TV or call customer support at 800-559-2333"
+            msg = "You do not have an active NHL.TV subscription. To access this content please purchase at www.NHL.TV" \
+                  " or call customer support at 800-559-2333"
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Account Not Authorized', msg)
             sys.exit()
@@ -541,8 +543,7 @@ def get_session_key(game_id, event_id, content_id, authorization):
 
         xbmc.log("REQUESTED SESSION KEY")
         if json_source['status_code'] == 1:
-            if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0][
-                'blackout_status']['status'] == 'BlackedOutStatus':
+            if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
                 msg = "The game you are trying to access is not currently available due to local or national blackout restrictions.\n Full game archives will be available 48 hours after completion of this game."
                 session_key = 'blackout'
             else:
