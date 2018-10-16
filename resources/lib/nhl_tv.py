@@ -196,9 +196,10 @@ def create_game_listItem(game, game_day):
             'genre': 'Sports'}
 
     start_time = None
-    if game['status']['detailedState'].lower() == 'in progress':
-        if 'startTime' in game['linescore']['periods'][0]:
-            start_time = game['linescore']['periods'][0]['startTime']
+    try:
+        start_time = game['linescore']['periods'][0]['startTime']
+    except:
+        pass
 
     # Create Playlist for all highlights
     try:
@@ -280,6 +281,7 @@ def stream_select(game_id, epg, start_time):
     media_auth = ''
 
     if media_state[0] == 'MEDIA_ARCHIVE':
+        start_time = None
         dialog = xbmcgui.Dialog()
         a = dialog.select('Choose Archive', archive_type)
         if a < 2:
