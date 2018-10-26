@@ -329,7 +329,7 @@ def stream_select(game_id, epg, start_time):
 
         x = -1
         if start_time is not None:
-            x = dialog.select("Choose Start", ['Live', 'Play from Beginning'])
+            x = dialog.select("Choose Start", ['Watch Live', 'Start from Beginning'])
 
         if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
             listitem = xbmcgui.ListItem(path=stream_url.split("|")[0])
@@ -344,13 +344,14 @@ def stream_select(game_id, epg, start_time):
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
 
         if x == 1:
-            start_time = string_to_date(start_time, '%Y-%m-%dT%H:%M:%SZ')
-            seek_secs = int((start_time - datetime.utcnow()).total_seconds())
             while not xbmc.Player().isPlayingVideo():
-                xbmc.sleep(250)
+                xbmc.Monitor().waitForAbort(0.25)
 
-            xbmc.log("seconds seek = " + str(seek_secs))
-            xbmc.executebuiltin('Seek(' + str(seek_secs) + ')')
+            if xbmc.Player().isPlayingVideo():
+                start_time = string_to_date(start_time, '%Y-%m-%dT%H:%M:%SZ')
+                seek_secs = int((start_time - datetime.utcnow()).total_seconds())
+                xbmc.log("seconds seek = " + str(seek_secs))
+                xbmc.executebuiltin('Seek(' + str(seek_secs) + ')')
 
     else:
         xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
