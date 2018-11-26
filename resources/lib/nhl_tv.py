@@ -23,7 +23,7 @@ def todays_games(game_day):
     display_day = string_to_date(game_day, "%Y-%m-%d")
     prev_day = display_day - timedelta(days=1)
 
-    add_dir('[B]<< Previous Day[/B]', '/live', 101, PREV_ICON, FANART, prev_day.strftime("%Y-%m-%d"))
+    add_dir('[B]<< '+LOCAL_STRING(30010)+'[/B]', '/live', 101, PREV_ICON, FANART, prev_day.strftime("%Y-%m-%d"))
 
     date_display = '[B][I]' + color_string(display_day.strftime("%A, %m/%d/%Y"), GAMETIME_COLOR) + '[/I][/B]'
     addPlaylist(date_display, display_day, '/playhighlights', 900, ICON, FANART)
@@ -49,12 +49,15 @@ def todays_games(game_day):
         pass
 
     next_day = display_day + timedelta(days=1)
-    add_dir('[B]Next Day >>[/B]', '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
+    add_dir('[B]'+LOCAL_STRING(30011)+' >>[/B]', '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
 
 
 def create_game_listItem(game, game_day):
     away = game['teams']['away']['team']
+    away_record = game['teams']['away']['leagueRecord']
     home = game['teams']['home']['team']
+    home_record = game['teams']['home']['leagueRecord']
+
     # http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/NJD_at_BOS.jpg
     # icon = 'http://nhl.cdn.neulion.net/u/nhlgc_roku/images/HD/'+away['abbreviation']+'_at_'+home['abbreviation']+'.jpg'
     # icon = 'http://raw.githubusercontent.com/eracknaphobia/game_images/master/square_black/'+away['abbreviation']+'vs'+home['abbreviation']+'.png'
@@ -129,7 +132,10 @@ def create_game_listItem(game, game_day):
     live_feeds = 0
     archive_feeds = 0
 
-    desc = ''
+    desc = ('%s %s-%s-%s\n%s %s-%s-%s') % (away_team, str(away_record['wins']), str(away_record['losses']),
+                                           str(away_record['ot']), home_team, str(home_record['wins']),
+                                           str(home_record['losses']), str(home_record['ot']))
+
     hide_spoilers = 0
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (
             NO_SPOILERS == '3' and game_day == local_to_eastern()) or (
@@ -192,7 +198,11 @@ def create_game_listItem(game, game_day):
     # Set audio/video info based on stream quality setting
     audio_info, video_info = getAudioVideoInfo()
     # 'duration':length
-    info = {'plot': desc, 'tvshowtitle': 'NHL', 'title': title, 'originaltitle': title, 'aired': game_day,
+    info = {'plot': desc,
+            'tvshowtitle': 'NHL',
+            'title': title,
+            'originaltitle': title,
+            'aired': game_day,
             'genre': 'Sports'}
 
     start_time = None
