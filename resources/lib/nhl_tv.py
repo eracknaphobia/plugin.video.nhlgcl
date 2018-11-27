@@ -818,7 +818,7 @@ def goto_date():
                 game_day = year + '-' + mnth.zfill(2) + '-' + day.zfill(2)
 
     if game_day != '':
-        todaysGames(game_day)
+        todays_games(game_day)
     else:
         sys.exit()
 
