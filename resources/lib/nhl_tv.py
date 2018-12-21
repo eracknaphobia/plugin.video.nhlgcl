@@ -131,11 +131,7 @@ def create_game_listItem(game, game_day):
         pass
     live_feeds = 0
     archive_feeds = 0
-
-    desc = ('%s %s-%s-%s\n%s %s-%s-%s') % (away_team, str(away_record['wins']), str(away_record['losses']),
-                                           str(away_record['ot']), home_team, str(home_record['wins']),
-                                           str(home_record['losses']), str(home_record['ot']))
-
+    desc = ''
     hide_spoilers = 0
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (
             NO_SPOILERS == '3' and game_day == local_to_eastern()) or (
@@ -146,6 +142,9 @@ def create_game_listItem(game, game_day):
         name = game_time + ' ' + away_team + ' ' + color_string(str(game['teams']['away']['score']),
                                                                 SCORE_COLOR) + ' at ' + home_team + ' ' + color_string(
             str(game['teams']['home']['score']), SCORE_COLOR)
+        desc = ('%s %s-%s-%s\n%s %s-%s-%s') % (away_team, str(away_record['wins']), str(away_record['losses']),
+                                               str(away_record['ot']), home_team, str(home_record['wins']),
+                                               str(home_record['losses']), str(home_record['ot']))
 
     # fanart = None
     fanart = 'http://nhl.bamcontent.com/images/arena/default/' + str(home['id']) + '@2x.jpg'
@@ -693,8 +692,6 @@ def my_teams_games():
             # add_dir(date_display,'/nothing',999,ICON,FANART)
             for game in date['games']:
                 create_game_listItem(game, date['date'])
-
-
     else:
         msg = "Please select your favorite team from the addon settings"
         dialog = xbmcgui.Dialog()
@@ -794,7 +791,7 @@ def goto_date():
         # mnth_name = ['September','October','November','December','Janurary','February','March','April','May','June']
         # mnth_num = ['9','10','11','12','1','2','3','4','5','6']
 
-        mnth_name = ['Janurary', 'February', 'March', 'April', 'May', 'June', 'September', 'October', 'November',
+        mnth_name = ['January', 'February', 'March', 'April', 'May', 'June', 'September', 'October', 'November',
                      'December']
         mnth_num = ['1', '2', '3', '4', '5', '6', '9', '10', '11', '12']
 
