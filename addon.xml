@@ -15,7 +15,7 @@
     <platform>all</platform>
     <summary lang="en">Watch out-of-market games from around the League on Kodi, with HD quality streaming</summary>
     <description lang="en">With NHL.TV you can access revolutionary 60fps (frames per second) video through Kodi</description>
-    <disclaimer lang="en"></disclaimer>
+    <disclaimer lang="en">Requires a valid NHL TV account to view full Live and Archived games. Blackout and other restrictions apply, including national blackouts.</disclaimer>
     <news>
         - Code clean up
         - Fix error when user cancel stream select
