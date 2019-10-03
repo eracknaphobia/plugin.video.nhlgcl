@@ -61,7 +61,7 @@ PREV_ICON = ROOTDIR + "/icon.png"
 NEXT_ICON = ROOTDIR + "/icon.png"
 
 API_URL = 'http://statsapi.web.nhl.com/api/v1/'
-VERIFY = False
+VERIFY = True
 PLATFORM = "IPHONE"
 PLAYBACK_SCENARIO = 'HTTP_CLOUD_TABLET_60'
 
