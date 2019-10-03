@@ -363,7 +363,7 @@ def stream_select(game_id, epg, start_time):
                 xbmc.executebuiltin('Seek(' + str(seek_secs) + ')')
 
     else:
-        xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
+        sys.exit()
 
 
 def play_all_highlights():
