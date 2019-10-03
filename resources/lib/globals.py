@@ -88,7 +88,8 @@ def find(source, start_str, end_str):
 
 
 def color_string(string, color):
-    return '[COLOR=' + color + ']' + string + '[/COLOR]'
+    return string
+    # return '[COLOR=' + color + ']' + string + '[/COLOR]'
 
 
 def string_to_date(string, date_format):
