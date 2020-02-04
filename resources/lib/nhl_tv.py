@@ -720,17 +720,23 @@ def play_fav_team_today():
             # Create the stream url
             stream_url, media_auth = fetch_stream(str(game_id), local_stream['mediaPlaybackId'],local_stream['eventId'])
             if stream_url != '':
-                stream_url = create_full_game_stream(stream_url, media_auth, local_stream['mediaState'])
+                stream_url = create_full_game_stream(stream_url, media_auth)
 
         else:
             dialog = xbmcgui.Dialog()
             dialog.ok('No Game Today', FAV_TEAM + " doesn't play today")
             sys.exit()
 
-        listitem = xbmcgui.ListItem(path=stream_url)
-
         if stream_url != '':
-            listitem.setMimeType("application/x-mpegURL")
+            if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
+                listitem = xbmcgui.ListItem(path=stream_url.split("|")[0])
+                listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+                listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
+                listitem.setProperty('inputstream.adaptive.stream_headers', stream_url.split("|")[1])
+                listitem.setProperty('inputstream.adaptive.license_key', "|" + stream_url.split("|")[1])
+            else:
+                listitem = xbmcgui.ListItem(path=stream_url)
+                listitem.setMimeType("application/x-mpegURL")
             xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
         else:
             xbmcplugin.setResolvedUrl(addon_handle, False, listitem)
