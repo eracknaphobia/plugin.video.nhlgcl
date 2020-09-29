@@ -164,12 +164,12 @@ def create_game_listitem(game, game_day):
     except:
         pass
 
-    name = name.encode('utf-8')
+    name = name
     if fav_game:
         name = '[B]%s[/B]' % name
 
     title = '%s at %s' % (away_team, home_team)
-    title = title.encode('utf-8')
+    title = title
 
     # Label free game of the day
     try:
@@ -247,7 +247,7 @@ def stream_select(game_id, epg, start_time):
     if len(full_game_items) > 0:
         for item in full_game_items:
             media_state.append(item['mediaState'])
-            feed_type = item['mediaFeedType'].encode('utf-8')
+            feed_type = item['mediaFeedType']
 
             if feed_type == "COMPOSITE":
                 multi_cam += 1
@@ -257,8 +257,8 @@ def stream_select(game_id, epg, start_time):
                 stream_title.append("Multi-Angle " + str(multi_angle))
             else:
                 temp_item = feed_type.title()
-                if item['callLetters'].encode('utf-8') != '':
-                    temp_item = '%s (%s)' % (temp_item, item['callLetters'].encode('utf-8'))
+                if item['callLetters'] != '':
+                    temp_item = '%s (%s)' % (temp_item, item['callLetters'])
 
                 stream_title.append(temp_item)
 
@@ -545,23 +545,19 @@ def get_session_key(game_id, event_id, content_id, authorization):
 def login():
     # Check if username and password are provided
     global USERNAME
-    if USERNAME == '""':
+    if USERNAME == '':
         dialog = xbmcgui.Dialog()
         USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
         settings.setSetting(id='username', value=USERNAME)
-        USERNAME = json.dumps(USERNAME)
-        sys.exit()
-
     global PASSWORD
-    if PASSWORD == '""':
+    if PASSWORD == '':
         dialog = xbmcgui.Dialog()
         PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM,
                                 option=xbmcgui.ALPHANUM_HIDE_INPUT)
         settings.setSetting(id='password', value=PASSWORD)
-        PASSWORD = json.dumps(PASSWORD)
-        sys.exit()
 
-    if USERNAME != '""' and PASSWORD != '""':
+
+    if USERNAME != '' and PASSWORD != '':
         url = 'https://user.svc.nhl.com/oauth/token?grant_type=client_credentials'
         headers = {
             "Accept": "application/json",
@@ -587,11 +583,11 @@ def login():
 
         if ROGERS_SUBSCRIBER == 'true':
             url = 'https://activation-rogers.svc.nhl.com/ws/subscription/flow/rogers.login'
-            login_data = '{"rogerCredentials":{"email":' + USERNAME + ',"password":' + PASSWORD + '}}'
-            # referer = "https://www.nhl.com/login/rogers"
+            login_data = '{"rogerCredentials":{"email":' + json.dumps(USERNAME) + ',"password":' + json.dumps(PASSWORD) + '}}'
+
         else:
             url = 'https://user.svc.nhl.com/v2/user/identity'
-            login_data = '{"email":{"address":' + USERNAME + '},"type":"email-password","password":{"value":' + PASSWORD + '}}'
+            login_data = '{"email":{"address":' + json.dumps(USERNAME) + '},"type":"email-password","password":{"value":' + json.dumps(PASSWORD) + '}}'
 
         headers = {
             "Accept": "*/*",

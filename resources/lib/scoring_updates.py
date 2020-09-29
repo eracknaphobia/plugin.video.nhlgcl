@@ -82,19 +82,19 @@ def startScoringUpdates():
                 break
 
             gid = str(game['gamePk'])
-            ateam = game['teams']['away']['team']['abbreviation'].encode('utf-8')
-            hteam = game['teams']['home']['team']['abbreviation'].encode('utf-8')
-            ascore = str(game['linescore']['teams']['away']['goals']).encode('utf-8')
-            hscore = str(game['linescore']['teams']['home']['goals']).encode('utf-8')
+            ateam = game['teams']['away']['team']['abbreviation']
+            hteam = game['teams']['home']['team']['abbreviation']
+            ascore = str(game['linescore']['teams']['away']['goals'])
+            hscore = str(game['linescore']['teams']['home']['goals'])
                             
             #Team names (these can be found in the live streams url)
-            atcommon = game['teams']['away']['team']['abbreviation'].encode('utf-8')
-            htcommon = game['teams']['home']['team']['abbreviation'].encode('utf-8')
-            gameclock = game['status']['detailedState'].encode('utf-8')
+            atcommon = game['teams']['away']['team']['abbreviation']
+            htcommon = game['teams']['home']['team']['abbreviation']
+            gameclock = game['status']['detailedState']
 
             current_period = game['linescore']['currentPeriod']            
             try:
-                current_period = game['linescore']['currentPeriodOrdinal'].encode('utf-8')                
+                current_period = game['linescore']['currentPeriodOrdinal']                
             except:
                 pass
             
@@ -114,7 +114,7 @@ def startScoringUpdates():
                 pass
 
             if 'In Progress' in gameclock:            
-                gameclock = game['linescore']['currentPeriodTimeRemaining'].encode('utf-8')+' '+game['linescore']['currentPeriodOrdinal'].encode('utf-8')
+                gameclock = game['linescore']['currentPeriodTimeRemaining']+' '+game['linescore']['currentPeriodOrdinal']
             
             
             #Disable spoiler by not showing score notifications for the game the user is currently watching

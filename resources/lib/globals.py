@@ -1,17 +1,19 @@
 import sys
-import xbmc, xbmcplugin, xbmcgui, xbmcaddon
 import re, os, time
 import calendar
 import pytz
 import urllib
 import requests
 import json
-import cookielib
+import http
 import time
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
-# from PIL import Image
-from cStringIO import StringIO
+from kodi_six import xbmc, xbmcplugin, xbmcgui, xbmcaddon
+
+if sys.version_info[0] > 2:
+    urllib = urllib.parse
+    cookielib = http.cookiejar
 
 addon_handle = int(sys.argv[1])
 
@@ -27,8 +29,8 @@ LOCAL_STRING = ADDON.getLocalizedString
 # Settings
 settings = xbmcaddon.Addon()
 CDN = str(settings.getSetting(id="cdn"))
-USERNAME = json.dumps(str(settings.getSetting(id="username")))
-PASSWORD = json.dumps(str(settings.getSetting(id="password")))
+USERNAME = str(settings.getSetting(id="username"))
+PASSWORD = str(settings.getSetting(id="password"))
 ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
 NO_SPOILERS = settings.getSetting(id="no_spoilers")
 QUALITY = str(settings.getSetting(id="stream_quality"))
@@ -342,7 +344,7 @@ def getFavTeamId():
 
     fav_team_id = "0"
     for team in json_source['teams']:
-        if FAV_TEAM in team['name'].encode('utf-8'):
+        if FAV_TEAM in team['name']:
             fav_team_id = str(team['id'])
             break
 
@@ -517,7 +519,7 @@ def getFavTeamLogo():
 
     fav_team_abbr = ''
     for team in json_source['teams']:
-        if FAV_TEAM in team['name'].encode('utf-8'):
+        if FAV_TEAM in team['name']:
             fav_team_abbr = str(team['abbreviation']).lower()
             break
 
