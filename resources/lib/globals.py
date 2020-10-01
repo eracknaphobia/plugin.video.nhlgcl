@@ -543,21 +543,6 @@ def getAudioVideoInfo():
     return audio_info, video_info
 
 
-def getConfigFile():
-    '''
-    GET http://lwsa.mlb.com/partner-config/config?company=sony-tri&type=nhl&productYear=2015&model=PS4&firmware=default&app_version=1_0 HTTP/1.0
-    Host: lwsa.mlb.com
-    User-Agent: PS4Application libhttp/1.000 (PS4) libhttp/3.15 (PlayStation 4)
-    Connection: close
-    '''
-    url = 'http://lwsa.mlb.com/partner-config/config?company=sony-tri&type=nhl&productYear=2015&model=PS4&firmware=default&app_version=1_0'
-    headers = {
-        "Connection": "close",
-        "User-Agent": UA_PS4
-    }
-    r = requests.get(url, headers=headers, verify=VERIFY)
-
-
 def load_cookies():
     cookie_file = os.path.join(ADDON_PATH_PROFILE, 'cookies.lwp')
     cj = cookielib.LWPCookieJar()
