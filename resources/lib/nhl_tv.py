@@ -1,6 +1,7 @@
 from resources.lib.globals import *
 
 
+
 def categories():
     add_dir('Today\'s Games', '/live', 100, ICON, FANART)
     add_dir('Yesterday\'s Games', '/live', 105, ICON, FANART)
@@ -327,7 +328,7 @@ def stream_select(game_id, epg, start_time):
 
         if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
             listitem = xbmcgui.ListItem(path=stream_url.split("|")[0])
-            listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+            listitem.setProperty('inputstream', 'inputstream.adaptive')
             listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
             listitem.setProperty('inputstream.adaptive.stream_headers', stream_url.split("|")[1])
             listitem.setProperty('inputstream.adaptive.license_key', "|" + stream_url.split("|")[1])
@@ -726,7 +727,7 @@ def play_fav_team_today():
         if stream_url != '':
             if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
                 listitem = xbmcgui.ListItem(path=stream_url.split("|")[0])
-                listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+                listitem.setProperty('inputstream', 'inputstream.adaptive')
                 listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
                 listitem.setProperty('inputstream.adaptive.stream_headers', stream_url.split("|")[1])
                 listitem.setProperty('inputstream.adaptive.license_key', "|" + stream_url.split("|")[1])
@@ -800,8 +801,7 @@ def goto_date():
 def nhl_videos(selected_topic=None):
     url = 'http://nhl.bamcontent.com/nhl/en/nav/v1/video/connectedDevices/nhl/playstation-v1.json'
 
-    headers = {'User-Agent': UA_PS4,
-               }
+    headers = {'User-Agent': UA_PS4 }
 
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
     json_source = r.json()
@@ -816,7 +816,10 @@ def nhl_videos(selected_topic=None):
                 for video in main_topic['list']:
                     title = video['title']
                     name = title
-                    icon = video['image']['cuts']['1136x640']['src']
+                    try:
+                        icon = video['image']['cuts']['1136x640']['src']
+                    except:
+                        icon = ICON
                     url = video['playbacks'][4]['url']
                     desc = video['description']
                     release_date = video['date'][0:10]
