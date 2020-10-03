@@ -11,7 +11,6 @@
     <extension point="xbmc.python.pluginsource" library="addon.py">
         <provides>video</provides>
     </extension>
-    <extension point="xbmc.service" library="service.py" start="startup"/>
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary lang="en">Watch out-of-market games from around the League on Kodi, with HD quality streaming</summary>
@@ -22,7 +21,7 @@
         </disclaimer>
         <news>
             - Update code for python 3
-            - Fixing favorite team's game (thanks Str8AWay)
+            - Fix favorite team's game (thanks Str8AWay)
         </news>
         <language>en</language>
         <platform>all</platform>
