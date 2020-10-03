@@ -570,7 +570,7 @@ def login():
         }
 
         r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-        if r.status_code >= 400:
+        if not r.ok:
             msg = "Authorization Cookie couldn't be downloaded."
             dialog = xbmcgui.Dialog()
             ok = dialog.ok('Authorization Not Found', msg)
@@ -584,11 +584,10 @@ def login():
 
         if ROGERS_SUBSCRIBER == 'true':
             url = 'https://activation-rogers.svc.nhl.com/ws/subscription/flow/rogers.login'
-            login_data = '{"rogerCredentials":{"email":' + json.dumps(USERNAME) + ',"password":' + json.dumps(PASSWORD) + '}}'
-
+            login_data = {"rogerCredentials": {"email": USERNAME, "password": PASSWORD}}
         else:
             url = 'https://user.svc.nhl.com/v2/user/identity'
-            login_data = '{"email":{"address":' + json.dumps(USERNAME) + '},"type":"email-password","password":{"value":' + json.dumps(PASSWORD) + '}}'
+            login_data = {"email":{"address": USERNAME},"type":"email-password","password":{"value": PASSWORD}}
 
         headers = {
             "Accept": "*/*",
@@ -600,9 +599,9 @@ def login():
             "User-Agent": UA_PC
         }
 
-        r = requests.post(url, headers=headers, data=login_data, cookies=load_cookies(), verify=VERIFY)
+        r = requests.post(url, headers=headers, json=login_data, cookies=load_cookies(), verify=VERIFY)
 
-        if r.status_code >= 400:
+        if not r.ok:
             try:
                 json_source = r.json()
                 msg = json_source['message']
@@ -628,7 +627,7 @@ def logout(display_msg=None):
     }
 
     r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-    if r.status_code >= 400:
+    if not r.ok:
         xbmc.log('The server couldn\'t fulfill the request.')
         xbmc.log('Error code: ', r.status_code)
         xbmc.log(url)
