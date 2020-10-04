@@ -9,11 +9,11 @@ import http
 import time
 from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
-from kodi_six import xbmc, xbmcplugin, xbmcgui, xbmcaddon
+import xbmc, xbmcvfs, xbmcplugin, xbmcgui, xbmcaddon
 
-if sys.version_info[0] > 2:
-    urllib = urllib.parse
-    cookielib = http.cookiejar
+
+urllib = urllib.parse
+cookielib = http.cookiejar
 
 addon_handle = int(sys.argv[1])
 
@@ -21,24 +21,23 @@ addon_handle = int(sys.argv[1])
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo('id')
 ADDON_VERSION = ADDON.getAddonInfo('version')
-ADDON_PATH = xbmc.translatePath(ADDON.getAddonInfo('path'))
-ADDON_PATH_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+ADDON_PATH_PROFILE = xbmcvfs.translatePath(ADDON.getAddonInfo('profile'))
 XBMC_VERSION = float(re.findall(r'\d{2}\.\d{1}', xbmc.getInfoLabel("System.BuildVersion"))[0])
 LOCAL_STRING = ADDON.getLocalizedString
 
 # Settings
-settings = xbmcaddon.Addon()
-CDN = str(settings.getSetting(id="cdn"))
-USERNAME = str(settings.getSetting(id="username"))
-PASSWORD = str(settings.getSetting(id="password"))
-ROGERS_SUBSCRIBER = str(settings.getSetting(id="rogers"))
-NO_SPOILERS = settings.getSetting(id="no_spoilers")
-QUALITY = str(settings.getSetting(id="stream_quality"))
-FAV_TEAM = str(settings.getSetting(id="fav_team"))
-TEAM_NAMES = settings.getSetting(id="team_names")
-TIME_FORMAT = settings.getSetting(id="time_format")
-VIEW_MODE = settings.getSetting(id='view_mode')
-PREVIEW_INFO = str(settings.getSetting(id='game_preview_info'))
+settings = ADDON
+CDN = settings.getSetting("cdn")
+USERNAME = settings.getSetting("username")
+PASSWORD = settings.getSetting("password")
+ROGERS_SUBSCRIBER = settings.getSetting("rogers")
+NO_SPOILERS = settings.getSetting("no_spoilers")
+QUALITY = settings.getSetting("stream_quality")
+FAV_TEAM = settings.getSetting("fav_team")
+TEAM_NAMES = settings.getSetting("team_names")
+TIME_FORMAT = settings.getSetting("time_format")
+VIEW_MODE = settings.getSetting("view_mode")
+PREVIEW_INFO = settings.getSetting("game_preview_info")
 
 # Colors
 SCORE_COLOR = 'FF00B7EB'
@@ -52,15 +51,11 @@ CRITICAL = 'FFD10D0D'
 FINAL = 'FF666666'
 FREE = 'FF43CD80'
 
-# Localization
-local_string = xbmcaddon.Addon().getLocalizedString
 ROOTDIR = xbmcaddon.Addon().getAddonInfo('path')
-
-# Images
-ICON = ROOTDIR + "/icon.png"
-FANART = ROOTDIR + "/fanart.jpg"
-PREV_ICON = ROOTDIR + "/icon.png"
-NEXT_ICON = ROOTDIR + "/icon.png"
+ICON = os.path.join(ROOTDIR, "/icon.png")
+FANART = os.path.join(ROOTDIR, "/fanart.jpg")
+PREV_ICON = os.path.join(ROOTDIR, "/icon.png")
+NEXT_ICON = os.path.join(ROOTDIR, "/icon.png")
 
 API_URL = 'http://statsapi.web.nhl.com/api/v1/'
 VERIFY = True
@@ -176,18 +171,11 @@ def add_stream(name, link_url, title, game_id, epg, icon=None, fanart=None, info
         u += '&start_time='+start_time
 
     liz = xbmcgui.ListItem(name)
-    if icon is not None:
-        liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
-    else:
-        liz.setArt({'icon': ICON, 'thumb': ICON, 'fanart': fanart})
-
-    if fanart is not None:
-        liz.setProperty('fanart_image', fanart)
-    else:
-        liz.setProperty('fanart_image', FANART)
-
+    if icon is None: icon = ICON
+    if fanart is None: fanart = FANART
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
+    
     liz.setProperty("IsPlayable", "true")
-
 
     liz.setInfo(type="Video", infoLabels={"Title": title})
     if info is not None:
@@ -204,7 +192,7 @@ def add_stream(name, link_url, title, game_id, epg, icon=None, fanart=None, info
     return ok
 
 
-def add_fav_today(name, title, icon, fanart=None):
+def add_fav_today(name, icon, fanart=None):
     info = {'plot': '',
             'tvshowtitle': 'NHL',
             'title': name,
@@ -216,18 +204,12 @@ def add_fav_today(name, title, icon, fanart=None):
     ok = True
     url = sys.argv[0] + '?url=/favteamCurrent&mode=510'
     liz = xbmcgui.ListItem(name)
-    if icon is not None:
-        liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
-    else:
-        liz.setArt({'icon': ICON, 'thumb': ICON, 'fanart': fanart})
-
-    if fanart is not None:
-        liz.setProperty('fanart_image', fanart)
-    else:
-        liz.setProperty('fanart_image', FANART)
+    if icon is None: icon = ICON
+    if fanart is None: fanart = FANART
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
 
     liz.setProperty("IsPlayable", "true")
-    liz.setInfo(type="Video", infoLabels={"Title": title})
+    liz.setInfo(type="Video", infoLabels={"Title": name})
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
     if video_info is not None:
@@ -242,16 +224,15 @@ def add_fav_today(name, title, icon, fanart=None):
     return ok
 
 
-def add_link(name, url, title, iconimage, info=None, video_info=None, audio_info=None, fanart=None):
+def add_link(name, url, title, icon, info=None, video_info=None, audio_info=None, fanart=None):
     ok = True
     liz = xbmcgui.ListItem(name)
     liz.setProperty("IsPlayable", "true")
     liz.setInfo(type="Video", infoLabels={"Title": title})
     liz.setProperty('fanart_image', FANART)
-    if iconimage is not None:
-        liz.setArt({'icon': iconimage, 'thumb': iconimage, 'fanart': fanart})
-    else:
-        liz.setArt({'icon': ICON, 'thumb': ICON, 'fanart': fanart})
+    if icon is None: icon = ICON
+    if fanart is None: fanart = FANART
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
 
     if info is not None:
         liz.setInfo(type="Video", infoLabels=info)
@@ -260,51 +241,38 @@ def add_link(name, url, title, iconimage, info=None, video_info=None, audio_info
     if audio_info is not None:
         liz.addStreamInfo('audio', audio_info)
 
-    if fanart is not None:
-        liz.setProperty('fanart_image', fanart)
-    else:
-        liz.setProperty('fanart_image', FANART)
-
     liz.setProperty('dbtype', 'video')
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=liz)
     xbmcplugin.setContent(addon_handle, 'videos')
     return ok
 
 
-def add_dir(name, url, mode, iconimage, fanart=None, game_day=None):
+def add_dir(name, url, mode, icon, fanart=None, game_day=None):
     ok = True
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(name) \
-        + "&icon=" + urllib.quote_plus(iconimage)
+        + "&icon=" + urllib.quote_plus(icon)
     if game_day is not None:
         u = u + "&game_day=" + urllib.quote_plus(game_day)
     liz = xbmcgui.ListItem(name)
-    if iconimage is not None:
-        liz.setArt({'icon': iconimage, 'thumb': iconimage, 'fanart': fanart})
-    else:
-        liz.setArt({'icon': ICON, 'thumb': ICON, 'fanart': fanart})
+    if icon is None: icon = ICON
+    if fanart is None: fanart = FANART
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
 
     liz.setInfo(type="Video", infoLabels={"Title": name})
-
-    if fanart is not None:
-        liz.setProperty('fanart_image', fanart)
-    else:
-        liz.setProperty('fanart_image', FANART)
 
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
     xbmcplugin.setContent(int(sys.argv[1]), 'videos')
     return ok
 
 
-def addPlaylist(name, game_day, url, mode, iconimage, fanart=None):
+def addPlaylist(name, game_day, url, mode, icon, fanart=None):
     ok = True
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
-        name) + "&icon=" + urllib.quote_plus(iconimage)
+        name) + "&icon=" + urllib.quote_plus(icon)
     liz = xbmcgui.ListItem(name)
-    if iconimage is not None:
-        liz.setArt({'icon': iconimage, 'thumb': iconimage, 'fanart': fanart})
-    else:
-        liz.setArt({'icon': ICON, 'thumb': ICON, 'fanart': fanart})
-
+    if icon is None: icon = ICON
+    if fanart is None: fanart = FANART
+    liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
     liz.setInfo(type="Video", infoLabels={"Title": name})
 
     if fanart is not None:
@@ -324,14 +292,7 @@ def addPlaylist(name, game_day, url, mode, iconimage, fanart=None):
         liz.addStreamInfo('audio', audio_info)
 
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
-    # xbmcplugin.setContent(int(sys.argv[1]), 'episodes')
     return ok
-
-
-def scoreUpdates():
-    # s = ScoreThread()
-    t = threading.Thread(target=scoringUpdates)
-    t.start()
 
 
 def getFavTeamId():
@@ -353,9 +314,9 @@ def getFavTeamId():
 
 def getGameIcon(home, away):
     # Check if game image already exists
-    image_path = ROOTDIR + '/resources/media/' + away.lower() + 'vs' + home.lower() + '.png'
-    file_name = os.path.join(image_path)
-    if not os.path.isfile(file_name):
+    image_path = os.path.join(ROOTDIR, 'resources','media', away.lower() + 'vs' + home.lower() + '.png')
+    # file_name = os.path.join(image_path)
+    if not os.path.isfile(image_path):
         image_path = ICON
 
     '''
@@ -492,7 +453,7 @@ def getFavTeamColor():
     json_source = r.json()
 
     fav_team_color = ''
-    fav_team_id = settings.getSetting(id="fav_team_id")
+    fav_team_id = settings.getSetting("fav_team_id")
     for team in json_source['teams']:
         if fav_team_id == str(team['id']):
             # Pick the lightest color
@@ -611,7 +572,7 @@ def getStreamQuality(stream_url):
 
     stream_title.sort(key=natural_sort_key, reverse=True)
     dialog = xbmcgui.Dialog()
-    ret = dialog.select('Choose Stream Quality', stream_title)
+    ret = dialog.select(LOCAL_STRING(30350), stream_title)
     if ret >= 0:
         bandwidth = find(stream_title[ret], '', ' kbps')
     else:
@@ -627,7 +588,7 @@ def natural_sort_key(s):
 
 
 # Refresh Fav team info if fav team changed
-if FAV_TEAM != str(settings.getSetting(id="fav_team_name")):
+if FAV_TEAM != str(settings.getSetting("fav_team_name")):
     if FAV_TEAM == 'None':
         settings.setSetting(id="fav_team_name", value='')
         settings.setSetting(id="fav_team_id", value='')
@@ -639,6 +600,6 @@ if FAV_TEAM != str(settings.getSetting(id="fav_team_name")):
         settings.setSetting(id="fav_team_color", value=getFavTeamColor())
         settings.setSetting(id="fav_team_logo", value=getFavTeamLogo())
 
-FAV_TEAM_ID = settings.getSetting(id="fav_team_id")
-FAV_TEAM_COLOR = settings.getSetting(id="fav_team_color")
-FAV_TEAM_LOGO = settings.getSetting(id="fav_team_logo")
+FAV_TEAM_ID = settings.getSetting("fav_team_id")
+FAV_TEAM_COLOR = settings.getSetting("fav_team_color")
+FAV_TEAM_LOGO = settings.getSetting("fav_team_logo")

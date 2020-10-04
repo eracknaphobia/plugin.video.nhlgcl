@@ -29,14 +29,5 @@
     <setting id="fav_team_id" type="text" label="30991" default="" visible="false"/>
     <setting id="fav_team_color" type="text" label="30992" default="" visible="false"/>
     <setting id="fav_team_logo" type="text" label="30993" default="" visible="false"/>
-
   </category>
-
-  <category label="30300" visible="false">
-  	<setting id="score_updates" type="bool" label="30310" default="false" visible="false"/>
-  	<setting label="30320" type="action" action="RunScript(special://home/addons/plugin.video.nhlgcl/resources/lib/scoring_updates.py)" option="close" />
-  	<setting label="30330" type="number" id="display_seconds" default="5"/>
-    <setting label="30340" type="bool" id="goal_desc" default="true" />
-  </category>
-
 </settings>

@@ -3,13 +3,13 @@ from resources.lib.globals import *
 
 
 def categories():
-    add_dir('Today\'s Games', '/live', 100, ICON, FANART)
-    add_dir('Yesterday\'s Games', '/live', 105, ICON, FANART)
+    add_dir(LOCAL_STRING(30360), '/live', 100, ICON, FANART)
+    add_dir(LOCAL_STRING(30361), '/live', 105, ICON, FANART)
     if FAV_TEAM != 'None' and FAV_TEAM != '':
-        add_fav_today(FAV_TEAM + '\'s Game Today', 'Today\'s ' + FAV_TEAM + ' Game', FAV_TEAM_LOGO, FANART)
-        add_dir(FAV_TEAM + '\'s Recent Games', 'favteam', 500, FAV_TEAM_LOGO, FANART)
-    add_dir('Goto Date', '/date', 200, ICON, FANART)
-    add_dir('Featured Videos', '/qp', 300, ICON, FANART)
+        add_fav_today(FAV_TEAM + LOCAL_STRING(30362), FAV_TEAM_LOGO, FANART)
+        add_dir(FAV_TEAM + LOCAL_STRING(30363), 'favteam', 500, FAV_TEAM_LOGO, FANART)
+    add_dir(LOCAL_STRING(30364), '/date', 200, ICON, FANART)
+    add_dir(LOCAL_STRING(30365), '/qp', 300, ICON, FANART)
 
 
 def todays_games(game_day):
@@ -339,10 +339,10 @@ def stream_select(game_id, epg, start_time):
         xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
 
         if x == 1:
-            while not xbmc.Player().isPlayingVideo():
+            while not xbmc.Player().isPlayingVideo() and not xbmc.Monitor().abortRequested():
                 xbmc.Monitor().waitForAbort(0.25)
 
-            if xbmc.Player().isPlayingVideo():
+            if xbmc.Player().isPlayingVideo() and not xbmc.Monitor().abortRequested():
                 start_time = string_to_date(start_time, '%Y-%m-%dT%H:%M:%SZ')
                 seek_secs = int((start_time - datetime.utcnow()).total_seconds())
                 xbmc.log("seconds seek = " + str(seek_secs))
@@ -439,11 +439,9 @@ def fetch_stream(game_id, content_id, event_id):
     session_key = get_session_key(game_id, event_id, content_id, authorization)
     if session_key == '':
         return stream_url, media_auth
-    elif session_key == 'blackout':
-        msg = "The game you are trying to access is not currently available due to local or national blackout " \
-              "restrictions.\n Full game archives will be available 48 hours after completion of this game."
+    elif session_key == 'blackout':        
         dialog = xbmcgui.Dialog()
-        ok = dialog.ok('Game Blacked Out', msg)
+        ok = dialog.ok(LOCAL_STRING(30370), LOCAL_STRING(30371))
         return stream_url, media_auth
 
     url = 'https://mf.svc.nhl.com/ws/media/mf/v2.4/stream'
@@ -474,18 +472,14 @@ def fetch_stream(game_id, content_id, event_id):
     if json_source['status_code'] == 1:
         session_key = json_source['session_key']
         settings.setSetting(id='session_key', value=session_key)
-        if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':
-            msg = "The game you are trying to access is not currently available due to local or national blackout" \
-                  " restrictions.\n Full game archives will be available 48 hours after completion of this game."
+        if json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0]['blackout_status']['status'] == 'BlackedOutStatus':            
             dialog = xbmcgui.Dialog()
-            ok = dialog.ok('Game Blacked Out', msg)
+            ok = dialog.ok(LOCAL_STRING(30370), LOCAL_STRING(30371))
             sys.exit()
         elif json_source['user_verified_event'][0]['user_verified_content'][0]['user_verified_media_item'][0][
-            'auth_status'] == 'NotAuthorizedStatus':
-            msg = "You do not have an active NHL.TV subscription. To access this content please purchase at www.NHL.TV" \
-                  " or call customer support at 800-559-2333"
+            'auth_status'] == 'NotAuthorizedStatus':            
             dialog = xbmcgui.Dialog()
-            ok = dialog.ok('Account Not Authorized', msg)
+            ok = dialog.ok(LOCAL_STRING(30372), LOCAL_STRING(30373))
             sys.exit()
         else:
             stream_url = \
@@ -498,7 +492,7 @@ def fetch_stream(game_id, content_id, event_id):
     else:
         msg = json_source['status_message']
         dialog = xbmcgui.Dialog()
-        ok = dialog.ok('Error Fetching Stream', msg)
+        ok = dialog.ok(LOCAL_STRING(30368), msg)
         sys.exit()
 
     return stream_url, media_auth
@@ -538,7 +532,7 @@ def get_session_key(game_id, event_id, content_id, authorization):
         else:
             msg = json_source['status_message']
             dialog = xbmcgui.Dialog()
-            ok = dialog.ok('Error Fetching Stream', msg)
+            ok = dialog.ok(LOCAL_STRING(30368), msg)
 
     return session_key
 
@@ -548,12 +542,12 @@ def login():
     global USERNAME
     if USERNAME == '':
         dialog = xbmcgui.Dialog()
-        USERNAME = dialog.input('Please enter your username', type=xbmcgui.INPUT_ALPHANUM)
+        USERNAME = dialog.input(LOCAL_STRING(30380), type=xbmcgui.INPUT_ALPHANUM)
         settings.setSetting(id='username', value=USERNAME)
     global PASSWORD
     if PASSWORD == '':
         dialog = xbmcgui.Dialog()
-        PASSWORD = dialog.input('Please enter your password', type=xbmcgui.INPUT_ALPHANUM,
+        PASSWORD = dialog.input(LOCAL_STRING(30381), type=xbmcgui.INPUT_ALPHANUM,
                                 option=xbmcgui.ALPHANUM_HIDE_INPUT)
         settings.setSetting(id='password', value=PASSWORD)
 
@@ -570,10 +564,9 @@ def login():
         }
 
         r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-        if not r.ok:
-            msg = "Authorization Cookie couldn't be downloaded."
+        if not r.ok:            
             dialog = xbmcgui.Dialog()
-            ok = dialog.ok('Authorization Not Found', msg)
+            ok = dialog.ok(LOCAL_STRING(30382), LOCAL_STRING(30383))
             sys.exit()
 
         json_source = r.json()
@@ -606,32 +599,16 @@ def login():
                 json_source = r.json()
                 msg = json_source['message']
             except:
-                msg = "Please check that your username and password are correct"
+                pass
+
             dialog = xbmcgui.Dialog()
-            ok = dialog.ok('Login Error', msg)
+            ok = dialog.ok(LOCAL_STRING(30384), LOCAL_STRING(30385))
             sys.exit()
 
         save_cookies(r.cookies)
 
 
 def logout(display_msg=None):
-    url = 'https://account.nhl.com/ui/rest/logout'
-    headers = {
-        "Accept": "*/*",
-        "Accept-Encoding": "identity",
-        "Accept-Language": "en-US,en;q=0.8",
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Origin": "https://account.nhl.com/ui/SignOut?lang=en",
-        "Connection": "close",
-        "User-Agent": UA_PC
-    }
-
-    r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-    if not r.ok:
-        xbmc.log('The server couldn\'t fulfill the request.')
-        xbmc.log('Error code: ', r.status_code)
-        xbmc.log(url)
-
     # Delete cookie file
     try:
         os.remove(ADDON_PATH_PROFILE + 'cookies.lwp')
@@ -640,9 +617,8 @@ def logout(display_msg=None):
 
     if display_msg == 'true':
         settings.setSetting(id='session_key', value='')
-        dialog = xbmcgui.Dialog()
-        title = "Logout Successful"
-        dialog.notification(title, 'Logout completed successfully', ICON, 5000, False)
+        dialog = xbmcgui.Dialog()        
+        dialog.notification(LOCAL_STRING(30386), LOCAL_STRING(30387), ICON, 5000, False)
 
 
 def my_teams_games():
@@ -658,15 +634,11 @@ def my_teams_games():
         json_source = r.json()
 
         for date in reversed(json_source['dates']):
-            # temp_date = string_to_date(date['date'], "%Y-%m-%d")
-            # date_display = '[B][I]'+ color_string(temp_date.strftime("%A, %m/%d/%Y"),GAMETIME_COLOR)+'[/I][/B]'
-            # add_dir(date_display,'/nothing',999,ICON,FANART)
             for game in date['games']:
                 create_game_listitem(game, date['date'])
-    else:
-        msg = "Please select your favorite team from the addon settings"
+    else:        
         dialog = xbmcgui.Dialog()
-        ok = dialog.ok('Favorite Team Not Set', msg)
+        ok = dialog.ok(LOCAL_STRING(30390), LOCAL_STRING(30391))
 
 
 def play_fav_team_today():
