@@ -23,7 +23,8 @@ def todays_games(game_day):
     date_display = '[B][I]%s[/I][/B]' % display_day.strftime("%A, %m/%d/%Y")
     addPlaylist(date_display, display_day, '/playhighlights', 900, ICON, FANART)
 
-    url = '%s/schedule?date=%s&expand=schedule.teams,schedule.game.content.media.epg&site=en_nhl&platform=%s' \
+    url = '%s/schedule?date=%s&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg' \
+          '&site=en_nhl&platform=%s' \
           % (API_URL, game_day, PLATFORM)
     headers = {'User-Agent': UA_IPHONE}
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
@@ -83,11 +84,8 @@ def create_game_listitem(game, game_day):
         else:
             game_time = game_time.strftime('%H:%M')
     elif game_time.lower().strip() == 'in progress':
-        try:
-            game_time = '%s %s' % \
-                    (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
-        except:
-            pass
+        game_time = '%s %s' % \
+                (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
 
     game_id = str(game['gamePk'])
 
@@ -243,6 +241,7 @@ def stream_select(game_id, start_time):
     else:
         start_from_beginning = -1
         if start_time is not None:
+            dialog = xbmcgui.Dialog()
             start_from_beginning = dialog.select("Choose Start", ['Watch Live', 'Start from Beginning'])
 
         listitem = stream_to_listitem(stream_url, headers)
