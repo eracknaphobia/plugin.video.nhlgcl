@@ -73,8 +73,8 @@ def create_game_listitem(game, game_day):
     if FAV_TEAM_ID == str(away['id']) or FAV_TEAM_ID == str(home['id']):
         fav_game = True
 
-    game_time = game['status']['detailedState']
-    if game_time.lower().strip() == 'scheduled':
+    game_time = ''
+    if game['status']['detailedState'].lower().strip() == 'scheduled':
         game_time = game['gameDate']
         game_time = string_to_date(game_time, "%Y-%m-%dT%H:%M:%SZ")
         game_time = utc_to_local(game_time)
@@ -83,7 +83,7 @@ def create_game_listitem(game, game_day):
             game_time = game_time.strftime('%I:%M %p').lstrip('0')
         else:
             game_time = game_time.strftime('%H:%M')
-    elif game_time.lower().strip() == 'in progress':
+    elif game['status']['detailedState'].lower().strip() == 'in progress':
         game_time = '%s %s' % \
                 (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
 
@@ -91,10 +91,10 @@ def create_game_listitem(game, game_day):
 
     desc = ''
     hide_spoilers = 0
-    if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or (
-            NO_SPOILERS == '3' and game_day == local_to_eastern()) or (
-            NO_SPOILERS == '4' and game_day < local_to_eastern()) or \
-            game_time.lower().strip() == 'scheduled':
+    if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) or \
+            (NO_SPOILERS == '3' and game_day == local_to_eastern()) or \
+            (NO_SPOILERS == '4' and game_day < local_to_eastern()) or \
+            game['status']['detailedState'].lower().strip() == 'scheduled':
         name = '%s %s at %s' % (game_time, away_team, home_team)
         hide_spoilers = 1
     else:
@@ -139,7 +139,6 @@ def create_game_listitem(game, game_day):
         name = '[B]%s[/B]' % name
 
     title = '%s at %s' % (away_team, home_team)
-    title = title
 
     # Label free game of the day
     try:
