@@ -62,7 +62,7 @@ NEXT_ICON = os.path.join(ROOTDIR, "icon.png")
 
 API_URL = 'http://statsapi.web.nhl.com/api/v1'
 API_MEDIA_URL = 'https://mf.svc.nhl.com/ws/media/mf/v2.4'
-VERIFY = False
+VERIFY = True
 PLATFORM = "IPHONE"
 PLAYBACK_SCENARIO = 'HTTP_CLOUD_TABLET_60'
 
