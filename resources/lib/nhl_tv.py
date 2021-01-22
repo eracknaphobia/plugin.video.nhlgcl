@@ -86,6 +86,8 @@ def create_game_listitem(game, game_day):
     elif game['status']['detailedState'].lower().strip() == 'in progress':
         game_time = '%s %s' % \
                 (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
+    else:
+        game_time = game['status']['detailedState']
 
     game_id = str(game['gamePk'])
 
