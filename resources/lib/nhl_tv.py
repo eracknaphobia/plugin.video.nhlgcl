@@ -43,8 +43,7 @@ def todays_games(game_day):
     next_day = display_day + timedelta(days=1)
     add_dir('[B]%s >>[/B]' % LOCAL_STRING(30011), '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
 
-
-def create_game_listitem(game, game_day):
+def create_game_listitem(game, game_day, show_date=False):
     away = game['teams']['away']['team']
     away_record = game['teams']['away']['leagueRecord']
     home = game['teams']['home']['team']
@@ -73,22 +72,29 @@ def create_game_listitem(game, game_day):
     if FAV_TEAM_ID == str(away['id']) or FAV_TEAM_ID == str(home['id']):
         fav_game = True
 
-    game_time = ''
+    game_line_header = ''
     if game['status']['detailedState'].lower().strip() == 'scheduled':
         game_time = game['gameDate']
         game_time = string_to_date(game_time, "%Y-%m-%dT%H:%M:%SZ")
         game_time = utc_to_local(game_time)
-
+        game_date = game_time.strftime("%Y-%m-%d")
         if TIME_FORMAT == '0':
             game_time = game_time.strftime('%I:%M %p').lstrip('0')
         else:
             game_time = game_time.strftime('%H:%M')
+        game_line_header = '%s %s' % (LOCAL_STRING(30023), game_time)
     elif game['status']['detailedState'].lower().strip() == 'in progress':
-        game_time = '%s %s' % \
+        game_line_header = '%s %s' % \
                 (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
     else:
-        game_time = game['status']['detailedState']
-
+        game_time = game['gameDate']
+        game_time = string_to_date(game_time, "%Y-%m-%dT%H:%M:%SZ")
+        game_time = utc_to_local(game_time)
+        game_date = game_time.strftime("%Y-%m-%d")
+        if (show_date):
+            game_line_header = game_date
+        else:
+            game_line_header  = game['status']['detailedState']
     game_id = str(game['gamePk'])
 
     desc = ''
@@ -97,11 +103,11 @@ def create_game_listitem(game, game_day):
             (NO_SPOILERS == '3' and game_day == local_to_eastern()) or \
             (NO_SPOILERS == '4' and game_day < local_to_eastern()) or \
             game['status']['detailedState'].lower().strip() == 'scheduled':
-        name = '%s %s at %s' % (game_time, away_team, home_team)
+        name = '%s - %s %s at %s' % (game_line_header, game_time, away_team, home_team)
         hide_spoilers = 1
     else:
         name = '%s %s - %s at %s - %s' % \
-               (game_time, away_team, game['teams']['away']['score'], home_team, game['teams']['home']['score'])
+               (game_line_header, away_team, game['teams']['away']['score'], home_team, game['teams']['home']['score'])
 
         desc = '%s %s-%s-%s\n%s %s-%s-%s' % (away_team, str(away_record['wins']), str(away_record['losses']),
                                              str(away_record['ot']), home_team, str(home_record['wins']),
@@ -578,7 +584,7 @@ def my_teams_games():
 
         for date in reversed(r.json()['dates']):
             for game in date['games']:
-                create_game_listitem(game, date['date'])
+                create_game_listitem(game, date['date'], True)
 
 
 def play_fav_team_today():

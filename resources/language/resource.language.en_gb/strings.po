@@ -36,6 +36,9 @@ msgctxt "#30022"
 msgid "Recap"
 msgstr ""
 
+msgctxt "#30023"
+msgid "Starting at"
+msgstr ""
 
 msgctxt "#30100"
 msgid "Login"
