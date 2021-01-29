@@ -571,7 +571,7 @@ def my_teams_games():
         start_date = end_date - timedelta(days=30)
         start_day = start_date.strftime("%Y-%m-%d")
 
-        url = '%s/schedule?teamId=%s&startDate=%s&endDate=%s&expand=schedule.game.content.media.epg,schedule.teams' % \
+        url = '%s/schedule?teamId=%s&startDate=%s&endDate=%s&expand=schedule.linescore,schedule.game.content.media.epg,schedule.teams' % \
               (API_URL, FAV_TEAM_ID, start_day, end_day)
         headers = {'User-Agent': UA_IPHONE}
         r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
