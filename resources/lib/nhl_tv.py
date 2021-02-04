@@ -259,6 +259,7 @@ def stream_select(game_id, start_time):
                 xbmc.Monitor().waitForAbort(0.25)
 
             if xbmc.Player().isPlayingVideo() and not xbmc.Monitor().abortRequested():
+                xbmc.Monitor().waitForAbort(0.25)
                 start_time = string_to_date(start_time, '%Y-%m-%dT%H:%M:%SZ')
                 seek_secs = int((start_time - datetime.utcnow()).total_seconds())
                 xbmc.log("seconds seek = " + str(seek_secs))
