@@ -131,7 +131,7 @@ def create_game_listitem(game, game_day, show_date=False):
                     json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])
                 soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
                 desc = soup.get_text()
-            elif hide_spoilers == 0:
+            elif hide_spoilers == 0 and 'scoringPlays' in game:
                 for play in game['scoringPlays']:
                     scorer = play['result']['description']
                     scorer = scorer[0:scorer.find(",")]
