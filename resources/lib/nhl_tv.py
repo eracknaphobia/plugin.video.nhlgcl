@@ -43,6 +43,7 @@ def todays_games(game_day):
     next_day = display_day + timedelta(days=1)
     add_dir('[B]%s >>[/B]' % LOCAL_STRING(30011), '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
 
+
 def create_game_listitem(game, game_day, show_date=False):
     away = game['teams']['away']['team']
     away_record = game['teams']['away']['leagueRecord']
@@ -83,10 +84,7 @@ def create_game_listitem(game, game_day, show_date=False):
         else:
             game_time = game_time.strftime('%H:%M')
         game_line_header = game_time
-    elif game['status']['detailedState'].lower().strip() == 'in progress':
-        game_line_header = '%s %s' % \
-                (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
-    else:
+    elif game['status']['detailedState'].lower().strip() == 'final':
         game_time = game['gameDate']
         game_time = string_to_date(game_time, "%Y-%m-%dT%H:%M:%SZ")
         game_time = utc_to_local(game_time)
@@ -94,7 +92,11 @@ def create_game_listitem(game, game_day, show_date=False):
         if (show_date):
             game_line_header = game_date
         else:
-            game_line_header  = game['status']['detailedState']
+            game_line_header = game['status']['detailedState']
+    else:
+        game_line_header = '%s %s' % \
+                           (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
+
     game_id = str(game['gamePk'])
 
     desc = ''
