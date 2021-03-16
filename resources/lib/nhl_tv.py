@@ -639,7 +639,7 @@ def play_fav_team_today():
                 stream_url, headers = create_full_game_stream(stream_url, media_auth)
         else:
             dialog = xbmcgui.Dialog()
-            dialog.ok('No Game Today', FAV_TEAM + " doesn't play today")
+            dialog.ok(LOCAL_STRING(30374), FAV_TEAM + LOCAL_STRING(30375).encode('utf8'))
             sys.exit()
 
         if stream_url != '':
