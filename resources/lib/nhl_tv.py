@@ -75,7 +75,7 @@ def create_game_listitem(game, game_day, show_date=False):
 
     game_line_header = ''
     detailed_state = game['status']['detailedState'].lower().strip()
-    if detailed_state == 'scheduled':
+    if detailed_state == 'scheduled' or detailed_state == 'pre-game':
         game_time = utc_to_local(string_to_date(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ"))
         if TIME_FORMAT == '0':
             game_time = game_time.strftime('%I:%M %p').lstrip('0')
