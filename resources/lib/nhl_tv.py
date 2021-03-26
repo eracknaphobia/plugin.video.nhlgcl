@@ -100,7 +100,7 @@ def create_game_listitem(game, game_day, show_date=False):
     if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) \
             or (NO_SPOILERS == '3' and game_day == local_to_eastern()) \
             or (NO_SPOILERS == '4' and game_day < local_to_eastern()) \
-            or game['status']['abstractGameState'].lower().strip() != 'live':
+            or game['status']['abstractGameState'].lower().strip() == 'preview':
 
         name = '%s %s at %s' % (game_line_header, away_team, home_team)
         hide_spoilers = 1
