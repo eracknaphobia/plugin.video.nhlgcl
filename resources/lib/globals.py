@@ -323,8 +323,12 @@ def getFavTeamId():
 def getGameIcon(home, away):
     # Check if game image already exists
     image_name = '%svs%s.png' % (away, home)
-    image_path = os.path.join(ROOTDIR, 'resources', 'media', image_name)
-    # file_name = os.path.join(image_path)
+    folder_path = os.path.join(ROOTDIR, 'resources', 'media')
+    image_path = os.path.join(folder_path, image_name)
+
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
     if not os.path.isfile(image_path):
         createGameIcon(home, away, image_path)
 
@@ -332,25 +336,24 @@ def getGameIcon(home, away):
 
 
 def createGameIcon(home, away, image_path):
+    size = 512, 512
+    bg = Image.new('RGBA', size, (0, 0, 0, 255))
     headers = {'User-Agent': UA_IPHONE}
     bg_url = 'http://nhl.bamcontent.com/images/arena/scoreboard/%s@2x.jpg' % home
     xbmc.log(bg_url)
     r = requests.get(bg_url, headers=headers)
-    bg_image = Image.open(BytesIO(r.content))
+    if r.ok:
+        bg_image = Image.open(BytesIO(r.content))
+        width, height = bg_image.size  # Get dimensions
+        left = (width - 512) / 2
+        top = (height - 512) / 2
+        right = (width + 512) / 2
+        bottom = (height + 512) / 2
 
-    size = 512, 512
-    bg = Image.new('RGBA', size, (0, 0, 0, 255))
-    width, height = bg_image.size  # Get dimensions
-
-    left = (width - 512) / 2
-    top = (height - 512) / 2
-    right = (width + 512) / 2
-    bottom = (height + 512) / 2
-
-    # Crop the center of the image
-    bg_image = bg_image.crop((left, top, right, bottom))
-    bg_image = bg_image.convert("RGBA")
-    bg.paste(bg_image, (0, 0), bg_image)
+        # Crop the center of the image
+        bg_image = bg_image.crop((left, top, right, bottom))
+        bg_image = bg_image.convert("RGBA")
+        bg.paste(bg_image, (0, 0), bg_image)
 
     home_image = get_team_logo(home)
     away_image = get_team_logo(away)
