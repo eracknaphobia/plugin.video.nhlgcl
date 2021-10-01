@@ -456,47 +456,26 @@ def get_thumbnails():
 
 
 def getFavTeamColor():
-    url = 'http://nhl.bamcontent.com/data/config/nhl/teamColors.json'
-    # url = 'https://statsapi.web.nhl.com/api/v1/teams?teamId=
-    headers = {'User-Agent': UA_IPHONE}
-
-    r = requests.get(url, headers=headers, verify=False)
-    json_source = r.json()
-
     fav_team_color = ''
     fav_team_id = settings.getSetting("fav_team_id")
-    for team in json_source['teams']:
-        if fav_team_id == str(team['id']):
-            # Pick the lightest color
-            fav_team_color = str(team['colors']['foreground'])
-            if fav_team_color < str(team['colors']['background']):
-                fav_team_color = str(team['colors']['background'])
-            if fav_team_color < str(team['colors']['highlight']):
-                fav_team_color = str(team['colors']['highlight'])
-
-            fav_team_color = fav_team_color.replace('#', 'FF')
-            break
+    headers = {'User-Agent': UA_IPHONE}
+    url = 'https://statsapi.web.nhl.com/api/v1/teams?teamId=%s&hydrate=deviceProperties' % fav_team_id
+    r = requests.get(url, headers=headers)
+    if r.ok:
+        fav_team_color = r.json()['teams'][0]['deviceProperties']['breakingNewsBar']['barBackgroundColor']
+        fav_team_color = fav_team_color.replace('#', 'FF')
 
     return fav_team_color
 
 
 def getFavTeamLogo():
     logo_url = ''
-
-    url = API_URL + '/teams'
+    fav_team_id = settings.getSetting("fav_team_id")
     headers = {'User-Agent': UA_IPHONE}
-
-    r = requests.get(url, headers=headers, verify=False)
-    json_source = r.json()
-
-    fav_team_abbr = ''
-    for team in json_source['teams']:
-        if FAV_TEAM in team['name'].encode('utf8'):
-            fav_team_abbr = str(team['abbreviation']).lower()
-            break
-
-    if fav_team_abbr != '':
-        logo_url = 'http://nhl.bamcontent.com/images/logos/600x600/' + fav_team_abbr + '.png'
+    url = 'https://statsapi.web.nhl.com/api/v1/teams?teamId=%s&hydrate=deviceProperties' % fav_team_id
+    r = requests.get(url, headers=headers)
+    if r.ok:
+        logo_url = r.json()['teams'][0]['deviceProperties']['favicon']['image']['cuts']['256x256']['src']
 
     return logo_url
 
