@@ -20,7 +20,9 @@
             restrictions apply, including national blackouts.
         </disclaimer>
         <news>
-            - Fix games not showing up because OT field missing
+            - Add Seattle to Favorite Team selection
+            - Refactor Fav Team code
+            - Build game images dynamically
         </news>
         <language>en</language>
         <platform>all</platform>
