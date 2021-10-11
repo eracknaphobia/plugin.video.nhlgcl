@@ -58,6 +58,7 @@ FINAL = 'FF666666'
 FREE = 'FF43CD80'
 
 ROOTDIR = xbmcaddon.Addon().getAddonInfo('path')
+USER_DATA_DIR = os.path.join(xbmc.translatePath("special://userdata"), 'addon_data', ADDON_ID)
 ICON = os.path.join(ROOTDIR, "icon.png")
 FANART = os.path.join(ROOTDIR, "fanart.jpg")
 PREV_ICON = os.path.join(ROOTDIR, "icon.png")
@@ -323,7 +324,7 @@ def getFavTeamId():
 def getGameIcon(home, away):
     # Check if game image already exists
     image_name = '%svs%s.png' % (away, home)
-    folder_path = os.path.join(ROOTDIR, 'resources', 'media')
+    folder_path = os.path.join(USER_DATA_DIR, 'media')
     image_path = os.path.join(folder_path, image_name)
 
     if not os.path.exists(folder_path):
@@ -421,8 +422,7 @@ def get_thumbnails():
             if (progress.iscanceled()): break
 
             if home_team != away_team:
-                image_path = ROOTDIR + '/resources/media/' + away_team + 'vs' + home_team + '.png'
-                # bg =  Image.open(ROOTDIR+'/resources/bg_dark.png')
+                image_path = os.path.join(USER_DATA_DIR, media, '%svs%s.png' % (away_team, home_team))
                 bg = Image.new('RGB', (400, 225), (255, 255, 255))
 
                 # home team
