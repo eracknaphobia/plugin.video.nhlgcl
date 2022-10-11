@@ -66,15 +66,17 @@ NEXT_ICON = os.path.join(ROOTDIR, "icon.png")
 
 API_URL = 'http://statsapi.web.nhl.com/api/v1'
 API_MEDIA_URL = 'https://mf.svc.nhl.com/ws/media/mf/v2.4'
-VERIFY = True
+VERIFY = False
 PLATFORM = "IPHONE"
 PLAYBACK_SCENARIO = 'HTTP_CLOUD_TABLET_60'
+ICON_URL = "https://nhltv.nhl.com/image/400/225/"
+FANART_URL = "https://nhltv.nhl.com/image/1920/1080/"
 
 # User Agents
 UA_IPHONE = 'AppleCoreMedia/1.0.0.15B202 (iPhone; U; CPU OS 11_1_2 like Mac OS X; en_us)'
 UA_IPAD = 'Mozilla/5.0 (iPad; CPU OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Mobile/12H143 ipad nhl 5.0925'
 UA_NHL = 'NHL/11479 CFNetwork/887 Darwin/17.0.0'
-UA_PC = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.97 Safari/537.36'
+UA_PC = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
 UA_PS4 = 'PS4Application libhttp/1.000 (PS4) libhttp/4.07 (PlayStation 4)'
 
 # Playlists
@@ -169,12 +171,14 @@ def get_params():
     return param
 
 
-def add_stream(name, link_url, title, game_id, icon=None, fanart=None, info=None, video_info=None, audio_info=None,
+def add_stream(name, link_url, title, home_id, away_id, icon=None, fanart=None, info=None, video_info=None, audio_info=None,
                start_time=None):
     ok = True
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) + "&mode=" + str(104) + "&name=" + urllib.quote_plus(
-        name.encode('utf8')) \
-        + "&game_id=" + urllib.quote_plus(game_id.encode('utf8'))
+    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) \
+        + "&mode=" + str(104) \
+        + "&name=" + urllib.quote_plus(name.encode('utf8')) \
+        + "&home_id=" + urllib.quote_plus(home_id.encode('utf8')) \
+        + "&away_id=" + urllib.quote_plus(away_id.encode('utf8'))
 
     if start_time is not None:
         u += '&start_time=' + start_time
@@ -529,7 +533,7 @@ def getAuthCookie():
 
         # If authorization cookie is missing or stale, perform login
         for cookie in cj:
-            if cookie.name == "Authorization" and not cookie.is_expired():
+            if cookie.name == "token" and not cookie.is_expired():
                 authorization = cookie.value
     except:
         pass
@@ -595,18 +599,19 @@ FAV_TEAM_COLOR = settings.getSetting("fav_team_color")
 FAV_TEAM_LOGO = settings.getSetting("fav_team_logo")
 
 
-def stream_to_listitem(stream_url, headers):
-    if xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)'):
-        listitem = xbmcgui.ListItem(path=stream_url)
-        if KODI_VERSION >= 19:
-            listitem.setProperty('inputstream', 'inputstream.adaptive')
-        else:
-            listitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
-        listitem.setProperty('inputstream.adaptive.manifest_type', 'hls')
-        listitem.setProperty('inputstream.adaptive.stream_headers', headers)
-        listitem.setProperty('inputstream.adaptive.license_key', "|" + headers)
+def stream_to_listitem(stream_url):
+    # if xbmc.getCondVisibility("System.HasAddon(inputstream.adaptive)"):
+    listitem = xbmcgui.ListItem(path=stream_url)
+    if KODI_VERSION >= 19:
+        listitem.setProperty("inputstream", "inputstream.adaptive")
     else:
-        listitem = xbmcgui.ListItem(path=stream_url + '|' + headers)
+        listitem.setProperty("inputstreamaddon", "inputstream.adaptive")
+    listitem.setProperty("inputstream.adaptive.manifest_type", "hls")
+    listitem.setProperty("inputstream.adaptive.stream_headers",  'User-Agent=%s' % UA_PC)
+    listitem.setProperty("inputstream.adaptive.license_key", '|User-Agent=%s' % UA_PC)
+    # else:
+    #     #listitem = xbmcgui.ListItem(path=stream_url + '|' + headers)
+    #     listitem = xbmcgui.ListItem(path=f"{stream_url}|{headers}")
 
     listitem.setMimeType("application/x-mpegURL")
     return listitem

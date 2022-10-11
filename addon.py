@@ -5,7 +5,8 @@ url = None
 name = None
 mode = None
 game_day = None
-game_id = None
+home_id = None
+away_id = None
 teams_stream = None
 stream_date = None
 start_time = None
@@ -18,8 +19,10 @@ if 'mode' in params:
     mode = int(params["mode"])
 if 'game_day' in params:
     game_day = urllib.unquote_plus(params["game_day"])
-if 'game_id' in params:
-    game_id = urllib.unquote_plus(params["game_id"])
+if 'home_id' in params:
+    home_id = urllib.unquote_plus(params["home_id"])
+if 'away_id' in params:
+    away_id = urllib.unquote_plus(params["away_id"])
 if 'start_time' in params:
     start_time = urllib.unquote_plus(params["start_time"])
 
@@ -31,7 +34,7 @@ elif mode == 100 or mode == 101:
     todays_games(game_day)
 
 elif mode == 104:
-    stream_select(game_id, start_time)
+    stream_select(home_id, away_id, start_time)
 
 elif mode == 105:
     # Yesterday's Games

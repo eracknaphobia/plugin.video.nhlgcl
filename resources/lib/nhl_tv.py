@@ -1,10 +1,11 @@
 from resources.lib.globals import *
+from resources.lib.game import *
 
 
 def categories():
     add_dir(LOCAL_STRING(30360), '/live', 100, ICON, FANART)
     add_dir(LOCAL_STRING(30361), '/live', 105, ICON, FANART)
-    if FAV_TEAM != 'None' and FAV_TEAM != '':
+    if FAV_TEAM != 'None' and FAV_TEAM != '' and FAV_TEAM is not None:
         add_fav_today(FAV_TEAM + LOCAL_STRING(30362).encode('utf8'), FAV_TEAM_LOGO, FANART)
         add_dir(FAV_TEAM + LOCAL_STRING(30363).encode('utf8'), 'favteam', 500, FAV_TEAM_LOGO, FANART)
     add_dir(LOCAL_STRING(30364), '/date', 200, ICON, FANART)
@@ -19,259 +20,265 @@ def todays_games(game_day):
     settings.setSetting(id='stream_date', value=game_day)
     display_day = string_to_date(game_day, "%Y-%m-%d")
     prev_day = display_day - timedelta(days=1)
+    next_day = display_day + timedelta(days=1)
     add_dir('[B]<< %s[/B]' % LOCAL_STRING(30010), '/live', 101, PREV_ICON, FANART, prev_day.strftime("%Y-%m-%d"))
     date_display = '[B][I]%s[/I][/B]' % display_day.strftime("%A, %m/%d/%Y")
     addPlaylist(date_display, display_day, '/playhighlights', 900, ICON, FANART)
 
-    url = '%s/schedule?date=%s&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg' \
-          '&site=en_nhl&platform=%s' \
-          % (API_URL, game_day, PLATFORM)
-    headers = {'User-Agent': UA_IPHONE}
+    # url = '%s/schedule?date=%s&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg' \
+    #       '&site=en_nhl&platform=%s' \
+    #       % (API_URL, game_day, PLATFORM)
+
+
+    url = "https://nhltv.nhl.com/api/v2/events" \
+          f"?date_time_from={game_day}T00:00:00-04:00" \
+          f"&date_time_to={next_day.strftime('%Y-%m-%d')}T00:00:00-04:00" \
+          "&metadata_id=259346" \
+          "&sort_direction=asc" \
+          "&limit=100"
+    headers = {'User-Agent': UA_PC}
+    xbmc.log(url)
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-    json_source = r.json()
+
+
+    #GET https://nhltv.nhl.com/api/v2/events?date_time_from=2022-10-08T00:00:00-04:00&date_time_to=2022-10-10T00:00:00-04:00&metadata_id=259346&sort_direction=asc&limit=100 HTTP/1.1
+    # Host: nhltv.nhl.com
+    # Connection: keep-alive
+    # sec-ch-ua: "Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"
+    # Accept: application/json, text/plain, */*
+    # sec-ch-ua-mobile: ?0
+    # User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36
+    # sec-ch-ua-platform: "Windows"
+    # Sec-Fetch-Site: same-origin
+    # Sec-Fetch-Mode: cors
+    # Sec-Fetch-Dest: empty
+    # Referer: https://nhltv.nhl.com/en-int/schedule?date=2022-10-09T00%3A00%3A00-04%3A00
+    # Accept-Encoding: gzip, deflate, br
+    # Accept-Language: en-US,en;q=0.9
+    # Cookie: _ga=GA1.2.930558499.1665416031; _gid=GA1.2.966761224.1665416031; check=true; _parsely_visitor={%22id%22:%22pid=379f7277c995cd1c7b336446fe914ced%22%2C%22session_count%22:1%2C%22last_session_ts%22:1665416036466}; _fbp=fb.1.1665416036997.1226483952; AMCVS_25823F955A99D5040A495C1D%40AdobeOrg=1; s_cc=true; _scid=c61cd4aa-7ec5-4aef-9dab-a6a24d4e3408; __gpi=UID=0000097da4f0a375:T=1665416037:RT=1665416037:S=ALNI_MZd2r0rT3B6RGba2woduJr80lnFeA; mbox=session#b0630de696f04fc4b393cfea0c5eb408#1665417898|PC#b0630de696f04fc4b393cfea0c5eb408.34_0#1728660838; AMCV_25823F955A99D5040A495C1D%40AdobeOrg=-330454231%7CMCIDTS%7C19276%7CMCMID%7C41843480140212443182602949835353566196%7CMCAAMLH-1666020837%7C4%7CMCAAMB-1666020837%7C6G1ynYcLPuiQxYZrsz_pkqfLG9yMXBpb2zX5dvJdYQJzPXImdj0y%7CMCOPTOUT-1665423237s%7CNONE%7CMCSYNCSOP%7C411-19283%7CvVersion%7C3.1.2; __gads=ID=ac73ff062854b9a8:T=1665416037:S=ALNI_Ma33q0CnkUkrzumaohSml2ujadnIw; _sctr=1|1665374400000; OptanonConsent=isIABGlobal=false&datestamp=Mon+Oct+10+2022+11%3A34%3A32+GMT-0400+(Eastern+Daylight+Time)&version=6.29.0&hosts=&consentId=3ecedfb5-ac24-4c66-9f2c-1eb9a41a8279&interactionCount=1&landingPath=https%3A%2F%2Fwww.nhl.com%2Finfo%2Fwhere-to-stream&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1%2CC0004%3A1%2CC0005%3A1; bitmovin_analytics_uuid=3374fe86-1234-498a-be67-9afc3100a2fe; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NjU0MjY3NTUsImV4cCI6MTY2ODAxODc1NCwiY3R4IjoiZXlKcGRpSTZJa05XWjA4NFIyMWtUVWRzTlhGSWNVdFBTVGx4VTNjOVBTSXNJblpoYkhWbElqb2lhbGRNZWxkSE0xUjVVMmhqUmxGNU5HcE9UMjkxVW5CdlIzSlBjR2s0YkV3M1NHSjBXbU5RVUZaeVNrdExNazF6ZG1sSVdFNTBjRGh0VTJwUkwxTXpaV2hYV205Q1dITTFNRTFyVFZkbU9HNXlUM0J5WjFaQlpHZExjM294TVVjNUwxVlRlR1JLZW14VlRtdHdTMFZwV1VnNFUwWTRSR01yYjBGR1VsbElSVzloYmxWNmFuazBRV0ZvVjFSdlZsQkxaM3AzV0hsWk1GcExjMWw1V2tJMlRrVnROM2xWTVdaalUyd3hXakpZYVd4a2JYcFZhVXBrTm1sRVMyVXdRemR1ZUZSclEyMHdVVzVXTmtWaFdTOUpNbmhRVVZCUE5FOHZlbFpKUjBacVVqSTVTVTFKVmtKNFdqVklWbEpYV25WSmNFRk5kRVpKTjAxMlpUaEJkM1YzZFdjM1lYWlBVVEZpUm5CdFFUZHRiV2N5VkVWWWFscGtRbmRNYVc0dlRsSjFOWEpUTlRKVGRIRnFXRGg2VTJkUWRsZFBVekpSVjNoRlVFZFljV3M0TVhKalZIaDZXRXdyUVdOT1RsZHVlSGRxZFd3eVkySk1kUzlRVFRsSGNGaHdXSFpUUWtvMmQwcElaVVl6WXpsQlJHVlVhWGR4Y3pSVE5XeFNjMWh3UjJoRlVIZzVhRUV4VlVKMGFHVllielJJWmxKMmIxaHlWakpOUTJwcFdqRktZblJJU2xwT1NTdHFkVkZqWjFsVWJ6Wm5hemhxU1RKdlkySTJTSGxuZUc0MWFrVkpjRzUwWVZVeVJqWlNaamRXYkhoT05tOVhhM1Y0VkU1NFVXdElaVVJ3YUZCQ0wwTkNOWEJCU1VocmJsbFJNVXc0WkhoQ1RHMW9hamg2UTBORVUySXpaalozVEZWV01YaFdOMFIzVERoWGNuSXZjakJoVUhjclowWk9Zbk4zTW5FNFRVbzFhRm95TUVWTU1GYzNjV1p0Wkc4MVVsSnliRU5LYUdseWVFUTNRVUYxUzBsME5WQm1VWEV2ZDNKdGNHMDBVRlozWmtKSWFWWk5lREZpZW5Gd2EwY3liRE5uVUhkeVVtMU5MelZIV0ZOaWNGSkdNREpwZG1aQlpHSXdVazVKVUZFdlozZEZZemxvVmtka2MxUkpNV2hyYkdkNlFTdE9TRlEwYUU5blJtaHJRekpNUm1GVmNTODRjeTl5U21kSlZYSTBOemRwVDB4M1YyMDBZVFpvV0hkMk5UZEVSM2c1VDNnclVHZGFUeXMzVkVoWFNqbEdRa1IyUmtkNVFqQjFWMVZLVnpjeFNWSkZNa2hWTUdveU9GaDRhSFpYZHpndllrOXVUVzV5V1hwaGRrUlZWVkpHUnpWclN6QlBiM016Y1ZZNGJpdG9hakJ3UW0welJrRm5WREF5YVZaa1lUTktaMjVOUml0V2JVbDFTakJRY25GRFlYUnRNazEwY1VZeVpYcFBZbGMyYldseFNXWlFZVTgxWjB4elQxcDFNRmcxTm10MFdXSnBaVzF3WlRaek5WWm9NSE52TDJWaVdYVkhZM1pEZFVkeGFHcDZURmRsYzBsQ1ptY3JXVFJIVGpVNGQzWmllV3BMYjA5SmVVUlVlWFJSWWk5U2JUaE1SRVZoYkc1akwxcHpaME5IYjIxTWRsVkNSemdyS3psVVdVODRTRkExTW5KNU1YQlVSWFo0UkU5NlJIZFRVek5yWVVSWGRGaDBSVWxEYVdkblFYRnlVbFY0YTFKYVVVcDFlRkJsZVZveFlYcDRlbmhoUXpoYUwzSkNVVmxUT0dOVUsxcDFPSGcxUVhsTmJUVTJTMEpsUkc1U1dFczJWMXByTW5oVE5sQTRlbFJ2ZERCNmRISmplSFV4T1RoRWRXcHBVR2R5TTFKM1UwaGFhelpZWW5obU9HSkVTVkU0T0RKT1NsSTJPV0pvU1VOSVYyaHdMM0JSUFQwaUxDSnRZV01pT2lJNE0yRTFPR1JsTnpBME9EUmlNR0UxTldNMFltRTBNVFk1TjJZME5EYzROek5rTW1FNVpUZGhOR1l4WldJNVlqYzRNbVZtT1RaallUQTBZelpoWmpFeUlpd2lkR0ZuSWpvaUluMD0ifQ.74qNyjn6GwZgcCsDIj5gVbSEjnojt1ly2mCWWzI9sfw
+
+
 
     global RECAP_PLAYLIST
     global EXTENDED_PLAYLIST
     RECAP_PLAYLIST.clear()
     EXTENDED_PLAYLIST.clear()
-    try:
-        for game in json_source['dates'][0]['games']:
-            create_game_listitem(game, game_day)
-    except:
-        pass
+    # try:
+    for game in r.json()['data']:
+        create_game_listitem(game, game_day)
+    # except:
+    #     pass
 
-    next_day = display_day + timedelta(days=1)
+
     add_dir('[B]%s >>[/B]' % LOCAL_STRING(30011), '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
 
 
 def create_game_listitem(game, game_day, show_date=False):
-    away = game['teams']['away']['team']
-    away_record = game['teams']['away']['leagueRecord']
-    home = game['teams']['home']['team']
-    home_record = game['teams']['home']['leagueRecord']
-    #icon = getGameIcon(home['abbreviation'], away['abbreviation'], home['id'])
-    icon = getGameIcon(home['id'], away['id'])
+    # away = game['teams']['away']['team']
+    # away_record = game['teams']['away']['leagueRecord']
+    # home = game['teams']['home']['team']
+    # home_record = game['teams']['home']['leagueRecord']
+    # #icon = getGameIcon(home['abbreviation'], away['abbreviation'], home['id'])
 
-    if TEAM_NAMES == "1":
-        away_team = away['teamName']
-        home_team = home['teamName']
-    elif TEAM_NAMES == "2":
-        away_team = away['name']
-        home_team = home['name']
-    elif TEAM_NAMES == "3":
-        away_team = away['abbreviation']
-        home_team = home['abbreviation']
+    # if TEAM_NAMES == "1":
+    #     away_team = away['teamName']
+    #     home_team = home['teamName']
+    # elif TEAM_NAMES == "2":
+    #     away_team = away['name']
+    #     home_team = home['name']
+    # elif TEAM_NAMES == "3":
+    #     away_team = away['abbreviation']
+    #     home_team = home['abbreviation']
+    # else:
+    #     away_team = away['locationName']
+    #     home_team = home['locationName']
+    #
+    # if away_team == "New York":
+    #     away_team = away['name']
+    # if home_team == "New York":
+    #     home_team = home['name']
+    #
+    # fav_game = False
+    # if FAV_TEAM_ID == str(away['id']) or FAV_TEAM_ID == str(home['id']):
+    #     fav_game = True
+    #
+    # game_line_header = ''
+    # detailed_state = game['status']['detailedState'].lower().strip()
+    # if detailed_state == 'scheduled' or detailed_state == 'pre-game':
+    #     game_time = utc_to_local(string_to_date(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ"))
+    #     if TIME_FORMAT == '0':
+    #         game_time = game_time.strftime('%I:%M %p').lstrip('0')
+    #     else:
+    #         game_time = game_time.strftime('%H:%M')
+    #     game_line_header = game_time
+    #
+    # elif detailed_state == 'in progress':
+    #     game_line_header = '%s %s' % \
+    #                        (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
+    #
+    # elif detailed_state == 'final' and show_date:
+    #     game_line_header = utc_to_local(string_to_date(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ")).strftime("%Y-%m-%d")
+    #
+    # else:
+    #     game_line_header = game['status']['detailedState']
+    #
+    # game_id = str(game['gamePk'])
+    #
+    # desc = ''
+    # hide_spoilers = 0
+    # if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) \
+    #         or (NO_SPOILERS == '3' and game_day == local_to_eastern()) \
+    #         or (NO_SPOILERS == '4' and game_day < local_to_eastern()) \
+    #         or game['status']['abstractGameState'].lower().strip() == 'preview':
+    #
+    #     name = '%s %s at %s' % (game_line_header, away_team, home_team)
+    #     hide_spoilers = 1
+    # else:
+    #     name = '%s %s - %s at %s - %s' % \
+    #            (game_line_header, away_team, game['teams']['away']['score'], home_team, game['teams']['home']['score'])
+    #     away_wins = away_record['wins'] if 'wins' in away_record else '0'
+    #     away_losses = away_record['losses'] if 'losses' in away_record else '0'
+    #     away_ot = away_record['ot'] if 'ot' in away_record else '0'
+    #     home_wins = home_record['wins'] if 'wins' in home_record else '0'
+    #     home_losses = home_record['losses'] if 'losses' in home_record else '0'
+    #     home_ot = home_record['ot'] if 'ot' in home_record else '0'
+    #     desc = '%s %s-%s-%s\n%s %s-%s-%s' % (away_team, away_wins, away_losses, away_ot,
+    #                                          home_team, home_wins, home_losses, home_ot)
+    #
+    # fanart = 'http://nhl.bamcontent.com/images/arena/default/%s@2x.jpg' % home['id']
+    # try:
+    #     if game_day < local_to_eastern():
+    #         if hide_spoilers == 0:
+    #             desc = str(game['content']['media']['epg'][3]['items'][0]['description'])
+    #     else:
+    #         if PREVIEW_INFO == 'true':
+    #             url = API_URL + '/game/' + str(game['gamePk']) + '/content?site=en_nhl'
+    #             headers = {'User-Agent': UA_IPHONE,
+    #                        'Connection': 'close'
+    #                        }
+    #
+    #             r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
+    #             json_source = r.json()
+    #             fanart = str(
+    #                 json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])
+    #             soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
+    #             desc = soup.get_text()
+    #         elif hide_spoilers == 0 and 'scoringPlays' in game:
+    #             for play in game['scoringPlays']:
+    #                 scorer = play['result']['description']
+    #                 scorer = scorer[0:scorer.find(",")]
+    #                 when = play['about']['periodTime'] + ' ' + play['about']['ordinalNum']
+    #                 game_score = '(' + str(play['about']['goals']['away']) + ' - ' + str(
+    #                     play['about']['goals']['home']) + ')'
+    #                 desc += color_string(when, LIVE) + ' ' + scorer + ' ' + game_score + '\n'
+    # except:
+    #     pass
+    #
+    # name = name
+    # if fav_game:
+    #     name = '[B]%s[/B]' % name
+    #
+    # title = '%s at %s' % (away_team, home_team)
+    #
+    # # Label free game of the day
+    # try:
+    #     if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
+    #         name = color_string(name, FREE)
+    # except:
+    #     pass
+    #
+    # # Set audio/video info based on stream quality setting
+    # audio_info, video_info = getAudioVideoInfo()
+    # # 'duration':length
+    # info = {'plot': desc,
+    #         'tvshowtitle': 'NHL',
+    #         'title': title,
+    #         'originaltitle': title,
+    #         'aired': game_day,
+    #         'genre': 'Sports'}
+    #
+    # start_time = None
+    # try:
+    #     start_time = game['linescore']['periods'][0]['startTime']
+    # except:
+    #     pass
+
+    # # Create playlists for all highlights
+    # global RECAP_PLAYLIST
+    # if 'media' in game['content']:
+    #     recap = get_epg_item(game['content']['media']['epg'], "recap")
+    #     if 'items' in recap and len(recap['items']) > 0:
+    #         recap_url = get_highlight_url(recap['items'][0]['playbacks'])
+    #         recap_url = create_highlight_stream(recap_url)
+    #         listitem = xbmcgui.ListItem(title)
+    #         listitem.setArt({'thumb' : icon})
+    #         listitem.setInfo(type="Video", infoLabels={"Title": title})
+    #         RECAP_PLAYLIST.add(recap_url, listitem)
+    #
+    # global EXTENDED_PLAYLIST
+    # if 'media' in game['content']:
+    #     extend = get_epg_item(game['content']['media']['epg'], "extended highlights")
+    #     if 'items' in extend and len(extend['items']) > 0:
+    #         extend_url = get_highlight_url(extend['items'][0]['playbacks'])
+    #         extend_url = create_highlight_stream(extend_url)
+    #         listitem = xbmcgui.ListItem(title)
+    #         listitem.setArt({'thumb' : icon})
+    #         listitem.setInfo(type="Video", infoLabels={"Title": title})
+    #         EXTENDED_PLAYLIST.add(extend_url, listitem)
+
+    start_time = game["startTime"]
+    game_time = utc_to_local(string_to_date(start_time, "%Y-%m-%dT%H:%M:%S+00:00"))
+    if TIME_FORMAT == '0':
+        game_time = game_time.strftime('%I:%M %p').lstrip('0')
     else:
-        away_team = away['locationName']
-        home_team = home['locationName']
+        game_time = game_time.strftime('%H:%M')
 
-    if away_team == "New York":
-        away_team = away['name']
-    if home_team == "New York":
-        home_team = home['name']
+    content = game["content"][0]
 
-    fav_game = False
-    if FAV_TEAM_ID == str(away['id']) or FAV_TEAM_ID == str(home['id']):
-        fav_game = True
-
-    game_line_header = ''
-    detailed_state = game['status']['detailedState'].lower().strip()
-    if detailed_state == 'scheduled' or detailed_state == 'pre-game':
-        game_time = utc_to_local(string_to_date(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ"))
-        if TIME_FORMAT == '0':
-            game_time = game_time.strftime('%I:%M %p').lstrip('0')
-        else:
-            game_time = game_time.strftime('%H:%M')
-        game_line_header = game_time
-
-    elif detailed_state == 'in progress':
-        game_line_header = '%s %s' % \
-                           (game['linescore']['currentPeriodTimeRemaining'], game['linescore']['currentPeriodOrdinal'])
-
-    elif detailed_state == 'final' and show_date:
-        game_line_header = utc_to_local(string_to_date(game['gameDate'], "%Y-%m-%dT%H:%M:%SZ")).strftime("%Y-%m-%d")
-
-    else:
-        game_line_header = game['status']['detailedState']
-
-    game_id = str(game['gamePk'])
-
-    desc = ''
-    hide_spoilers = 0
-    if NO_SPOILERS == '1' or (NO_SPOILERS == '2' and fav_game) \
-            or (NO_SPOILERS == '3' and game_day == local_to_eastern()) \
-            or (NO_SPOILERS == '4' and game_day < local_to_eastern()) \
-            or game['status']['abstractGameState'].lower().strip() == 'preview':
-
-        name = '%s %s at %s' % (game_line_header, away_team, home_team)
-        hide_spoilers = 1
-    else:
-        name = '%s %s - %s at %s - %s' % \
-               (game_line_header, away_team, game['teams']['away']['score'], home_team, game['teams']['home']['score'])
-        away_wins = away_record['wins'] if 'wins' in away_record else '0'
-        away_losses = away_record['losses'] if 'losses' in away_record else '0'
-        away_ot = away_record['ot'] if 'ot' in away_record else '0'
-        home_wins = home_record['wins'] if 'wins' in home_record else '0'
-        home_losses = home_record['losses'] if 'losses' in home_record else '0'
-        home_ot = home_record['ot'] if 'ot' in home_record else '0'
-        desc = '%s %s-%s-%s\n%s %s-%s-%s' % (away_team, away_wins, away_losses, away_ot,
-                                             home_team, home_wins, home_losses, home_ot)
-
-    fanart = 'http://nhl.bamcontent.com/images/arena/default/%s@2x.jpg' % home['id']
+    name = "%s %s" % (game_time, str(content["editorial"]["translations"]["en"]["title"]).title())
+    title = str(content["editorial"]["translations"]["en"]["title"]).title()
+    home_id = str(game["content"][0]["id"])
+    away_id = ""
     try:
-        if game_day < local_to_eastern():
-            if hide_spoilers == 0:
-                desc = str(game['content']['media']['epg'][3]['items'][0]['description'])
-        else:
-            if PREVIEW_INFO == 'true':
-                url = API_URL + '/game/' + str(game['gamePk']) + '/content?site=en_nhl'
-                headers = {'User-Agent': UA_IPHONE,
-                           'Connection': 'close'
-                           }
-
-                r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-                json_source = r.json()
-                fanart = str(
-                    json_source['editorial']['preview']['items'][0]['media']['image']['cuts']['1284x722']['src'])
-                soup = BeautifulSoup(str(json_source['editorial']['preview']['items'][0]['preview']))
-                desc = soup.get_text()
-            elif hide_spoilers == 0 and 'scoringPlays' in game:
-                for play in game['scoringPlays']:
-                    scorer = play['result']['description']
-                    scorer = scorer[0:scorer.find(",")]
-                    when = play['about']['periodTime'] + ' ' + play['about']['ordinalNum']
-                    game_score = '(' + str(play['about']['goals']['away']) + ' - ' + str(
-                        play['about']['goals']['home']) + ')'
-                    desc += color_string(when, LIVE) + ' ' + scorer + ' ' + game_score + '\n'
+        away_id = str(game["content"][1]["id"])
     except:
         pass
-
-    name = name
-    if fav_game:
-        name = '[B]%s[/B]' % name
-
-    title = '%s at %s' % (away_team, home_team)
-
-    # Label free game of the day
-    try:
-        if bool(game['content']['media']['epg'][0]['items'][0]['freeGame']):
-            name = color_string(name, FREE)
-    except:
-        pass
-
-    # Set audio/video info based on stream quality setting
-    audio_info, video_info = getAudioVideoInfo()
-    # 'duration':length
-    info = {'plot': desc,
+    icon = "%s%s" % (ICON_URL, content["editorial"]["image"]["path"])
+    fanart = "%s%s" % (FANART_URL, content["editorial"]["image"]["path"])
+    info = {'plot': "",
             'tvshowtitle': 'NHL',
             'title': title,
             'originaltitle': title,
             'aired': game_day,
             'genre': 'Sports'}
-
-    start_time = None
-    try:
-        start_time = game['linescore']['periods'][0]['startTime']
-    except:
-        pass
-
-    # Create playlists for all highlights
-    global RECAP_PLAYLIST
-    if 'media' in game['content']:
-        recap = get_epg_item(game['content']['media']['epg'], "recap")
-        if 'items' in recap and len(recap['items']) > 0:
-            recap_url = get_highlight_url(recap['items'][0]['playbacks'])
-            recap_url = create_highlight_stream(recap_url)
-            listitem = xbmcgui.ListItem(title)
-            listitem.setArt({'thumb' : icon})
-            listitem.setInfo(type="Video", infoLabels={"Title": title})
-            RECAP_PLAYLIST.add(recap_url, listitem)
-
-    global EXTENDED_PLAYLIST
-    if 'media' in game['content']:
-        extend = get_epg_item(game['content']['media']['epg'], "extended highlights")
-        if 'items' in extend and len(extend['items']) > 0:
-            extend_url = get_highlight_url(extend['items'][0]['playbacks'])
-            extend_url = create_highlight_stream(extend_url)
-            listitem = xbmcgui.ListItem(title)
-            listitem.setArt({'thumb' : icon})
-            listitem.setInfo(type="Video", infoLabels={"Title": title})
-            EXTENDED_PLAYLIST.add(extend_url, listitem)
-
-    add_stream(name, '', title, game_id, icon, fanart, info, video_info, audio_info, start_time)
+    audio_info, video_info = getAudioVideoInfo()
 
 
-def stream_select(game_id, start_time):
-    url = '%s/game/%s/content' % (API_URL, game_id)
-    headers = {'User-Agent': UA_PC}
-    r = requests.get(url, headers=headers, verify=VERIFY)
+    add_stream(name, '', title, home_id, away_id, icon, fanart, info, video_info, audio_info, start_time)
 
-    if not r.ok or 'media' not in r.json() or 'epg' not in r.json()['media']:
-        dialog = xbmcgui.Dialog()
-        ok = dialog.ok(LOCAL_STRING(30366), LOCAL_STRING(30367))
-        sys.exit()
 
-    epg = r.json()['media']['epg']
-    full_game = get_epg_item(epg, "nhltv")
-    # audio_items = get_epg_item(epg, "audio")['items']
-    stream_title = []
-    content_id = []
-    event_id = []
-    free_game = []
-    media_state = []
-
-    multi_angle = 0
-    multi_cam = 0
-    if 'items' in full_game and len(full_game['items']) > 0:
-        for item in full_game['items']:
-            media_state.append(item['mediaState'])
-            feed_type = item['mediaFeedType']
-            if feed_type == "COMPOSITE":
-                multi_cam += 1
-                stream_title.append("Multi-Cam " + str(multi_cam))
-            elif feed_type == "ISO":
-                multi_angle += 1
-                stream_title.append("Multi-Angle " + str(multi_angle))
-            else:
-                temp_item = feed_type.title()
-                if item['callLetters'] != '':
-                    temp_item = '%s (%s)' % (temp_item, item['callLetters'])
-                stream_title.append(temp_item)
-
-            content_id.append(item['mediaPlaybackId'])
-            event_id.append(item['eventId'])
-            free_game.append(item['freeGame'])
+def stream_select(home_id, away_id, start_time):
+    dialog = xbmcgui.Dialog()
+    if away_id != "":
+        n = dialog.select('Choose Stream', ['Home', 'Away'])
+        if n > -1:
+            if n == 0:
+                id = home_id
+            elif n == 1:
+                id = away_id
+        else:
+            sys.exit()
     else:
-        dialog = xbmcgui.Dialog()
-        ok = dialog.ok(LOCAL_STRING(30366), LOCAL_STRING(30367))
-        sys.exit()
+        id = home_id
 
-    if 'archive' in media_state[0].lower().strip():
-        stream_url, headers = media_archive(stream_title, content_id, event_id, epg)
-    else:
-        stream_url, headers = media_live(stream_title, content_id, event_id)
+    update_user_token()
 
-    if stream_url == '':
-        sys.exit()
-    else:
-        start_from_beginning = -1
-        if start_time is not None and 'archive' not in media_state[0].lower().strip():
-            dialog = xbmcgui.Dialog()
-            start_from_beginning = dialog.select("Choose Start", ['Watch Live', 'Start from Beginning'])
+    game = Game(id)
+    stream_url = game.get_stream()
+    xbmc.log(str(stream_url))
+    listitem = stream_to_listitem(stream_url)
+    xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
 
-        listitem = stream_to_listitem(stream_url, headers)
-        xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
-
-        if start_from_beginning == 1:
-            while not xbmc.Player().isPlayingVideo() and not xbmc.Monitor().abortRequested():
-                xbmc.Monitor().waitForAbort(0.25)
-
-            if xbmc.Player().isPlayingVideo() and not xbmc.Monitor().abortRequested():
-                xbmc.Monitor().waitForAbort(0.25)
-                start_time = string_to_date(start_time, '%Y-%m-%dT%H:%M:%SZ')
-                seek_secs = int((start_time - datetime.utcnow()).total_seconds())
-                xbmc.log("seconds seek = " + str(seek_secs))
-                xbmc.executebuiltin('Seek(' + str(seek_secs) + ')')
 
 
 def media_live(stream_title, content_id, event_id):
@@ -500,6 +507,14 @@ def get_session_key(event_id, authorization):
 
     return session_key
 
+def update_user_token():
+    url = "https://nhltv.nhl.com/api/v3/cleeng/user"
+    headers = {'User-Agent': UA_PC}
+    r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
+    if r.ok:
+        save_cookies(r.cookies)
+    else:
+        login()
 
 def login():
     # Check if username and password are provided
@@ -516,42 +531,20 @@ def login():
         settings.setSetting(id='password', value=PASSWORD)
 
     if USERNAME != '' and PASSWORD != '':
-        url = 'https://user.svc.nhl.com/oauth/token?grant_type=client_credentials'
+        url = 'https://nhltv.nhl.com/api/v3/sso/nhl/sign-in'
         headers = {
-            "Accept": "application/json",
+            "Accept": "application/json, text/plain, */*",
             "User-Agent": UA_PC,
-            "Origin": "https://www.nhl.com",
-            "Authorization": "Basic d2ViX25obC12MS4wLjA6MmQxZDg0NmVhM2IxOTRhMThlZjQwYWM5ZmJjZTk3ZTM=",
+            "Origin": "https://nhltv.nhl.com",
         }
 
-        r = requests.post(url, headers=headers, data='', cookies=load_cookies(), verify=VERIFY)
-        if not r.ok:            
-            dialog = xbmcgui.Dialog()
-            ok = dialog.ok(LOCAL_STRING(30382), LOCAL_STRING(30383))
-            sys.exit()
-
-        json_source = r.json()
-
-        authorization = getAuthCookie()
-        if authorization == '':
-            authorization = json_source['access_token']
-
-        if ROGERS_SUBSCRIBER == 'true':
-            url = 'https://activation-rogers.svc.nhl.com/ws/subscription/flow/rogers.login'
-            login_data = {"rogerCredentials": {"email": USERNAME, "password": PASSWORD}}
-        else:
-            url = 'https://user.svc.nhl.com/v2/user/identity'
-            login_data = {"email":{"address": USERNAME},"type":"email-password","password":{"value": PASSWORD}}
-
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": authorization,
-            "User-Agent": UA_PC
-        }
+        login_data = {"email":USERNAME,
+                      "password":PASSWORD,
+                      "code":None,
+                      "gCaptchaResponse":None
+                      }
 
         r = requests.post(url, headers=headers, json=login_data, cookies=load_cookies(), verify=VERIFY)
-
         if not r.ok:
             if 'message' in r.json():
                 msg = r.json()['message']
