@@ -1,69 +1,51 @@
 from resources.lib.globals import *
 
 class Game:
-    id = ""
-    auth_code = ""
-    content_url = "https://nhltv.nhl.com/api/v3/contents/"
 
-    def __init__(self,id):
-        self.id = id
-        self.auth_code = ""
+    def __init__(self, game_json):
+        self.game_id = game_json["id"]
+        self.start_time = game_json["startTime"]
+        self.home_team = game_json["homeCompetitor"]
+        self.away_team = game_json["awayCompetitor"]
+        self.content = game_json["content"]
+        self.home_id = ""
+        self.away_id = ""
 
-    def check_access(self):
-        url = f"{self.content_url}{self.id}/check-access"
-        headers = {"User-Agent": UA_PC,
-                   "Content-Type": "application/json;charset=UTF-8",
-                   "Origin": "https://nhltv.nhl.com"
-                   }
-        data = {"type": "nhl"}
-        xbmc.log(url)
+    def create_listitem(self):
+        content = self.content[0]
+        title = str(content["editorial"]["translations"]["en"]["title"]).title()
+        game_time = utc_to_local(string_to_date(self.start_time, "%Y-%m-%dT%H:%M:%S+00:00"))
+        game_day = game_time.strftime("%Y-%m-%d")
 
-        r = requests.post(url, headers=headers, json=data, cookies=load_cookies(), verify=VERIFY)
-        xbmc.log(r.text)
-        if r.ok:
-            if "data" in r.json():
-                self.auth_code = r.json()["data"]
-        else:
-            sys.exit()
+        name = title
+        if not content["status"]["isLive"]:
+            if TIME_FORMAT == '0':
+                game_time = game_time.strftime('%I:%M %p').lstrip('0')
+            else:
+                game_time = game_time.strftime('%H:%M')
+            name = "%s %s" % (game_time, title)
 
+        home_id = str(self.content[0]["id"])
+        away_id = ""
+        if len(self.content) > 1:
+            away_id = str(self.content[1]["id"])
+        # self.set_ids()
 
-    def player_settings(self):
-        url = f"{self.content_url}{self.id}/player-settings"
-        headers = {"User-Agent": UA_PC,
-                   "Origin": "https://nhltv.nhl.com"
-                   }
-        r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-        if not r.ok or 'streamAccess' not in r.json():
-            dialog = xbmcgui.Dialog()
-            ok = dialog.ok(LOCAL_STRING(30366), LOCAL_STRING(30367))
-            sys.exit()
+        icon = "%s%s" % (ICON_URL, content["editorial"]["image"]["path"])
+        fanart = "%s%s" % (FANART_URL, content["editorial"]["image"]["path"])
+        info = {'plot': "",
+                'tvshowtitle': 'NHLTV',
+                'title': title,
+                'originaltitle': title,
+                'aired': game_day,
+                'genre': 'Sports'}
+        audio_info, video_info = getAudioVideoInfo()
+        add_stream(name, '', title, self.home_id, self.away_id, icon, fanart, info, video_info, audio_info, self.start_time)
 
-        if "?" not in r.json()['streamAccess']:
-            access_url = f"{r.json()['streamAccess']}?authorization_code={self.auth_code}"
-        else:
-            access_url = f"{r.json()['streamAccess']}&authorization_code={self.auth_code}"
-        xbmc.log(str(access_url))
-
-        return access_url
-
-    def get_stream(self):
-        self.check_access()
-        access_url = self.player_settings()
-        headers = {"User-Agent": UA_PC,
-                   "Content-Type": "application/json;charset=UTF-8",
-                   "Origin": "https://nhltv.nhl.com"
-                   }
-
-        r = requests.post(access_url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-        xbmc.log(r.text)
-        # #if r.ok:
-        # if "status" in r.json() and r.json()["status"] == "error":
-        #     ok = dialog.ok(LOCAL_STRING(30384), r.json()["message"])
-
-        if not r.ok or 'data' not in r.json() or 'stream' not in r.json()['data']:
-            dialog = xbmcgui.Dialog()
-            ok = dialog.ok(LOCAL_STRING(30366), r.json()["message"])
-            sys.exit()
-
-
-        return r.json()["data"]["stream"]
+    def set_ids(self):
+        for item in self.content:
+            broadcast = str(item["client"]["ContentMetadata"][0]["name"]).Upper()
+            if broadcast == "HOME" or broadcast == "NATIONAL":
+                self.home_id = item["id"]
+            elif broadcast == "AWAY":
+                self.away_id = item["id"]

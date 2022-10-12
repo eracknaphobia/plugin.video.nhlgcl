@@ -1,4 +1,5 @@
 from resources.lib.globals import *
+from resources.lib.stream import *
 from resources.lib.game import *
 
 
@@ -25,47 +26,25 @@ def todays_games(game_day):
     date_display = '[B][I]%s[/I][/B]' % display_day.strftime("%A, %m/%d/%Y")
     addPlaylist(date_display, display_day, '/playhighlights', 900, ICON, FANART)
 
-    # url = '%s/schedule?date=%s&expand=schedule.teams,schedule.linescore,schedule.game.content.media.epg' \
-    #       '&site=en_nhl&platform=%s' \
-    #       % (API_URL, game_day, PLATFORM)
-
 
     url = "https://nhltv.nhl.com/api/v2/events" \
           f"?date_time_from={game_day}T00:00:00-04:00" \
           f"&date_time_to={next_day.strftime('%Y-%m-%d')}T00:00:00-04:00" \
-          "&metadata_id=259346" \
-          "&sort_direction=asc" \
-          "&limit=100"
+          "&sort_direction=asc"
+
     headers = {'User-Agent': UA_PC}
     xbmc.log(url)
     r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
-
-
-    #GET https://nhltv.nhl.com/api/v2/events?date_time_from=2022-10-08T00:00:00-04:00&date_time_to=2022-10-10T00:00:00-04:00&metadata_id=259346&sort_direction=asc&limit=100 HTTP/1.1
-    # Host: nhltv.nhl.com
-    # Connection: keep-alive
-    # sec-ch-ua: "Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"
-    # Accept: application/json, text/plain, */*
-    # sec-ch-ua-mobile: ?0
-    # User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36
-    # sec-ch-ua-platform: "Windows"
-    # Sec-Fetch-Site: same-origin
-    # Sec-Fetch-Mode: cors
-    # Sec-Fetch-Dest: empty
-    # Referer: https://nhltv.nhl.com/en-int/schedule?date=2022-10-09T00%3A00%3A00-04%3A00
-    # Accept-Encoding: gzip, deflate, br
-    # Accept-Language: en-US,en;q=0.9
-    # Cookie: _ga=GA1.2.930558499.1665416031; _gid=GA1.2.966761224.1665416031; check=true; _parsely_visitor={%22id%22:%22pid=379f7277c995cd1c7b336446fe914ced%22%2C%22session_count%22:1%2C%22last_session_ts%22:1665416036466}; _fbp=fb.1.1665416036997.1226483952; AMCVS_25823F955A99D5040A495C1D%40AdobeOrg=1; s_cc=true; _scid=c61cd4aa-7ec5-4aef-9dab-a6a24d4e3408; __gpi=UID=0000097da4f0a375:T=1665416037:RT=1665416037:S=ALNI_MZd2r0rT3B6RGba2woduJr80lnFeA; mbox=session#b0630de696f04fc4b393cfea0c5eb408#1665417898|PC#b0630de696f04fc4b393cfea0c5eb408.34_0#1728660838; AMCV_25823F955A99D5040A495C1D%40AdobeOrg=-330454231%7CMCIDTS%7C19276%7CMCMID%7C41843480140212443182602949835353566196%7CMCAAMLH-1666020837%7C4%7CMCAAMB-1666020837%7C6G1ynYcLPuiQxYZrsz_pkqfLG9yMXBpb2zX5dvJdYQJzPXImdj0y%7CMCOPTOUT-1665423237s%7CNONE%7CMCSYNCSOP%7C411-19283%7CvVersion%7C3.1.2; __gads=ID=ac73ff062854b9a8:T=1665416037:S=ALNI_Ma33q0CnkUkrzumaohSml2ujadnIw; _sctr=1|1665374400000; OptanonConsent=isIABGlobal=false&datestamp=Mon+Oct+10+2022+11%3A34%3A32+GMT-0400+(Eastern+Daylight+Time)&version=6.29.0&hosts=&consentId=3ecedfb5-ac24-4c66-9f2c-1eb9a41a8279&interactionCount=1&landingPath=https%3A%2F%2Fwww.nhl.com%2Finfo%2Fwhere-to-stream&groups=C0001%3A1%2CC0003%3A1%2CC0002%3A1%2CC0004%3A1%2CC0005%3A1; bitmovin_analytics_uuid=3374fe86-1234-498a-be67-9afc3100a2fe; token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NjU0MjY3NTUsImV4cCI6MTY2ODAxODc1NCwiY3R4IjoiZXlKcGRpSTZJa05XWjA4NFIyMWtUVWRzTlhGSWNVdFBTVGx4VTNjOVBTSXNJblpoYkhWbElqb2lhbGRNZWxkSE0xUjVVMmhqUmxGNU5HcE9UMjkxVW5CdlIzSlBjR2s0YkV3M1NHSjBXbU5RVUZaeVNrdExNazF6ZG1sSVdFNTBjRGh0VTJwUkwxTXpaV2hYV205Q1dITTFNRTFyVFZkbU9HNXlUM0J5WjFaQlpHZExjM294TVVjNUwxVlRlR1JLZW14VlRtdHdTMFZwV1VnNFUwWTRSR01yYjBGR1VsbElSVzloYmxWNmFuazBRV0ZvVjFSdlZsQkxaM3AzV0hsWk1GcExjMWw1V2tJMlRrVnROM2xWTVdaalUyd3hXakpZYVd4a2JYcFZhVXBrTm1sRVMyVXdRemR1ZUZSclEyMHdVVzVXTmtWaFdTOUpNbmhRVVZCUE5FOHZlbFpKUjBacVVqSTVTVTFKVmtKNFdqVklWbEpYV25WSmNFRk5kRVpKTjAxMlpUaEJkM1YzZFdjM1lYWlBVVEZpUm5CdFFUZHRiV2N5VkVWWWFscGtRbmRNYVc0dlRsSjFOWEpUTlRKVGRIRnFXRGg2VTJkUWRsZFBVekpSVjNoRlVFZFljV3M0TVhKalZIaDZXRXdyUVdOT1RsZHVlSGRxZFd3eVkySk1kUzlRVFRsSGNGaHdXSFpUUWtvMmQwcElaVVl6WXpsQlJHVlVhWGR4Y3pSVE5XeFNjMWh3UjJoRlVIZzVhRUV4VlVKMGFHVllielJJWmxKMmIxaHlWakpOUTJwcFdqRktZblJJU2xwT1NTdHFkVkZqWjFsVWJ6Wm5hemhxU1RKdlkySTJTSGxuZUc0MWFrVkpjRzUwWVZVeVJqWlNaamRXYkhoT05tOVhhM1Y0VkU1NFVXdElaVVJ3YUZCQ0wwTkNOWEJCU1VocmJsbFJNVXc0WkhoQ1RHMW9hamg2UTBORVUySXpaalozVEZWV01YaFdOMFIzVERoWGNuSXZjakJoVUhjclowWk9Zbk4zTW5FNFRVbzFhRm95TUVWTU1GYzNjV1p0Wkc4MVVsSnliRU5LYUdseWVFUTNRVUYxUzBsME5WQm1VWEV2ZDNKdGNHMDBVRlozWmtKSWFWWk5lREZpZW5Gd2EwY3liRE5uVUhkeVVtMU5MelZIV0ZOaWNGSkdNREpwZG1aQlpHSXdVazVKVUZFdlozZEZZemxvVmtka2MxUkpNV2hyYkdkNlFTdE9TRlEwYUU5blJtaHJRekpNUm1GVmNTODRjeTl5U21kSlZYSTBOemRwVDB4M1YyMDBZVFpvV0hkMk5UZEVSM2c1VDNnclVHZGFUeXMzVkVoWFNqbEdRa1IyUmtkNVFqQjFWMVZLVnpjeFNWSkZNa2hWTUdveU9GaDRhSFpYZHpndllrOXVUVzV5V1hwaGRrUlZWVkpHUnpWclN6QlBiM016Y1ZZNGJpdG9hakJ3UW0welJrRm5WREF5YVZaa1lUTktaMjVOUml0V2JVbDFTakJRY25GRFlYUnRNazEwY1VZeVpYcFBZbGMyYldseFNXWlFZVTgxWjB4elQxcDFNRmcxTm10MFdXSnBaVzF3WlRaek5WWm9NSE52TDJWaVdYVkhZM1pEZFVkeGFHcDZURmRsYzBsQ1ptY3JXVFJIVGpVNGQzWmllV3BMYjA5SmVVUlVlWFJSWWk5U2JUaE1SRVZoYkc1akwxcHpaME5IYjIxTWRsVkNSemdyS3psVVdVODRTRkExTW5KNU1YQlVSWFo0UkU5NlJIZFRVek5yWVVSWGRGaDBSVWxEYVdkblFYRnlVbFY0YTFKYVVVcDFlRkJsZVZveFlYcDRlbmhoUXpoYUwzSkNVVmxUT0dOVUsxcDFPSGcxUVhsTmJUVTJTMEpsUkc1U1dFczJWMXByTW5oVE5sQTRlbFJ2ZERCNmRISmplSFV4T1RoRWRXcHBVR2R5TTFKM1UwaGFhelpZWW5obU9HSkVTVkU0T0RKT1NsSTJPV0pvU1VOSVYyaHdMM0JSUFQwaUxDSnRZV01pT2lJNE0yRTFPR1JsTnpBME9EUmlNR0UxTldNMFltRTBNVFk1TjJZME5EYzROek5rTW1FNVpUZGhOR1l4WldJNVlqYzRNbVZtT1RaallUQTBZelpoWmpFeUlpd2lkR0ZuSWpvaUluMD0ifQ.74qNyjn6GwZgcCsDIj5gVbSEjnojt1ly2mCWWzI9sfw
-
-
 
     global RECAP_PLAYLIST
     global EXTENDED_PLAYLIST
     RECAP_PLAYLIST.clear()
     EXTENDED_PLAYLIST.clear()
     # try:
-    for game in r.json()['data']:
-        create_game_listitem(game, game_day)
+    for game_json in r.json()['data']:
+        # create_game_listitem(game_json, game_day)
+        game = Game(game_json)
+        game.create_listitem()
     # except:
     #     pass
 
@@ -73,7 +52,7 @@ def todays_games(game_day):
     add_dir('[B]%s >>[/B]' % LOCAL_STRING(30011), '/live', 101, NEXT_ICON, FANART, next_day.strftime("%Y-%m-%d"))
 
 
-def create_game_listitem(game, game_day, show_date=False):
+    # def create_game_listitem(game_json, game_day, show_date=False):
     # away = game['teams']['away']['team']
     # away_record = game['teams']['away']['leagueRecord']
     # home = game['teams']['home']['team']
@@ -225,36 +204,43 @@ def create_game_listitem(game, game_day, show_date=False):
     #         listitem.setArt({'thumb' : icon})
     #         listitem.setInfo(type="Video", infoLabels={"Title": title})
     #         EXTENDED_PLAYLIST.add(extend_url, listitem)
-
-    start_time = game["startTime"]
-    game_time = utc_to_local(string_to_date(start_time, "%Y-%m-%dT%H:%M:%S+00:00"))
-    if TIME_FORMAT == '0':
-        game_time = game_time.strftime('%I:%M %p').lstrip('0')
-    else:
-        game_time = game_time.strftime('%H:%M')
-
-    content = game["content"][0]
-
-    name = "%s %s" % (game_time, str(content["editorial"]["translations"]["en"]["title"]).title())
-    title = str(content["editorial"]["translations"]["en"]["title"]).title()
-    home_id = str(game["content"][0]["id"])
-    away_id = ""
-    try:
-        away_id = str(game["content"][1]["id"])
-    except:
-        pass
-    icon = "%s%s" % (ICON_URL, content["editorial"]["image"]["path"])
-    fanart = "%s%s" % (FANART_URL, content["editorial"]["image"]["path"])
-    info = {'plot': "",
-            'tvshowtitle': 'NHL',
-            'title': title,
-            'originaltitle': title,
-            'aired': game_day,
-            'genre': 'Sports'}
-    audio_info, video_info = getAudioVideoInfo()
-
-
-    add_stream(name, '', title, home_id, away_id, icon, fanart, info, video_info, audio_info, start_time)
+    # game = Game(game_json)
+    # title = game.get_title()
+    # sys.exit()
+    # content = game["content"][0]
+    # start_time = game["startTime"]
+    # title = str(content["editorial"]["translations"]["en"]["title"]).title()
+    #
+    # if not content["status"]["isLive"]:
+    #     game_time = utc_to_local(string_to_date(start_time, "%Y-%m-%dT%H:%M:%S+00:00"))
+    #     if TIME_FORMAT == '0':
+    #         game_time = game_time.strftime('%I:%M %p').lstrip('0')
+    #     else:
+    #         game_time = game_time.strftime('%H:%M')
+    #     name = "%s %s" % (game_time, title)
+    # else:
+    #     name = title
+    #
+    #
+    #
+    # home_id = str(game["content"][0]["id"])
+    # away_id = ""
+    # try:
+    #     away_id = str(game["content"][1]["id"])
+    # except:
+    #     pass
+    # icon = "%s%s" % (ICON_URL, content["editorial"]["image"]["path"])
+    # fanart = "%s%s" % (FANART_URL, content["editorial"]["image"]["path"])
+    # info = {'plot': "",
+    #         'tvshowtitle': 'NHL',
+    #         'title': title,
+    #         'originaltitle': title,
+    #         'aired': game_day,
+    #         'genre': 'Sports'}
+    # audio_info, video_info = getAudioVideoInfo()
+    #
+    #
+    # add_stream(name, '', title, home_id, away_id, icon, fanart, info, video_info, audio_info, start_time)
 
 
 def stream_select(home_id, away_id, start_time):
@@ -273,8 +259,8 @@ def stream_select(home_id, away_id, start_time):
 
     update_user_token()
 
-    game = Game(id)
-    stream_url = game.get_stream()
+    stream = Stream(id)
+    stream_url = stream.get_manifest()
     xbmc.log(str(stream_url))
     listitem = stream_to_listitem(stream_url)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
