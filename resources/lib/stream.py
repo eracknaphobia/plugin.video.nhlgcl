@@ -32,16 +32,22 @@ class Stream:
         headers = {"User-Agent": UA_PC,
                    "Origin": "https://nhltv.nhl.com"
                    }
+
+        xbmc.log(url)
         r = requests.get(url, headers=headers, cookies=load_cookies(), verify=VERIFY)
+        xbmc.log(r.text)
         if not r.ok or 'streamAccess' not in r.json():
             dialog = xbmcgui.Dialog()
             ok = dialog.ok(LOCAL_STRING(30366), LOCAL_STRING(30367))
             sys.exit()
 
-        if "?" not in r.json()['streamAccess']:
-            access_url = f"{r.json()['streamAccess']}?authorization_code={self.auth_code}"
-        else:
-            access_url = f"{r.json()['streamAccess']}&authorization_code={self.auth_code}"
+        access_url = r.json()['streamAccess']
+        if self.auth_code != "":
+            if "?" not in r.json()['streamAccess']:
+                access_url = f"{access_url}?authorization_code={self.auth_code}"
+            else:
+                access_url = f"{access_url}&authorization_code={self.auth_code}"
+
         xbmc.log(str(access_url))
 
         return access_url

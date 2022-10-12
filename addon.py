@@ -7,24 +7,24 @@ mode = None
 game_day = None
 home_id = None
 away_id = None
+highlight_id = None
 teams_stream = None
 stream_date = None
-start_time = None
 
-if 'url' in params:
+if "url" in params:
     url = urllib.unquote_plus(params["url"])
-if 'name' in params:
+if "name" in params:
     name = urllib.unquote_plus(params["name"])
-if 'mode' in params:
+if "mode" in params:
     mode = int(params["mode"])
-if 'game_day' in params:
+if "game_day" in params:
     game_day = urllib.unquote_plus(params["game_day"])
-if 'home_id' in params:
+if "home_id" in params:
     home_id = urllib.unquote_plus(params["home_id"])
-if 'away_id' in params:
+if "away_id" in params:
     away_id = urllib.unquote_plus(params["away_id"])
-if 'start_time' in params:
-    start_time = urllib.unquote_plus(params["start_time"])
+if "highlight_id" in params:
+    highlight_id = urllib.unquote_plus(params["highlight_id"])
 
 
 if mode is None or url is None:
@@ -34,10 +34,10 @@ elif mode == 100 or mode == 101:
     todays_games(game_day)
 
 elif mode == 104:
-    stream_select(home_id, away_id, start_time)
+    stream_select(home_id, away_id, highlight_id)
 
 elif mode == 105:
-    # Yesterday's Games
+    # Yesterday"s Games
     game_day = local_to_eastern()
     display_day = string_to_date(game_day, "%Y-%m-%d")
     prev_day = display_day - timedelta(days=1)
@@ -50,7 +50,7 @@ elif mode == 300:
     nhl_videos(url)
 
 elif mode == 400:
-    logout('true')
+    logout("true")
 
 elif mode == 500:
     my_teams_games()

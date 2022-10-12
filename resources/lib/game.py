@@ -10,6 +10,7 @@ class Game:
         self.content = game_json["content"]
         self.home_id = ""
         self.away_id = ""
+        self.highlight_id = ""
 
     def create_listitem(self):
         content = self.content[0]
@@ -25,11 +26,7 @@ class Game:
                 game_time = game_time.strftime('%H:%M')
             name = "%s %s" % (game_time, title)
 
-        home_id = str(self.content[0]["id"])
-        away_id = ""
-        if len(self.content) > 1:
-            away_id = str(self.content[1]["id"])
-        # self.set_ids()
+        self.set_ids()
 
         icon = "%s%s" % (ICON_URL, content["editorial"]["image"]["path"])
         fanart = "%s%s" % (FANART_URL, content["editorial"]["image"]["path"])
@@ -40,12 +37,17 @@ class Game:
                 'aired': game_day,
                 'genre': 'Sports'}
         audio_info, video_info = getAudioVideoInfo()
-        add_stream(name, '', title, self.home_id, self.away_id, icon, fanart, info, video_info, audio_info, self.start_time)
+        # add_stream(name, '', title, self.home_id, self.away_id, icon, fanart, info, video_info, audio_info)
+
+        add_stream(name, title, icon, fanart, home_id=self.home_id, away_id=self.away_id, highlight_id=self.highlight_id)
 
     def set_ids(self):
         for item in self.content:
-            broadcast = str(item["client"]["ContentMetadata"][0]["name"]).Upper()
-            if broadcast == "HOME" or broadcast == "NATIONAL":
-                self.home_id = item["id"]
-            elif broadcast == "AWAY":
-                self.away_id = item["id"]
+            if str(item["contentType"]["name"]).upper() == "FULL GAME":
+                broadcast = str(item["clientContentMetadata"][0]["name"]).upper()
+                if broadcast == "HOME" or broadcast == "NATIONAL":
+                    self.home_id = str(item["id"])
+                elif broadcast == "AWAY":
+                    self.away_id = str(item["id"])
+            elif str(item["contentType"]["name"]).upper() == "HIGHLIGHTS":
+                self.highlight_id = str(item["id"])

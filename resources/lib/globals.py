@@ -171,32 +171,25 @@ def get_params():
     return param
 
 
-def add_stream(name, link_url, title, home_id, away_id, icon=None, fanart=None, info=None, video_info=None, audio_info=None,
-               start_time=None):
+def add_stream(name, title, icon=None, fanart=None, **kwargs):
     ok = True
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(link_url) \
-        + "&mode=" + str(104) \
-        + "&name=" + urllib.quote_plus(name.encode('utf8')) \
-        + "&home_id=" + urllib.quote_plus(home_id.encode('utf8')) \
-        + "&away_id=" + urllib.quote_plus(away_id.encode('utf8'))
-
-    if start_time is not None:
-        u += '&start_time=' + start_time
+    u = sys.argv[0] + f"?url=''&mode=104&name={urllib.quote_plus(name.encode('utf8'))}"
+    for key, value in kwargs.items():
+        u += f"&{key}={value}"
 
     liz = xbmcgui.ListItem(name)
     if icon is None: icon = ICON
     if fanart is None: fanart = FANART
     liz.setArt({'icon': icon, 'thumb': icon, 'fanart': fanart})
-
     liz.setProperty("IsPlayable", "true")
-
     liz.setInfo(type="Video", infoLabels={"Title": title})
-    if info is not None:
-        liz.setInfo(type="Video", infoLabels=info)
-    if video_info is not None:
-        liz.addStreamInfo('video', video_info)
-    if audio_info is not None:
-        liz.addStreamInfo('audio', audio_info)
+
+    # if info is not None:
+    #     liz.setInfo(type="Video", infoLabels=info)
+    # if video_info is not None:
+    #     liz.addStreamInfo('video', video_info)
+    # if audio_info is not None:
+    #     liz.addStreamInfo('audio', audio_info)
 
     liz.setProperty('dbtype', 'video')
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)

@@ -6,9 +6,9 @@ from resources.lib.game import *
 def categories():
     add_dir(LOCAL_STRING(30360), '/live', 100, ICON, FANART)
     add_dir(LOCAL_STRING(30361), '/live', 105, ICON, FANART)
-    if FAV_TEAM != 'None' and FAV_TEAM != '' and FAV_TEAM is not None:
-        add_fav_today(FAV_TEAM + LOCAL_STRING(30362).encode('utf8'), FAV_TEAM_LOGO, FANART)
-        add_dir(FAV_TEAM + LOCAL_STRING(30363).encode('utf8'), 'favteam', 500, FAV_TEAM_LOGO, FANART)
+    # if FAV_TEAM != 'None' and FAV_TEAM != '' and FAV_TEAM is not None:
+    #     add_fav_today(FAV_TEAM + LOCAL_STRING(30362).encode('utf8'), FAV_TEAM_LOGO, FANART)
+    #     add_dir(FAV_TEAM + LOCAL_STRING(30363).encode('utf8'), 'favteam', 500, FAV_TEAM_LOGO, FANART)
     add_dir(LOCAL_STRING(30364), '/date', 200, ICON, FANART)
     add_dir(LOCAL_STRING(30365), '/qp', 300, ICON, FANART)
 
@@ -243,21 +243,32 @@ def todays_games(game_day):
     # add_stream(name, '', title, home_id, away_id, icon, fanart, info, video_info, audio_info, start_time)
 
 
-def stream_select(home_id, away_id, start_time):
-    dialog = xbmcgui.Dialog()
-    if away_id != "":
-        n = dialog.select('Choose Stream', ['Home', 'Away'])
-        if n > -1:
-            if n == 0:
-                id = home_id
-            elif n == 1:
-                id = away_id
-        else:
-            sys.exit()
-    else:
-        id = home_id
+def stream_select(home_id, away_id, highlight_id):
+    xbmc.log(f"home_id: {home_id}")
+    xbmc.log(f"away_id: {home_id}")
+    xbmc.log(f"highlight_id: {highlight_id}")
 
-    update_user_token()
+    options = ["Home"]
+    if away_id != "":
+        options.append("Away")
+    if highlight_id != "":
+        options.append("Highlights")
+
+    dialog = xbmcgui.Dialog()
+    n = dialog.select('Choose Stream', options)
+    if n > -1:
+        if options[n] == "Home":
+            id = home_id
+        elif options[n] == "Away":
+            id = away_id
+        elif options[n] == "Highlights":
+            id = highlight_id
+    else:
+        sys.exit()
+
+
+    if options[n] != "Highlights":
+        update_user_token()
 
     stream = Stream(id)
     stream_url = stream.get_manifest()
