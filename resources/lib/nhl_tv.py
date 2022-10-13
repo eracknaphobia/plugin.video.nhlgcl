@@ -42,9 +42,9 @@ def todays_games(game_day):
     EXTENDED_PLAYLIST.clear()
     # try:
     for game_json in r.json()['data']:
-        # create_game_listitem(game_json, game_day)
-        game = Game(game_json)
-        game.create_listitem()
+        if game_json["srMatchId"]:
+            game = Game(game_json)
+            game.create_listitem()
     # except:
     #     pass
 
@@ -248,8 +248,10 @@ def stream_select(home_id, away_id, highlight_id):
     xbmc.log(f"away_id: {home_id}")
     xbmc.log(f"highlight_id: {highlight_id}")
 
-    options = ["Home"]
+    options = ["National"]
     if away_id != "":
+        options.remove("National")
+        options.append("Home")
         options.append("Away")
     if highlight_id != "":
         options.append("Highlights")
@@ -257,7 +259,7 @@ def stream_select(home_id, away_id, highlight_id):
     dialog = xbmcgui.Dialog()
     n = dialog.select('Choose Stream', options)
     if n > -1:
-        if options[n] == "Home":
+        if options[n] == "National" or options[n] == "Home":
             id = home_id
         elif options[n] == "Away":
             id = away_id
@@ -275,6 +277,7 @@ def stream_select(home_id, away_id, highlight_id):
     xbmc.log(str(stream_url))
     listitem = stream_to_listitem(stream_url)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem)
+
 
 
 

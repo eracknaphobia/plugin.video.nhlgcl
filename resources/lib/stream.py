@@ -60,7 +60,7 @@ class Stream:
                    "Origin": "https://nhltv.nhl.com"
                    }
 
-        r = requests.post(access_url, headers=headers, cookies=load_cookies(), verify=VERIFY)
+        r = requests.post(access_url, headers=headers, verify=VERIFY)
         xbmc.log(r.text)
         # #if r.ok:
         # if "status" in r.json() and r.json()["status"] == "error":
