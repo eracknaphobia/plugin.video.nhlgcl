@@ -24,6 +24,8 @@ class Stream:
             if "data" in r.json():
                 self.auth_code = r.json()["data"]
         else:
+            dialog = xbmcgui.Dialog()
+            ok = dialog.ok(LOCAL_STRING(30368), LOCAL_STRING(30376))
             sys.exit()
 
 
