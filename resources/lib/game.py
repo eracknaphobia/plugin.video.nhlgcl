@@ -36,10 +36,10 @@ class Game:
                 'originaltitle': title,
                 'aired': game_day,
                 'genre': 'Sports'}
-        audio_info, video_info = getAudioVideoInfo()
+
         # add_stream(name, '', title, self.home_id, self.away_id, icon, fanart, info, video_info, audio_info)
 
-        add_stream(name, title, icon, fanart, home_id=self.home_id, away_id=self.away_id, highlight_id=self.highlight_id)
+        add_stream(name, title, icon, fanart, info, home_id=self.home_id, away_id=self.away_id, highlight_id=self.highlight_id)
 
     def set_ids(self):
         for item in self.content:

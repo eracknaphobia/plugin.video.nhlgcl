@@ -46,23 +46,8 @@ elif mode == 105:
 elif mode == 200:
     goto_date()
 
-elif mode == 300:
-    nhl_videos(url)
-
 elif mode == 400:
     logout("true")
-
-elif mode == 500:
-    my_teams_games()
-
-elif mode == 510:
-    play_fav_team_today()
-
-elif mode == 515:
-    get_thumbnails()
-
-elif mode == 900:
-    play_all_highlights()
 
 elif mode == 999:
     sys.exit()

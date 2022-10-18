@@ -64,9 +64,6 @@ class Stream:
 
         r = requests.post(access_url, headers=headers, verify=VERIFY)
         xbmc.log(r.text)
-        # #if r.ok:
-        # if "status" in r.json() and r.json()["status"] == "error":
-        #     ok = dialog.ok(LOCAL_STRING(30384), r.json()["message"])
 
         if not r.ok or 'data' not in r.json() or 'stream' not in r.json()['data']:
             dialog = xbmcgui.Dialog()

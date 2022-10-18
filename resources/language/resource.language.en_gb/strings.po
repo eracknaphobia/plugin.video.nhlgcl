@@ -190,7 +190,7 @@ msgid "Featured Videos"
 msgstr ""
 
 msgctxt "#30366"
-msgid "Streams Not Found"
+msgid "Stream Not Found"
 msgstr ""
 
 msgctxt "#30367"
