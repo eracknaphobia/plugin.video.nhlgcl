@@ -106,7 +106,7 @@ def login():
         settings.setSetting(id='password', value=PASSWORD)
 
     if USERNAME != '' and PASSWORD != '':
-        url = 'https://nhltv.nhl.com/api/v3/sso/nhl/sign-in'
+        url = 'https://nhltv.nhl.com/api/v3/sso/nhl/login'
         headers = {
             "Accept": "application/json, text/plain, */*",
             "User-Agent": UA_PC,
@@ -114,9 +114,7 @@ def login():
         }
 
         login_data = {"email":USERNAME,
-                      "password":PASSWORD,
-                      "code":None,
-                      "gCaptchaResponse":None
+                      "password":PASSWORD
                       }
 
         r = requests.post(url, headers=headers, json=login_data, cookies=load_cookies(), verify=VERIFY)
