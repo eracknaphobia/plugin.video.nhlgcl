@@ -45,7 +45,7 @@ class Game:
         for item in self.content:
             if str(item["contentType"]["name"]).upper() == "FULL GAME" and len(item["clientContentMetadata"]):
                 broadcast = str(item["clientContentMetadata"][0]["name"]).upper()
-                if broadcast == "HOME" or broadcast == "NATIONAL" or broadcast == "SPORTSNET" or broadcast == "TNT":
+                if broadcast == "HOME" or broadcast == "NATIONAL" or broadcast == "SPORTSNET" or broadcast == "TNT" or broadcast == "ESPN":
                     self.home_id = str(item["id"])
                 elif broadcast == "AWAY":
                     self.away_id = str(item["id"])
