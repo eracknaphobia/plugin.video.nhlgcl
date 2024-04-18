@@ -41,6 +41,8 @@ class Game:
 
         add_stream(name, title, icon, fanart, info, home_id=self.home_id, away_id=self.away_id, highlight_id=self.highlight_id)
 
+#TO-DO: When both teams have a National broadcast, you'll only get the ability to select one of them. Figure out something to allow all broadcasts. I imagine the same thing could with French broadcasts?
+    
     def set_ids(self):
         for item in self.content:
             if str(item["contentType"]["name"]).upper() == "FULL GAME" and len(item["clientContentMetadata"]):
