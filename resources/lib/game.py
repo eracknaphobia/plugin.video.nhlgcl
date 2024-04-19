@@ -8,12 +8,7 @@ class Game:
         self.home_team = game_json["homeCompetitor"]
         self.away_team = game_json["awayCompetitor"]
         self.content = game_json["content"]
-        self.stream1_id = ""
-        self.stream2_id = ""
-        self.stream3_id = ""
-        self.stream1_name = ""
-        self.stream2_name = ""
-        self.stream3_name = ""
+        self.stream_ids = {}
         self.highlight_id = ""
 
     def create_listitem(self):
@@ -43,21 +38,11 @@ class Game:
 
         # add_stream(name, '', title, self.home_id, self.away_id, icon, fanart, info, video_info, audio_info)
 
-        add_stream(name, title, icon, fanart, info, stream1_id=self.stream1_id, stream2_id=self.stream2_id, stream3_id=self.stream3_id, \
-                   stream1_name=self.stream1_name, stream2_name=self.stream2_name, stream3_name=self.stream3_name, highlight_id=self.highlight_id)
+        add_stream(name, title, icon, fanart, info, stream_ids=self.stream_ids, highlight_id=self.highlight_id)
 
     def set_ids(self):
         for item in self.content:
             if str(item["contentType"]["name"]).upper() == "FULL GAME" and len(item["clientContentMetadata"]):
-                broadcast = str(item["clientContentMetadata"][0]["name"]).upper()
-                if broadcast == "HOME" or broadcast == "NATIONAL":
-                    self.stream1_id = str(item["id"])
-                    self.stream1_name = broadcast
-                elif broadcast == "AWAY":
-                    self.stream2_id = str(item["id"])
-                    self.stream2_name = broadcast
-                else:
-                    self.stream3_id = str(item["id"])
-                    self.stream3_name = broadcast
+                self.stream_ids[str(item["clientContentMetadata"][0]["name"]).upper()] = str(item["id"])
             elif str(item["contentType"]["name"]).upper() == "HIGHLIGHTS":
                 self.highlight_id = str(item["id"])
